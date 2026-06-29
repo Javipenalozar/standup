@@ -1,6 +1,6 @@
 # Stand-Up Therapy landing
 
-Landing estatica lista para subir a Netlify.
+Landing estática lista para subir a Netlify.
 
 Archivos principales:
 
@@ -12,7 +12,7 @@ Archivos principales:
 Datos que puedes ajustar:
 
 - Fecha: `2 de septiembre`
-- Ciudad: `Bogota`
+- Ciudad: `Bogotá`
 - WhatsApp: `+57 323 801 6527`
 - Texto del hero y secciones
 - Enlaces de WhatsApp en los botones
