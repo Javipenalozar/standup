@@ -184,6 +184,73 @@ h1 em {
   font-size: clamp(1.05rem, 2vw, 1.32rem);
 }
 
+.deal-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  max-width: 620px;
+  margin-top: 28px;
+  border: 1px solid rgba(135, 242, 255, 0.3);
+  border-radius: 18px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 44px rgba(135, 242, 255, 0.1);
+}
+
+.deal-copy,
+.countdown,
+.price-box,
+.seat-box,
+.timer-box {
+  display: grid;
+  gap: 4px;
+}
+
+.deal-copy span,
+.countdown span,
+.price-box span,
+.seat-box span,
+.timer-box span {
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.deal-copy strong,
+.countdown strong,
+.price-box strong,
+.seat-row strong,
+.timer-box strong {
+  font-family: Anton, Impact, sans-serif;
+  letter-spacing: 0;
+  line-height: 1;
+}
+
+.deal-copy strong {
+  font-size: 2.4rem;
+}
+
+.deal-copy del {
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 800;
+}
+
+.countdown {
+  min-width: 132px;
+  justify-items: center;
+  align-content: center;
+  border: 1px solid rgba(255, 61, 61, 0.42);
+  border-radius: 14px;
+  background: rgba(255, 61, 61, 0.12);
+  padding: 12px;
+}
+
+.countdown strong {
+  color: var(--white);
+  font-size: 2.15rem;
+}
+
 .hero-actions {
   display: flex;
   flex-wrap: wrap;
@@ -438,7 +505,7 @@ blockquote {
 
 .tickets {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) 260px;
   gap: 28px;
   align-items: center;
   margin-bottom: 70px;
@@ -447,6 +514,67 @@ blockquote {
 
 .tickets p {
   max-width: 650px;
+}
+
+.ticket-offer {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.8fr) minmax(220px, 1fr) minmax(150px, 0.7fr);
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.price-box,
+.seat-box,
+.timer-box {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 18px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.price-box strong {
+  color: var(--cyan);
+  font-size: 2.55rem;
+}
+
+.price-box small,
+.seat-box small {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.seat-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.seat-row strong {
+  color: var(--white);
+  font-size: 2.2rem;
+}
+
+.seat-meter {
+  height: 12px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.seat-meter span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--cyan), var(--red));
+}
+
+.timer-box {
+  align-content: center;
+}
+
+.timer-box strong {
+  color: var(--red);
+  font-size: 2.45rem;
 }
 
 .footer {
@@ -467,7 +595,8 @@ blockquote {
   .split,
   .cards,
   .details,
-  .tickets {
+  .tickets,
+  .ticket-offer {
     grid-template-columns: 1fr;
   }
 
@@ -495,7 +624,8 @@ blockquote {
   }
 
   .event-facts,
-  .detail-list {
+  .detail-list,
+  .deal-card {
     grid-template-columns: 1fr;
   }
 

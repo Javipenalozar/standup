@@ -49,6 +49,17 @@
               Un show para reirte de lo que normalmente duele, soltar cargas con humor
               y salir con una conversacion distinta contigo mismo.
             </p>
+            <aside class="deal-card" aria-label="Oferta de preventa">
+              <div class="deal-copy">
+                <span>Precio especial</span>
+                <strong>$69.000 COP</strong>
+                <del>$99.000 COP</del>
+              </div>
+              <div class="countdown" aria-label="Tiempo restante para precio especial">
+                <span>Termina en</span>
+                <strong data-countdown>20:00</strong>
+              </div>
+            </aside>
             <div class="hero-actions">
               <a class="button primary" href="#boletas">Reservar boleta</a>
               <a class="button ghost" href="#experiencia">Ver la experiencia</a>
@@ -153,11 +164,32 @@
           <p class="section-label">Boletas</p>
           <h2>Reserva tu cupo antes de que cierre la preventa.</h2>
           <p>
-            Escribe por WhatsApp para confirmar disponibilidad, precio de preventa y ubicacion.
-            El boton abre una conversacion con el mensaje listo.
+            Durante los proximos minutos puedes reservar con precio especial de preventa.
+            Despues, la boleta vuelve a precio full.
           </p>
+          <div class="ticket-offer" aria-label="Precio y disponibilidad">
+            <div class="price-box">
+              <span>Precio especial</span>
+              <strong>$69.000 COP</strong>
+              <small>Precio full: $99.000 COP</small>
+            </div>
+            <div class="seat-box">
+              <div class="seat-row">
+                <span>Asientos disponibles</span>
+                <strong><span data-seats-left>97</span>/140</strong>
+              </div>
+              <div class="seat-meter" aria-hidden="true">
+                <span style="width: 69.3%"></span>
+              </div>
+              <small>Salieron 140 cupos a la venta. Quedan 97 en este momento.</small>
+            </div>
+            <div class="timer-box">
+              <span>Esta oferta termina en</span>
+              <strong data-countdown>20:00</strong>
+            </div>
+          </div>
         </div>
-        <a class="button primary large" href="https://wa.me/573238016527?text=Hola%2C%20quiero%20reservar%20mi%20boleta%20para%20Stand-Up%20Therapy%20en%20Bogota" target="_blank" rel="noreferrer">
+        <a class="button primary large" href="https://wa.me/573238016527?text=Hola%2C%20quiero%20reservar%20mi%20boleta%20para%20Stand-Up%20Therapy%20en%20Bogota%20con%20el%20precio%20especial%20de%2069.000%20COP" target="_blank" rel="noreferrer">
           Reservar por WhatsApp
         </a>
       </section>
