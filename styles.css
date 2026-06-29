@@ -600,13 +600,31 @@ blockquote {
     grid-template-columns: 1fr;
   }
 
+  .hero {
+    min-height: auto;
+    overflow: visible;
+  }
+
+  .hero::after {
+    height: 22%;
+  }
+
+  .hero-bg {
+    inset: 92px 0 auto;
+    font-size: clamp(4.8rem, 25vw, 8rem);
+  }
+
   .hero-grid {
-    padding-top: 106px;
+    gap: 30px;
+    min-height: auto;
+    padding-top: 104px;
+    padding-bottom: 54px;
   }
 
   .poster-frame {
-    width: min(420px, 100%);
+    width: min(360px, 92%);
     margin-inline: auto;
+    order: -1;
   }
 
   .tickets {
@@ -616,11 +634,41 @@ blockquote {
 
 @media (max-width: 620px) {
   .topbar {
-    padding-block: 14px;
+    padding: 12px 20px;
   }
 
   .brand span:last-child {
     display: none;
+  }
+
+  .brand-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+  }
+
+  .nav-cta {
+    padding: 10px 16px;
+    font-size: 0.95rem;
+  }
+
+  .hero-grid {
+    padding: 92px 18px 46px;
+  }
+
+  .poster-frame {
+    width: min(310px, 88vw);
+    border-radius: 28px;
+    padding: 7px;
+  }
+
+  .poster-frame::before {
+    border-width: 2px;
+    border-radius: 28px;
+  }
+
+  .poster-frame img {
+    border-radius: 20px;
   }
 
   .event-facts,
@@ -630,15 +678,104 @@ blockquote {
   }
 
   h1 {
-    font-size: 4rem;
+    font-size: 3.35rem;
+    line-height: 0.88;
   }
 
   h2 {
-    font-size: 2.75rem;
+    font-size: clamp(2.15rem, 12vw, 3.3rem);
+    line-height: 0.96;
+    overflow-wrap: break-word;
   }
 
   section:not(.hero):not(.marquee) {
-    padding-block: 66px;
+    padding: 56px 20px;
+  }
+
+  .lead {
+    margin-top: 18px;
+    font-size: 1rem;
+  }
+
+  .deal-card {
+    margin-top: 20px;
+    padding: 14px;
+  }
+
+  .deal-copy strong,
+  .price-box strong,
+  .timer-box strong {
+    font-size: 2.05rem;
+  }
+
+  .countdown {
+    min-width: 0;
+    justify-items: start;
+  }
+
+  .countdown strong {
+    font-size: 1.9rem;
+  }
+
+  .hero-actions {
+    margin-top: 22px;
+  }
+
+  .event-facts {
+    margin-top: 28px;
+  }
+
+  .event-facts div,
+  .cards article,
+  .details-panel,
+  .tickets,
+  .price-box,
+  .seat-box,
+  .timer-box {
+    padding: 18px;
+  }
+
+  .marquee {
+    gap: 10px;
+    overflow-x: auto;
+    padding: 14px 20px;
+    font-size: 1.35rem;
+    scrollbar-width: none;
+  }
+
+  .marquee::-webkit-scrollbar {
+    display: none;
+  }
+
+  .split {
+    gap: 24px;
+  }
+
+  .copy-stack p,
+  .cards p,
+  .tickets p {
+    font-size: 0.98rem;
+  }
+
+  h3 {
+    margin-top: 30px;
+    font-size: 1.75rem;
+  }
+
+  blockquote {
+    font-size: 2rem;
+  }
+
+  .mini-poster {
+    min-height: 280px;
+  }
+
+  .seat-row {
+    display: grid;
+  }
+
+  .seat-row strong {
+    font-size: 1.9rem;
   }
 
   .button {
