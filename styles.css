@@ -512,6 +512,11 @@ blockquote {
   padding: clamp(28px, 5vw, 54px);
 }
 
+.ticket-actions {
+  display: grid;
+  gap: 12px;
+}
+
 .tickets p {
   max-width: 650px;
 }
@@ -586,6 +591,82 @@ blockquote {
   color: var(--muted);
 }
 
+.subpage {
+  width: min(100%, var(--max));
+  margin: 0 auto;
+  padding: 128px clamp(20px, 5vw, 64px) 70px;
+}
+
+.subhero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 460px);
+  gap: clamp(28px, 6vw, 70px);
+  align-items: end;
+  min-height: 58svh;
+}
+
+.signup-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  padding: 56px 0;
+}
+
+.signup-steps article,
+.confirmation-panel,
+.thanks-card {
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: linear-gradient(145deg, rgba(28, 40, 52, 0.78), rgba(255, 255, 255, 0.035));
+}
+
+.signup-steps article {
+  padding: 28px;
+}
+
+.signup-steps span {
+  color: var(--cyan);
+  font-weight: 900;
+}
+
+.confirmation-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 300px);
+  gap: 28px;
+  align-items: center;
+  padding: clamp(28px, 5vw, 54px);
+}
+
+.confirmation-panel p,
+.signup-steps p,
+.thanks-card p {
+  color: var(--muted);
+}
+
+.thank-you-page {
+  display: grid;
+  min-height: 100svh;
+  place-items: center;
+}
+
+.thanks-card {
+  width: min(820px, 100%);
+  padding: clamp(30px, 6vw, 70px);
+  text-align: center;
+}
+
+.thanks-card .lead {
+  margin-inline: auto;
+}
+
+.thank-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 34px;
+}
+
 @media (max-width: 900px) {
   .nav {
     display: none;
@@ -596,7 +677,10 @@ blockquote {
   .cards,
   .details,
   .tickets,
-  .ticket-offer {
+  .ticket-offer,
+  .subhero,
+  .signup-steps,
+  .confirmation-panel {
     grid-template-columns: 1fr;
   }
 
@@ -629,6 +713,10 @@ blockquote {
 
   .tickets {
     margin-bottom: 28px;
+  }
+
+  .subhero {
+    min-height: auto;
   }
 }
 
@@ -780,6 +868,24 @@ blockquote {
 
   .button {
     width: 100%;
+  }
+
+  .subpage {
+    padding: 104px 20px 48px;
+  }
+
+  .signup-steps {
+    padding: 34px 0;
+  }
+
+  .signup-steps article,
+  .confirmation-panel,
+  .thanks-card {
+    padding: 20px;
+  }
+
+  .thank-actions {
+    display: grid;
   }
 
   .footer {
