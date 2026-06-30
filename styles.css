@@ -549,14 +549,13 @@ blockquote {
 }
 
 .seat-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
+  display: grid;
+  gap: 8px;
 }
 
 .seat-row strong {
   color: var(--white);
-  font-size: 2.2rem;
+  font-size: 3.15rem;
 }
 
 .seat-meter {
