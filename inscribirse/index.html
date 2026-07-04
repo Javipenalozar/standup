@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Elegir silla | Stand-Up Therapy</title>
+    <meta name="description" content="Elige tu silla en Teatro Belarte para Stand-Up Therapy. Paga en línea y recibe tu QR de entrada." />
+    <meta property="og:title" content="Elige tu silla — Stand-Up Therapy" />
+    <meta property="og:description" content="Selecciona tu silla en Teatro Belarte para la noche de Stand-Up Therapy. 2 de septiembre, Bogotá." />
+    <meta property="og:image" content="https://standup.eventosjv.com/assets/standup-poster.jpeg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="topbar is-scrolled" data-topbar>
+      <a aria-label="Stand-Up Therapy" class="brand" href="/">
+        <span class="brand-icon">ST</span>
+        <span>Stand-Up Therapy</span>
+      </a>
+      <nav class="nav" aria-label="Navegación principal">
+        <a href="/#experiencia">Experiencia</a>
+        <a href="/#fecha">Fecha</a>
+        <a href="/#boletas">Boletas</a>
+      </nav>
+      <a class="nav-cta" href="https://wa.me/573238016527?text=Hola%2C%20quiero%20informacion%20de%20Stand-Up%20Therapy" target="_blank" rel="noreferrer">
+        WhatsApp
+      </a>
+    </header>
+
+    <main class="subpage">
+      <div style="margin-bottom: 40px;">
+        <p class="eyebrow">2 de septiembre · Teatro Belarte · Cra 7 # 152-54, Bogotá</p>
+        <h2 style="font-size: clamp(2rem, 5vw, 4rem);">Elige tu silla</h2>
+        <p style="color: var(--muted); max-width: 600px; margin-top: 10px;">
+          Selecciona donde quieres sentarte, completa tus datos y paga en línea.
+          Recibirás un QR único para presentar en la entrada.
+        </p>
+      </div>
+
+      <div class="theater-container" style="padding: 0;">
+
+        <div class="stage-label">Escenario</div>
+
+        <div id="seatMapLoading" class="map-loading">
+          <div class="spinner"></div>
+          <p>Cargando sillas disponibles...</p>
+        </div>
+
+        <div id="seatMapContainer" style="display: none;">
+          <div class="seat-map-grid" id="seatMap"></div>
+
+          <div class="exit-row">
+            <span>↓ Salida</span>
+            <span>↓ Salida</span>
+          </div>
+
+          <div class="map-legend">
+            <div><div class="legend-swatch sw-available"></div>Disponible</div>
+            <div><div class="legend-swatch sw-selected"></div>Tu selección</div>
+            <div><div class="legend-swatch sw-taken"></div>Ocupada</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="checkout-panel" id="checkoutPanel">
+        <div class="checkout-header">
+          <h3 id="checkoutTitle" style="font-size: 1.5rem;">Selecciona tus sillas arriba</h3>
+          <div class="checkout-total" id="checkoutTotal"></div>
+        </div>
+        <div class="selected-seats-list" id="selectedSeatsList"></div>
+
+        <form class="checkout-form" id="checkoutForm" style="display: none;" onsubmit="return false;">
+          <div class="field-group">
+            <label for="fname">Nombre</label>
+            <input type="text" id="fname" placeholder="Tu nombre" required />
+          </div>
+          <div class="field-group">
+            <label for="lname">Apellido</label>
+            <input type="text" id="lname" placeholder="Tu apellido" required />
+          </div>
+          <div class="field-group">
+            <label for="email">Correo electrónico</label>
+            <input type="email" id="email" placeholder="correo@ejemplo.com" required />
+          </div>
+          <div class="field-group">
+            <label for="phone">WhatsApp / Celular</label>
+            <input type="tel" id="phone" placeholder="3001234567" required />
+          </div>
+          <div class="checkout-actions">
+            <button type="button" class="btn-bold" id="btnPay" disabled>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+              Pagar con Bold
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div id="qrResultSection" style="display: none;"></div>
+    </main>
+
+    <footer class="footer">
+      <p>Javi Penaloza - Sí es posible</p>
+      <a href="https://wa.me/573238016527" target="_blank" rel="noreferrer">+57 323 801 6527</a>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
+    <script>
+    (function () {
+      // ══════════════════════════════════════════════
+      //  CONFIG — reemplaza estos valores con los tuyos
+      // ══════════════════════════════════════════════
+      const SUPABASE_URL = 'https://rpgagnnhsefwaethszfl.supabase.co';
+      const SUPABASE_ANON_KEY = 'REEMPLAZA_CON_TU_ANON_KEY';
+
+      // Bold: API key secreta va en la Netlify Function, no aquí.
+      // Este es el ID de tu link/botón de Bold (lo encuentras en tu dashboard de Bold).
+      const BOLD_API_KEY = 'REEMPLAZA_CON_TU_BOLD_API_KEY';
+
+      const PRICE = 69000;
+      const EVENT_ID = 'standup-therapy-bogota-2sep2026';
+      const RETURN_URL = 'https://standup.eventosjv.com/inscribirse/';
+      const DEMO_MODE = SUPABASE_ANON_KEY === 'REEMPLAZA_CON_TU_ANON_KEY';
+
+      const sb = DEMO_MODE ? null : window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+      // ── Theater layout (Teatro Belarte — Cra 7 # 152-54) ──
+      const ROWS = [
+        { label: 'A', left: [1,2,3,4,5], center: [6,7,8,9,10,11,12,13,14,15,16,17], right: [18,19,20,21,22] },
+        { label: 'B', left: [1,2,3,4,5], center: [6,7,8,9,10,11,12,13,14,15,16,17], right: [18,19,20,21,22] },
+        { label: 'C', left: [1,2,3,4,5], center: [6,7,8,9,10,11,12,13,14,15,16,17], right: [18,19,20,21,22] },
+        { label: 'D', left: [1,2,3,4,5], center: [6,7,8,9,10,11,12,13,14,15,16,17], right: [18,19,20,21,22] },
+        { label: 'E', left: [1,2,3,4,5], center: [6,7,8,9,10,11,12,13,14,15,16,17], right: [18,19,20,21,22] },
+        { label: 'F', left: [1,2,3,4,5], center: [6,7,8,9,10,11,12,13,14,15,16,17], right: [18,19,20,21,22] },
+        { label: 'G', left: [1,2,3,4,5], center: [6,7,8,9,10,11,12,13,14,15,16,17], right: [18,19,20,21,22] },
+        { label: 'H', left: [1,2,3,4,5], center: [6,7,8,9,10,11,12,13,14,15,16,17], right: [18,19,20,21,22] },
+        { label: 'I', left: [1,2,3,4,5], center: [6,7,8,9,10,11,12,13,14,15,16,17], right: [18,19,20,21,22] },
+        { label: 'J', left: [1,2,3,4,5], center: [6,7,8,9,10,11,12,13,14,15,16,17], right: [18,19,20,21,22] },
+        { label: 'K', left: [1,2,3,4],   center: [5,6,7,8,9,10,11,12,13,14,15],     right: [16,17,18,19] },
+      ];
+
+      const takenSeats = new Set();
+      const selectedSeats = new Set();
+      const seatButtons = {};
+
+      // ══════════════════════════════════════════════
+      //  1. CARGAR SILLAS OCUPADAS DESDE SUPABASE
+      // ══════════════════════════════════════════════
+      async function loadTakenSeats() {
+        if (sb) {
+          try {
+            const { data, error } = await sb
+              .from('reservations')
+              .select('seat_id')
+              .eq('event_id', EVENT_ID)
+              .in('payment_status', ['paid', 'pending']);
+
+            if (!error && data) {
+              data.forEach(r => takenSeats.add(r.seat_id));
+            }
+          } catch (e) {
+            console.warn('Supabase no disponible — mostrando todas como disponibles.');
+          }
+        }
+
+        renderSeatMap();
+        document.getElementById('seatMapLoading').style.display = 'none';
+        document.getElementById('seatMapContainer').style.display = 'block';
+      }
+
+      // ══════════════════════════════════════════════
+      //  2. RENDERIZAR MAPA DE SILLAS
+      // ══════════════════════════════════════════════
+      function renderSeatMap() {
+        const map = document.getElementById('seatMap');
+
+        ROWS.forEach(row => {
+          const rowEl = document.createElement('div');
+          rowEl.className = 'seat-map-row';
+
+          const lblL = document.createElement('div');
+          lblL.className = 'row-id';
+          lblL.textContent = row.label;
+          rowEl.appendChild(lblL);
+
+          function addSection(seats) {
+            const sec = document.createElement('div');
+            sec.className = 'seat-section';
+            seats.forEach(num => {
+              const btn = document.createElement('button');
+              const seatId = row.label + '-' + num;
+              btn.className = 'seat-btn';
+              btn.textContent = num;
+              btn.title = 'Fila ' + row.label + ', Silla ' + num;
+              btn.setAttribute('aria-label', 'Fila ' + row.label + ' Silla ' + num);
+
+              if (takenSeats.has(seatId)) {
+                btn.classList.add('is-taken');
+                btn.disabled = true;
+              } else {
+                btn.addEventListener('click', () => toggleSeat(seatId));
+              }
+
+              seatButtons[seatId] = btn;
+              sec.appendChild(btn);
+            });
+            return sec;
+          }
+
+          rowEl.appendChild(addSection(row.left));
+          const a1 = document.createElement('div'); a1.className = 'seat-aisle'; rowEl.appendChild(a1);
+          rowEl.appendChild(addSection(row.center));
+          const a2 = document.createElement('div'); a2.className = 'seat-aisle'; rowEl.appendChild(a2);
+          rowEl.appendChild(addSection(row.right));
+
+          const lblR = document.createElement('div');
+          lblR.className = 'row-id';
+          lblR.textContent = row.label;
+          rowEl.appendChild(lblR);
+
+          map.appendChild(rowEl);
+        });
+      }
+
+      function toggleSeat(seatId) {
+        if (selectedSeats.has(seatId)) {
+          selectedSeats.delete(seatId);
+          seatButtons[seatId].classList.remove('is-selected');
+        } else {
+          if (selectedSeats.size >= 10) return;
+          selectedSeats.add(seatId);
+          seatButtons[seatId].classList.add('is-selected');
+        }
+        updateCheckout();
+      }
+
+      // ══════════════════════════════════════════════
+      //  3. PANEL DE CHECKOUT
+      // ══════════════════════════════════════════════
+      function updateCheckout() {
+        const title = document.getElementById('checkoutTitle');
+        const total = document.getElementById('checkoutTotal');
+        const list = document.getElementById('selectedSeatsList');
+        const form = document.getElementById('checkoutForm');
+        const btn = document.getElementById('btnPay');
+
+        if (selectedSeats.size === 0) {
+          title.textContent = 'Selecciona tus sillas arriba';
+          total.textContent = '';
+          list.textContent = '';
+          form.style.display = 'none';
+          btn.disabled = true;
+          return;
+        }
+
+        const count = selectedSeats.size;
+        const amount = count * PRICE;
+        title.textContent = count + (count === 1 ? ' silla seleccionada' : ' sillas seleccionadas');
+        total.textContent = '$' + amount.toLocaleString('es-CO') + ' COP';
+
+        const sorted = [...selectedSeats].sort((a, b) => {
+          const [ra, sa] = a.split('-');
+          const [rb, sb_] = b.split('-');
+          return ra === rb ? Number(sa) - Number(sb_) : ra.localeCompare(rb);
+        });
+
+        list.textContent = sorted.map(s => 'Fila ' + s.replace('-', ' · Silla ')).join('  ·  ');
+        form.style.display = 'grid';
+        validateForm();
+      }
+
+      function validateForm() {
+        const btn = document.getElementById('btnPay');
+        const fname = document.getElementById('fname').value.trim();
+        const lname = document.getElementById('lname').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        btn.disabled = !(selectedSeats.size > 0 && fname && lname && email && phone);
+      }
+
+      document.querySelectorAll('#checkoutForm input').forEach(input => {
+        input.addEventListener('input', validateForm);
+      });
+
+      // ══════════════════════════════════════════════
+      //  4. FLUJO DE PAGO CON BOLD
+      //
+      //  Paso 1: Usuario elige sillas + llena datos
+      //  Paso 2: Se crea reserva PENDIENTE en Supabase
+      //  Paso 3: Se crea orden de pago en Bold via API
+      //  Paso 4: Bold redirige al usuario a su checkout
+      //  Paso 5: Tras pagar, Bold redirige de vuelta aquí
+      //  Paso 6: Verificamos el pago con Bold API
+      //  Paso 7: Actualizamos Supabase a 'paid'
+      //  Paso 8: Mostramos el QR
+      //
+      //  El webhook de Bold (Netlify Function) es el
+      //  respaldo: si el usuario cierra la ventana tras
+      //  pagar, el webhook igual actualiza Supabase.
+      // ══════════════════════════════════════════════
+
+      document.getElementById('btnPay').addEventListener('click', async function () {
+        const btn = this;
+        const fname = document.getElementById('fname').value.trim();
+        const lname = document.getElementById('lname').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+
+        if (!fname || !lname || !email || !phone || selectedSeats.size === 0) return;
+
+        btn.disabled = true;
+        btn.textContent = 'Procesando...';
+
+        const seats = [...selectedSeats].sort();
+        const amount = seats.length * PRICE;
+        const orderRef = 'ST-' + Date.now().toString(36).toUpperCase() + '-' + seats.join('_');
+
+        // ── Paso 2: Crear reserva PENDIENTE en Supabase ──
+        if (sb) {
+          try {
+            const reservations = seats.map(seatId => ({
+              event_id: EVENT_ID,
+              seat_id: seatId,
+              customer_name: fname + ' ' + lname,
+              customer_email: email,
+              customer_phone: phone,
+              payment_status: 'pending',
+              qr_code: orderRef,
+              amount: PRICE,
+            }));
+
+            const { error } = await sb.from('reservations').insert(reservations);
+
+            if (error) {
+              console.error('Supabase error:', error);
+              alert('Algunas sillas ya fueron reservadas. Recarga la página e intenta con otras.');
+              btn.disabled = false;
+              btn.innerHTML = svgCard() + ' Pagar con Bold';
+              return;
+            }
+          } catch (e) {
+            console.error('Error Supabase:', e);
+          }
+        }
+
+        // ── Paso 3: Crear link de pago en Bold ──
+        if (BOLD_API_KEY !== 'REEMPLAZA_CON_TU_BOLD_API_KEY') {
+          try {
+            const res = await fetch('https://api.bold.co/online/link/v1', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'x-api-key ' + BOLD_API_KEY,
+              },
+              body: JSON.stringify({
+                amount_type: 'CLOSE',
+                amount: {
+                  currency: 'COP',
+                  total_amount: amount,
+                  tip_amount: 0,
+                },
+                description: 'Stand-Up Therapy — ' + seats.length + ' silla(s): ' + seats.join(', '),
+                payment_method: ['CARD', 'PSE', 'NEQUI', 'DAVIPLATA'],
+                order_reference: orderRef,
+                redirect_url: RETURN_URL + '?ref=' + encodeURIComponent(orderRef),
+                expiration_date: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
+                payer_email: email,
+              }),
+            });
+
+            const data = await res.json();
+
+            if (data.payload && data.payload.url) {
+              window.location.href = data.payload.url;
+              return;
+            }
+
+            console.error('Bold API response:', data);
+            alert('Error creando el pago. Intenta de nuevo.');
+            rollbackPending(orderRef);
+            btn.disabled = false;
+            btn.innerHTML = svgCard() + ' Pagar con Bold';
+            return;
+
+          } catch (e) {
+            console.error('Bold API error:', e);
+            alert('No se pudo conectar con Bold. Intenta de nuevo.');
+            rollbackPending(orderRef);
+            btn.disabled = false;
+            btn.innerHTML = svgCard() + ' Pagar con Bold';
+            return;
+          }
+        }
+
+        // ── Modo demo (sin Bold configurado): mostrar QR directo ──
+        showQRResult(seats, fname + ' ' + lname, email, orderRef, amount);
+      });
+
+      function svgCard() {
+        return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>';
+      }
+
+      async function rollbackPending(ref) {
+        if (!sb) return;
+        await sb.from('reservations').delete().eq('qr_code', ref).eq('payment_status', 'pending');
+      }
+
+      // ══════════════════════════════════════════════
+      //  5. RETORNO DE BOLD — VERIFICAR PAGO
+      // ══════════════════════════════════════════════
+      async function handleBoldReturn(orderRef) {
+        document.getElementById('seatMapLoading').style.display = 'block';
+        document.getElementById('seatMapContainer').style.display = 'none';
+        document.querySelector('.subpage > div:first-child').innerHTML =
+          '<p class="eyebrow">Verificando tu pago...</p>' +
+          '<h2 style="font-size:clamp(2rem,5vw,4rem);">Un momento</h2>' +
+          '<p style="color:var(--muted);">Estamos confirmando tu pago con Bold.</p>';
+        document.getElementById('checkoutPanel').style.display = 'none';
+
+        if (sb) {
+          // Intentar verificar el estado del pago vía Netlify Function
+          let paid = false;
+          try {
+            const verifyRes = await fetch('/.netlify/functions/verify-bold-payment?ref=' + encodeURIComponent(orderRef));
+            const verifyData = await verifyRes.json();
+            paid = verifyData.status === 'paid';
+          } catch (e) {
+            // Si la función no existe, chequeamos directo en Supabase
+            // (el webhook ya pudo haber actualizado el status)
+            const { data } = await sb
+              .from('reservations')
+              .select('payment_status')
+              .eq('qr_code', orderRef)
+              .limit(1);
+
+            if (data && data[0]) {
+              paid = data[0].payment_status === 'paid';
+            }
+          }
+
+          if (!paid) {
+            // Esperar 3 segundos y reintentar (Bold webhook puede tardar)
+            await new Promise(r => setTimeout(r, 3000));
+            const { data } = await sb
+              .from('reservations')
+              .select('payment_status')
+              .eq('qr_code', orderRef)
+              .limit(1);
+            paid = data && data[0] && data[0].payment_status === 'paid';
+          }
+
+          if (paid) {
+            const { data } = await sb
+              .from('reservations')
+              .select('*')
+              .eq('qr_code', orderRef);
+
+            if (data && data.length > 0) {
+              const r = data[0];
+              const seats = data.map(d => d.seat_id).sort();
+              const amount = data.length * PRICE;
+              document.getElementById('seatMapLoading').style.display = 'none';
+              showQRResult(seats, r.customer_name, r.customer_email, orderRef, amount);
+              return;
+            }
+          }
+
+          // Si no se verificó el pago, mostrar mensaje de espera
+          document.getElementById('seatMapLoading').style.display = 'none';
+          document.querySelector('.subpage > div:first-child').innerHTML =
+            '<p class="eyebrow">Pago en proceso</p>' +
+            '<h2 style="font-size:clamp(2rem,5vw,4rem);">Estamos verificando</h2>' +
+            '<p style="color:var(--muted);max-width:500px;">Tu pago fue recibido y está siendo procesado. Recibirás tu QR por correo electrónico en los próximos minutos. Si no lo recibes, escríbenos por WhatsApp.</p>' +
+            '<div style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;">' +
+              '<a class="button primary" href="https://wa.me/573238016527?text=Hola%2C%20hice%20un%20pago%20para%20Stand-Up%20Therapy%20con%20referencia%20' + orderRef + '" target="_blank" rel="noreferrer">WhatsApp</a>' +
+              '<a class="button ghost" href="/">Volver al inicio</a>' +
+            '</div>';
+        }
+      }
+
+      // ══════════════════════════════════════════════
+      //  6. MOSTRAR QR DE CONFIRMACIÓN
+      // ══════════════════════════════════════════════
+      function showQRResult(seats, name, email, code, amount) {
+        document.getElementById('checkoutPanel').style.display = 'none';
+        document.querySelector('.theater-container').style.display = 'none';
+        document.querySelector('.subpage > div:first-child').style.display = 'none';
+        document.getElementById('seatMapLoading').style.display = 'none';
+
+        const section = document.getElementById('qrResultSection');
+        section.style.display = 'block';
+
+        section.innerHTML =
+          '<div class="qr-result-card">' +
+            '<h3>RESERVA CONFIRMADA</h3>' +
+            '<p class="qr-subtitle">Presenta este QR en la entrada del Teatro Belarte el 2 de septiembre</p>' +
+            '<div class="qr-canvas-wrap"><canvas id="qrCanvas"></canvas></div>' +
+            '<div class="qr-info">' +
+              '<div class="qr-info-item"><span>Nombre</span><strong>' + escapeHtml(name) + '</strong></div>' +
+              '<div class="qr-info-item"><span>Sillas</span><strong>' + seats.map(s => s.replace('-', ' #')).join(', ') + '</strong></div>' +
+              '<div class="qr-info-item"><span>Total</span><strong>$' + amount.toLocaleString('es-CO') + ' COP</strong></div>' +
+              '<div class="qr-info-item"><span>Código</span><strong style="font-size:0.78rem;word-break:break-all;">' + escapeHtml(code) + '</strong></div>' +
+            '</div>' +
+            '<p class="qr-footer-note">También enviamos la confirmación a <strong>' + escapeHtml(email) + '</strong></p>' +
+            '<div style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">' +
+              '<a class="button primary" href="/" style="display:inline-flex;">Volver al inicio</a>' +
+              '<a class="button ghost" href="https://wa.me/573238016527?text=Hola%2C%20ya%20pagu%C3%A9%20mi%20boleta%20para%20Stand-Up%20Therapy.%20Mi%20c%C3%B3digo%20es%20' + encodeURIComponent(code) + '" target="_blank" rel="noreferrer" style="display:inline-flex;">Confirmar por WhatsApp</a>' +
+            '</div>' +
+          '</div>';
+
+        new QRious({
+          element: document.getElementById('qrCanvas'),
+          value: code,
+          size: 220,
+          foreground: '#050608',
+          background: '#ffffff',
+        });
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      function escapeHtml(str) {
+        const d = document.createElement('div');
+        d.textContent = str;
+        return d.innerHTML;
+      }
+
+      // ══════════════════════════════════════════════
+      //  INIT — detectar si es retorno de Bold o carga normal
+      // ══════════════════════════════════════════════
+      const params = new URLSearchParams(window.location.search);
+      const boldRef = params.get('ref');
+
+      if (boldRef) {
+        handleBoldReturn(boldRef);
+      } else {
+        loadTakenSeats();
+      }
+
+      // ── Topbar scroll ──
+      const tb = document.querySelector('[data-topbar]');
+      window.addEventListener('scroll', () => {
+        tb?.classList.toggle('is-scrolled', window.scrollY > 24);
+      }, { passive: true });
+    })();
+    </script>
+  </body>
+</html>
