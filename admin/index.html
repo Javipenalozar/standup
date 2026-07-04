@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin | Stand-Up Therapy</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/styles.css" />
+    <style>
+      .admin-container { max-width: 700px; margin: 0 auto; padding: 100px 24px 60px; }
+      .admin-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 32px; margin-bottom: 24px; }
+      .admin-card h3 { font-family: 'Anton', sans-serif; font-size: 1.4rem; text-transform: uppercase; margin-bottom: 16px; }
+      .admin-field { margin-bottom: 14px; }
+      .admin-field label { display: block; font-size: 0.82rem; color: var(--muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+      .admin-field input, .admin-field select { width: 100%; padding: 10px 14px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; color: #fff; font-size: 0.95rem; }
+      .admin-field input:focus, .admin-field select:focus { outline: none; border-color: #87f2ff; }
+      .admin-btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 28px; background: #87f2ff; color: #000; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; font-size: 0.95rem; }
+      .admin-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+      .admin-btn.secondary { background: rgba(255,255,255,0.08); color: #fff; }
+      .result-box { margin-top: 20px; padding: 20px; background: rgba(0,255,200,0.06); border: 1px solid rgba(0,255,200,0.15); border-radius: 12px; display: none; }
+      .result-box .link { word-break: break-all; font-size: 0.9rem; color: #87f2ff; font-weight: 600; }
+      .result-box .copy-btn { margin-top: 12px; padding: 8px 20px; background: #87f2ff; color: #000; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.85rem; }
+      .login-box { text-align: center; padding: 160px 24px; }
+      .login-box h2 { font-family: 'Anton', sans-serif; font-size: 2rem; margin-bottom: 24px; }
+      .login-box input { max-width: 300px; }
+      .history-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 16px; }
+      .history-table th { text-align: left; color: var(--muted); font-weight: 600; padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.1); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; }
+      .history-table td { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+      .badge { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+      .badge.active { background: rgba(0,255,200,0.12); color: #87f2ff; }
+      .badge.used { background: rgba(255,255,255,0.06); color: var(--muted); }
+      .badge.multi { background: rgba(100,150,255,0.12); color: #8ab4ff; }
+      .tabs { display: flex; gap: 0; margin-bottom: 24px; }
+      .tab-btn { flex: 1; padding: 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: var(--muted); font-weight: 600; cursor: pointer; font-size: 0.9rem; }
+      .tab-btn:first-child { border-radius: 8px 0 0 8px; }
+      .tab-btn:last-child { border-radius: 0 8px 8px 0; }
+      .tab-btn.active { background: #87f2ff; color: #000; border-color: #87f2ff; }
+      .tab-content { display: none; }
+      .tab-content.active { display: block; }
+      .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
+      .stat-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 16px; text-align: center; }
+      .stat-card .num { font-family: 'Anton', sans-serif; font-size: 2rem; color: #87f2ff; }
+      .stat-card .label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    </style>
+  </head>
+  <body>
+    <!-- Login -->
+    <div id="loginScreen" class="login-box">
+      <h2>Admin Panel</h2>
+      <p style="color:var(--muted);margin-bottom:24px;">Stand-Up Therapy · Teatro Belarte</p>
+      <div class="admin-field">
+        <input type="password" id="passwordInput" placeholder="Contraseña" />
+      </div>
+      <button class="admin-btn" id="loginBtn" style="margin-top:12px;">Entrar</button>
+      <p id="loginError" style="color:#ff4444;margin-top:12px;display:none;">Contraseña incorrecta</p>
+    </div>
+
+    <!-- Panel -->
+    <div id="adminPanel" style="display:none;">
+      <header class="topbar is-scrolled" data-topbar>
+        <a class="brand" href="/admin/">
+          <span class="brand-icon">ST</span>
+          <span>Admin</span>
+        </a>
+        <a class="nav-cta" href="/" target="_blank">Ver sitio</a>
+      </header>
+
+      <div class="admin-container">
+        <div class="stats" id="statsGrid">
+          <div class="stat-card"><div class="num" id="statTotal">-</div><div class="label">Reservas</div></div>
+          <div class="stat-card"><div class="num" id="statSeats">-</div><div class="label">Sillas ocupadas</div></div>
+          <div class="stat-card"><div class="num" id="statAvailable">-</div><div class="label">Disponibles</div></div>
+        </div>
+
+        <div class="tabs">
+          <button class="tab-btn active" data-tab="crear">Crear invitación</button>
+          <button class="tab-btn" data-tab="historial">Historial</button>
+          <button class="tab-btn" data-tab="reservas">Reservas</button>
+        </div>
+
+        <!-- Tab: Crear invitación -->
+        <div class="tab-content active" id="tab-crear">
+          <div class="admin-card">
+            <h3>Nueva invitación</h3>
+            <p style="color:var(--muted);font-size:0.88rem;margin-bottom:20px;">Crea un link para que alguien elija su silla sin pasar por Bold.</p>
+
+            <div class="admin-field">
+              <label>Tipo</label>
+              <select id="invType">
+                <option value="single">Individual (un solo uso)</option>
+                <option value="multi">Genérico (uso múltiple — para grupo de pagos externos)</option>
+              </select>
+            </div>
+            <div class="admin-field">
+              <label>Nombre del invitado / Grupo</label>
+              <input type="text" id="invName" placeholder="Ej: Familia Penaloza, o Pagos externos" />
+            </div>
+            <div class="admin-field">
+              <label>Máximo de sillas por persona</label>
+              <select id="invSeats">
+                <option value="1">1 silla</option>
+                <option value="2">2 sillas</option>
+                <option value="3">3 sillas</option>
+                <option value="4">4 sillas</option>
+                <option value="5">5 sillas</option>
+              </select>
+            </div>
+            <button class="admin-btn" id="createBtn">Crear invitación</button>
+
+            <div class="result-box" id="resultBox">
+              <p style="font-size:0.85rem;color:var(--muted);margin-bottom:8px;">Link listo para enviar:</p>
+              <p class="link" id="resultLink"></p>
+              <button class="copy-btn" id="copyBtn">Copiar link</button>
+              <button class="copy-btn" id="copyWaBtn" style="margin-left:8px;background:rgba(255,255,255,0.1);color:#fff;">Copiar mensaje WhatsApp</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Historial -->
+        <div class="tab-content" id="tab-historial">
+          <div class="admin-card">
+            <h3>Invitaciones creadas</h3>
+            <div id="historyList"><p style="color:var(--muted);">Cargando...</p></div>
+          </div>
+        </div>
+
+        <!-- Tab: Reservas -->
+        <div class="tab-content" id="tab-reservas">
+          <div class="admin-card">
+            <h3>Todas las reservas</h3>
+            <div id="reservasList"><p style="color:var(--muted);">Cargando...</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script>
+    (function () {
+      const SUPABASE_URL = 'https://rpgagnnhsefwaethszfl.supabase.co';
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwZ2Fnbm5oc2Vmd2FldGhzemZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4MDAxMjcsImV4cCI6MjA5ODM3NjEyN30.YxXpLyJVFhObTmq30UNnpgBOD6cq2ubR1lIYS6A-Z1g';
+      const EVENT_ID = 'standup-therapy-bogota-2sep2026';
+      const TOTAL_SEATS = 239;
+      const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+      let adminPassword = '';
+
+      // Login
+      document.getElementById('loginBtn').addEventListener('click', tryLogin);
+      document.getElementById('passwordInput').addEventListener('keydown', e => { if (e.key === 'Enter') tryLogin(); });
+
+      async function tryLogin() {
+        const pw = document.getElementById('passwordInput').value;
+        try {
+          const res = await fetch('/.netlify/functions/crear-invitacion', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nombre: '__test__', cantidad: 1, password: pw, dry_run: true }),
+          });
+          if (res.status === 401) {
+            document.getElementById('loginError').style.display = 'block';
+            return;
+          }
+          adminPassword = pw;
+          document.getElementById('loginScreen').style.display = 'none';
+          document.getElementById('adminPanel').style.display = 'block';
+          loadStats();
+          loadHistory();
+          loadReservas();
+        } catch (e) {
+          document.getElementById('loginError').style.display = 'block';
+        }
+      }
+
+      // Tabs
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+          btn.classList.add('active');
+          document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+          if (btn.dataset.tab === 'historial') loadHistory();
+          if (btn.dataset.tab === 'reservas') loadReservas();
+        });
+      });
+
+      // Stats
+      async function loadStats() {
+        const { data } = await sb
+          .from('reservations')
+          .select('seat_id')
+          .eq('event_id', EVENT_ID)
+          .in('payment_status', ['paid', 'pending']);
+
+        const occupied = data ? data.length : 0;
+        const unique = data ? new Set(data.map(r => r.qr_code || '')).size : 0;
+        document.getElementById('statTotal').textContent = unique;
+        document.getElementById('statSeats').textContent = occupied;
+        document.getElementById('statAvailable').textContent = TOTAL_SEATS - occupied;
+      }
+
+      // Create invitation
+      document.getElementById('createBtn').addEventListener('click', async () => {
+        const btn = document.getElementById('createBtn');
+        const name = document.getElementById('invName').value.trim();
+        const seats = parseInt(document.getElementById('invSeats').value);
+        const type = document.getElementById('invType').value;
+
+        if (!name) { alert('Escribe un nombre'); return; }
+
+        btn.disabled = true;
+        btn.textContent = 'Creando...';
+
+        try {
+          const res = await fetch('/.netlify/functions/crear-invitacion', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              nombre: name,
+              cantidad: seats,
+              password: adminPassword,
+              multi_use: type === 'multi',
+            }),
+          });
+
+          const data = await res.json();
+
+          if (!res.ok) {
+            alert(data.error || 'Error');
+            btn.disabled = false;
+            btn.textContent = 'Crear invitación';
+            return;
+          }
+
+          const box = document.getElementById('resultBox');
+          const link = data.link;
+          document.getElementById('resultLink').textContent = link;
+          box.style.display = 'block';
+
+          document.getElementById('copyBtn').onclick = () => {
+            navigator.clipboard.writeText(link);
+            document.getElementById('copyBtn').textContent = '¡Copiado!';
+            setTimeout(() => document.getElementById('copyBtn').textContent = 'Copiar link', 2000);
+          };
+
+          document.getElementById('copyWaBtn').onclick = () => {
+            const msg = '¡Hola! 🎭 Tu entrada para *Stand-Up Therapy* está confirmada.\n\n' +
+              '📍 Teatro Belarte · Cra 7 #152-54, Bogotá\n' +
+              '📅 2 de septiembre · 18:00 horas\n\n' +
+              'Elige tu silla y obtén tu QR de entrada aquí:\n' + link + '\n\n' +
+              '¡Nos vemos! 🎤';
+            navigator.clipboard.writeText(msg);
+            document.getElementById('copyWaBtn').textContent = '¡Copiado!';
+            setTimeout(() => document.getElementById('copyWaBtn').textContent = 'Copiar mensaje WhatsApp', 2000);
+          };
+
+        } catch (e) {
+          alert('Error de conexión');
+        }
+
+        btn.disabled = false;
+        btn.textContent = 'Crear invitación';
+      });
+
+      // History
+      async function loadHistory() {
+        const { data, error } = await sb
+          .from('invitations')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        const container = document.getElementById('historyList');
+        if (!data || data.length === 0) {
+          container.innerHTML = '<p style="color:var(--muted);">No hay invitaciones creadas aún.</p>';
+          return;
+        }
+
+        let html = '<table class="history-table"><thead><tr><th>Código</th><th>Nombre</th><th>Sillas</th><th>Estado</th></tr></thead><tbody>';
+        data.forEach(inv => {
+          const status = inv.multi_use
+            ? '<span class="badge multi">Múltiple</span>'
+            : inv.used
+              ? '<span class="badge used">Usado</span>'
+              : '<span class="badge active">Activo</span>';
+          html += '<tr>' +
+            '<td style="font-family:monospace;font-size:0.8rem;">' + esc(inv.code) + '</td>' +
+            '<td>' + esc(inv.guest_name) + '</td>' +
+            '<td>' + inv.max_seats + '</td>' +
+            '<td>' + status + '</td>' +
+            '</tr>';
+        });
+        html += '</tbody></table>';
+        container.innerHTML = html;
+      }
+
+      // Reservas
+      async function loadReservas() {
+        const { data, error } = await sb
+          .from('reservations')
+          .select('*')
+          .eq('event_id', EVENT_ID)
+          .order('created_at', { ascending: false });
+
+        const container = document.getElementById('reservasList');
+        if (!data || data.length === 0) {
+          container.innerHTML = '<p style="color:var(--muted);">No hay reservas aún.</p>';
+          return;
+        }
+
+        // Agrupar por qr_code
+        const groups = {};
+        data.forEach(r => {
+          if (!groups[r.qr_code]) groups[r.qr_code] = { ...r, seats: [] };
+          groups[r.qr_code].seats.push(r.seat_id);
+        });
+
+        let html = '<table class="history-table"><thead><tr><th>Nombre</th><th>Sillas</th><th>Estado</th><th>Tipo</th></tr></thead><tbody>';
+        Object.values(groups).forEach(g => {
+          const statusClass = g.payment_status === 'paid' ? 'active' : 'used';
+          const type = g.amount === 0 ? 'Invitación' : '$' + g.amount.toLocaleString('es-CO');
+          html += '<tr>' +
+            '<td>' + esc(g.customer_name) + '<br><span style="font-size:0.75rem;color:var(--muted);">' + esc(g.customer_email) + '</span></td>' +
+            '<td>' + g.seats.sort().join(', ') + '</td>' +
+            '<td><span class="badge ' + statusClass + '">' + g.payment_status + '</span></td>' +
+            '<td>' + type + '</td>' +
+            '</tr>';
+        });
+        html += '</tbody></table>';
+        container.innerHTML = html;
+      }
+
+      function esc(str) {
+        const d = document.createElement('div');
+        d.textContent = str || '';
+        return d.innerHTML;
+      }
+    })();
+    </script>
+  </body>
+</html>

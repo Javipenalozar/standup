@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Invitación | Stand-Up Therapy</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/styles.css" />
+    <style>
+      @media (max-width: 620px) {
+        .theater-container { overflow: hidden; }
+        .seat-map-grid {
+          transform: scale(0.58);
+          transform-origin: top center;
+          margin-bottom: -100px;
+          overflow: visible;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar is-scrolled" data-topbar>
+      <a aria-label="Stand-Up Therapy" class="brand" href="/">
+        <span class="brand-icon">ST</span>
+        <span>Stand-Up Therapy</span>
+      </a>
+      <nav class="nav" aria-label="Navegación principal">
+        <a href="/">Inicio</a>
+      </nav>
+    </header>
+
+    <main class="subpage">
+      <!-- Estado: validando código -->
+      <div id="loadingState" style="text-align:center;padding:120px 24px;">
+        <p class="eyebrow" style="color:var(--accent);">Invitación especial</p>
+        <h2 style="font-size:clamp(2rem,5vw,3.5rem);">Validando tu invitación...</h2>
+        <div class="map-loading" style="margin-top:24px;">
+          <div style="width:32px;height:32px;border:3px solid var(--accent);border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto;"></div>
+        </div>
+      </div>
+
+      <!-- Estado: código inválido -->
+      <div id="errorState" style="display:none;text-align:center;padding:120px 24px;">
+        <p class="eyebrow" style="color:#ff4444;">Error</p>
+        <h2 id="errorTitle" style="font-size:clamp(2rem,5vw,3.5rem);">Código no válido</h2>
+        <p id="errorMsg" style="color:var(--muted);max-width:500px;margin:16px auto 0;">Este código de invitación no existe o ya fue utilizado.</p>
+        <a class="button ghost" href="/" style="margin-top:24px;display:inline-flex;">Volver al inicio</a>
+      </div>
+
+      <!-- Estado: válido, elegir silla -->
+      <div id="mainContent" style="display:none;">
+        <div>
+          <p class="eyebrow" style="color:var(--accent);" id="eyebrowText">Invitación especial</p>
+          <h2 style="font-size:clamp(2rem,5vw,3.5rem);font-family:'Anton',sans-serif;text-transform:uppercase;" id="mainTitle">ELIGE TU SILLA</h2>
+          <p id="welcomeMsg" style="color:var(--muted);">Selecciona tu silla y confirma tu asistencia.</p>
+        </div>
+
+        <div class="theater-container">
+          <div class="stage-label">ESCENARIO</div>
+          <div id="seatMapLoading" class="map-loading" style="display:none;">
+            <div style="width:32px;height:32px;border:3px solid var(--accent);border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto;"></div>
+            <p>Cargando sillas disponibles...</p>
+          </div>
+          <div class="seat-map-grid" id="seatMap"></div>
+          <div class="seat-map-legend">
+            <div class="seat-map-exits"><span>↓ SALIDA</span><span>↓ SALIDA</span></div>
+            <div style="display:flex;gap:24px;justify-content:center;margin-top:12px;">
+              <span style="display:flex;align-items:center;gap:6px;"><span class="seat-btn" style="width:18px;height:18px;font-size:0;pointer-events:none;"></span> Disponible</span>
+              <span style="display:flex;align-items:center;gap:6px;"><span class="seat-btn is-selected" style="width:18px;height:18px;font-size:0;pointer-events:none;"></span> Tu selección</span>
+              <span style="display:flex;align-items:center;gap:6px;"><span class="seat-btn is-taken" style="width:18px;height:18px;font-size:0;pointer-events:none;"></span> Ocupada</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="checkout-panel" id="checkoutPanel">
+          <div class="checkout-header">
+            <h3 id="checkoutTitle" style="font-size:1.5rem;">Selecciona tus sillas arriba</h3>
+            <div class="checkout-total" id="checkoutTotal"></div>
+          </div>
+          <form class="checkout-form" id="checkoutForm" style="display:none;" onsubmit="return false;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;min-width:0;">
+              <div style="min-width:0;"><label>Nombre</label><input type="text" id="fname" placeholder="Nombre" required style="width:100%;box-sizing:border-box;" /></div>
+              <div style="min-width:0;"><label>Apellido</label><input type="text" id="lname" placeholder="Apellido" required style="width:100%;box-sizing:border-box;" /></div>
+            </div>
+            <div><label>Correo electrónico</label><input type="email" id="email" placeholder="tu@correo.com" required /></div>
+            <div><label>WhatsApp / Celular</label><input type="tel" id="phone" placeholder="+57 300 000 0000" required /></div>
+            <div class="checkout-actions">
+              <button type="button" class="btn-bold" id="btnConfirm" disabled style="background:#87f2ff;color:#000;font-weight:700;padding:14px 32px;border:none;border-radius:8px;cursor:pointer;font-size:1rem;">
+                Confirmar asistencia
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div id="qrResultSection" style="display:none;"></div>
+    </main>
+
+    <footer class="footer">
+      <p>Javi Penaloza - Sí es posible</p>
+      <a href="https://wa.me/573238016527" target="_blank" rel="noreferrer">+57 323 801 6527</a>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
+    <script>
+    (function () {
+      const SUPABASE_URL = 'https://rpgagnnhsefwaethszfl.supabase.co';
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwZ2Fnbm5oc2Vmd2FldGhzemZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4MDAxMjcsImV4cCI6MjA5ODM3NjEyN30.YxXpLyJVFhObTmq30UNnpgBOD6cq2ubR1lIYS6A-Z1g';
+      const EVENT_ID = 'standup-therapy-bogota-2sep2026';
+      const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+      const ROWS = [
+        { label: 'A', left: [1,2,3,4,5], center: [6,7,8,9,10,11,12,13,14,15,16,17], right: [18,19,20,21,22] },
+        { label: 'B', left: [1,2,3,4,5], center: [6,7,8,9,10,11,12,13,14,15,16,17], right: [18,19,20,21,22] },
+        { label: 'C', left: [1,2,3,4,5], center: [6,7,8,9,10,11,12,13,14,15,16,17], right: [18,19,20,21,22] },
+        { label: 'D', left: [1,2,3,4,5], center: [6,7,8,9,10,11,12,13,14,15,16,17], right: [18,19,20,21,22] },
+        { label: 'E', left: [1,2,3,4,5], center: [6,7,8,9,10,11,12,13,14,15,16,17], right: [18,19,20,21,22] },
+        { label: 'F', left: [1,2,3,4,5], center: [6,7,8,9,10,11,12,13,14,15,16,17], right: [18,19,20,21,22] },
+        { label: 'G', left: [1,2,3,4,5], center: [6,7,8,9,10,11,12,13,14,15,16,17], right: [18,19,20,21,22] },
+        { label: 'H', left: [1,2,3,4,5], center: [6,7,8,9,10,11,12,13,14,15,16,17], right: [18,19,20,21,22] },
+        { label: 'I', left: [1,2,3,4,5], center: [6,7,8,9,10,11,12,13,14,15,16,17], right: [18,19,20,21,22] },
+        { label: 'J', left: [1,2,3,4,5], center: [6,7,8,9,10,11,12,13,14,15,16,17], right: [18,19,20,21,22] },
+        { label: 'K', left: [1,2,3,4],   center: [5,6,7,8,9,10,11,12,13,14,15],     right: [16,17,18,19] },
+      ];
+
+      const takenSeats = new Set();
+      const selectedSeats = new Set();
+      let invitationData = null;
+
+      // Obtener código de la URL
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get('code');
+
+      if (!code) {
+        showError('Sin código', 'No se proporcionó un código de invitación. Verifica tu link.');
+        return;
+      }
+
+      // Validar invitación
+      validateInvitation(code);
+
+      async function validateInvitation(code) {
+        try {
+          const res = await fetch('/.netlify/functions/validar-invitacion?code=' + encodeURIComponent(code));
+          const data = await res.json();
+
+          if (!res.ok) {
+            showError(
+              res.status === 410 ? 'Código usado' : 'Código no válido',
+              data.error || 'Este código de invitación no existe o ya fue utilizado.'
+            );
+            return;
+          }
+
+          invitationData = data;
+          document.getElementById('loadingState').style.display = 'none';
+          document.getElementById('mainContent').style.display = 'block';
+
+          if (data.multi_use) {
+            document.getElementById('eyebrowText').textContent = '¡Gracias por tu compra!';
+            document.getElementById('mainTitle').textContent = 'ELIGE TU SILLA';
+            document.getElementById('welcomeMsg').textContent =
+              'Tu pago ha sido confirmado. Ahora selecciona ' + (data.max_seats > 1 ? 'hasta ' + data.max_seats + ' sillas' : 'tu silla') + ' para la noche del 2 de septiembre en Teatro Belarte.';
+          } else {
+            document.getElementById('welcomeMsg').textContent =
+              '¡Hola ' + escapeHtml(data.guest_name) + '! Tienes ' + data.max_seats + ' silla(s) disponible(s). Selecciona donde quieres sentarte.';
+          }
+
+          loadTakenSeats();
+        } catch (e) {
+          showError('Error', 'No se pudo validar tu invitación. Intenta de nuevo.');
+        }
+      }
+
+      function showError(title, msg) {
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('errorState').style.display = 'block';
+        document.getElementById('errorTitle').textContent = title;
+        document.getElementById('errorMsg').textContent = msg;
+      }
+
+      async function loadTakenSeats() {
+        try {
+          const { data, error } = await sb
+            .from('reservations')
+            .select('seat_id')
+            .eq('event_id', EVENT_ID)
+            .in('payment_status', ['paid', 'pending']);
+
+          if (!error && data) {
+            data.forEach(r => takenSeats.add(r.seat_id));
+          }
+        } catch (e) {
+          console.warn('Error cargando sillas:', e);
+        }
+        renderSeatMap();
+      }
+
+      function renderSeatMap() {
+        const map = document.getElementById('seatMap');
+        ROWS.forEach(row => {
+          const rowDiv = document.createElement('div');
+          rowDiv.className = 'seat-map-row';
+
+          const lblL = document.createElement('span');
+          lblL.className = 'row-id';
+          lblL.textContent = row.label;
+          rowDiv.appendChild(lblL);
+
+          [row.left, row.center, row.right].forEach((section, i) => {
+            const sec = document.createElement('div');
+            sec.className = 'seat-section';
+            section.forEach(num => {
+              const id = row.label + '-' + num;
+              const btn = document.createElement('button');
+              btn.className = 'seat-btn';
+              btn.textContent = num;
+              btn.setAttribute('aria-label', 'Fila ' + row.label + ' Silla ' + num);
+
+              if (takenSeats.has(id)) {
+                btn.classList.add('is-taken');
+                btn.disabled = true;
+              } else {
+                btn.addEventListener('click', () => toggleSeat(id, btn));
+              }
+              sec.appendChild(btn);
+            });
+            rowDiv.appendChild(sec);
+            if (i < 2) { const aisle = document.createElement('div'); aisle.className = 'seat-aisle'; rowDiv.appendChild(aisle); }
+          });
+
+          const lblR = document.createElement('span');
+          lblR.className = 'row-id';
+          lblR.textContent = row.label;
+          rowDiv.appendChild(lblR);
+
+          map.appendChild(rowDiv);
+        });
+      }
+
+      function toggleSeat(id, btn) {
+        if (selectedSeats.has(id)) {
+          selectedSeats.delete(id);
+          btn.classList.remove('is-selected');
+        } else {
+          if (selectedSeats.size >= invitationData.max_seats) {
+            alert('Máximo ' + invitationData.max_seats + ' silla(s) para esta invitación.');
+            return;
+          }
+          selectedSeats.add(id);
+          btn.classList.add('is-selected');
+        }
+        updateCheckout();
+      }
+
+      function updateCheckout() {
+        const title = document.getElementById('checkoutTitle');
+        const total = document.getElementById('checkoutTotal');
+        const form = document.getElementById('checkoutForm');
+
+        if (selectedSeats.size === 0) {
+          title.textContent = 'Selecciona tus sillas arriba';
+          total.textContent = '';
+          form.style.display = 'none';
+        } else {
+          const seats = [...selectedSeats].sort();
+          title.textContent = seats.length + ' silla(s): ' + seats.map(s => s.replace('-', ' #')).join(', ');
+          total.innerHTML = '<span style="color:var(--accent);font-weight:700;">CORTESÍA</span>';
+          form.style.display = 'block';
+        }
+        validateForm();
+      }
+
+      function validateForm() {
+        const fname = document.getElementById('fname').value.trim();
+        const lname = document.getElementById('lname').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        const btn = document.getElementById('btnConfirm');
+        btn.disabled = !(selectedSeats.size > 0 && fname && lname && email && phone);
+      }
+
+      document.querySelectorAll('#checkoutForm input').forEach(input => {
+        input.addEventListener('input', validateForm);
+      });
+
+      // Confirmar reserva
+      document.getElementById('btnConfirm').addEventListener('click', async function () {
+        const btn = this;
+        const fname = document.getElementById('fname').value.trim();
+        const lname = document.getElementById('lname').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+
+        if (!fname || !lname || !email || !phone || selectedSeats.size === 0) return;
+
+        btn.disabled = true;
+        btn.textContent = 'Reservando...';
+
+        const seats = [...selectedSeats].sort();
+
+        try {
+          const res = await fetch('/.netlify/functions/reservar-invitado', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              code: code,
+              seats: seats,
+              name: fname + ' ' + lname,
+              email: email,
+              phone: phone,
+            }),
+          });
+
+          const data = await res.json();
+
+          if (!res.ok) {
+            alert(data.error || 'Error al reservar. Intenta de nuevo.');
+            btn.disabled = false;
+            btn.textContent = 'Confirmar asistencia';
+            return;
+          }
+
+          showQRResult(seats, fname + ' ' + lname, email, data.orderRef);
+        } catch (e) {
+          alert('Error de conexión. Intenta de nuevo.');
+          btn.disabled = false;
+          btn.textContent = 'Confirmar asistencia';
+        }
+      });
+
+      function showQRResult(seats, name, email, orderRef) {
+        document.getElementById('checkoutPanel').style.display = 'none';
+        document.querySelector('.theater-container').style.display = 'none';
+        document.querySelector('#mainContent > div:first-child').style.display = 'none';
+
+        const section = document.getElementById('qrResultSection');
+        section.style.display = 'block';
+
+        section.innerHTML =
+          '<div class="qr-result-card">' +
+            '<h3>RESERVA CONFIRMADA</h3>' +
+            '<p class="qr-subtitle">Presenta este QR en la entrada del Teatro Belarte el 2 de septiembre</p>' +
+            '<div class="qr-canvas-wrap"><canvas id="qrCanvas"></canvas></div>' +
+            '<div class="qr-info">' +
+              '<div class="qr-info-item"><span>Nombre</span><strong>' + escapeHtml(name) + '</strong></div>' +
+              '<div class="qr-info-item"><span>Sillas</span><strong>' + seats.map(s => s.replace('-', ' #')).join(', ') + '</strong></div>' +
+              '<div class="qr-info-item"><span>Tipo</span><strong style="color:var(--accent);">Invitación especial</strong></div>' +
+              '<div class="qr-info-item"><span>Código</span><strong style="font-size:0.78rem;word-break:break-all;">' + escapeHtml(orderRef) + '</strong></div>' +
+            '</div>' +
+            '<p class="qr-footer-note">Guarda una captura de pantalla de este QR</p>' +
+            '<div style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">' +
+              '<a class="button primary" href="/" style="display:inline-flex;">Volver al inicio</a>' +
+              '<a class="button ghost" href="https://wa.me/573238016527?text=Hola%2C%20ya%20confirm%C3%A9%20mi%20asistencia%20a%20Stand-Up%20Therapy.%20Mi%20c%C3%B3digo%20es%20' + encodeURIComponent(orderRef) + '" target="_blank" rel="noreferrer" style="display:inline-flex;">Confirmar por WhatsApp</a>' +
+            '</div>' +
+          '</div>';
+
+        new QRious({
+          element: document.getElementById('qrCanvas'),
+          value: orderRef,
+          size: 220,
+          foreground: '#050608',
+          background: '#ffffff',
+        });
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      function escapeHtml(str) {
+        const d = document.createElement('div');
+        d.textContent = str;
+        return d.innerHTML;
+      }
+    })();
+    </script>
+  </body>
+</html>
