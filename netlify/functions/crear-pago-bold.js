@@ -15,6 +15,9 @@ exports.handler = async function (event) {
 
     const boldBody = JSON.stringify(body);
 
+    console.log('Bold request body:', boldBody);
+    console.log('Bold API key present:', !!process.env.BOLD_API_KEY);
+
     const result = await new Promise((resolve, reject) => {
       const req = https.request({
         method: 'POST',
@@ -36,6 +39,8 @@ exports.handler = async function (event) {
       req.write(boldBody);
       req.end();
     });
+
+    console.log('Bold response:', result.status, JSON.stringify(result.data));
 
     return {
       statusCode: result.status,
