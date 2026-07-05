@@ -21,7 +21,7 @@ exports.handler = async function (event) {
     const result = await new Promise((resolve, reject) => {
       const req = https.request({
         method: 'POST',
-        hostname: 'api.bold.co',
+        hostname: 'integrations.api.bold.co',
         path: '/online/link/v1',
         headers: {
           'Content-Type': 'application/json',
