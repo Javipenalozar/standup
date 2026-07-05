@@ -12,6 +12,17 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/styles.css" />
+    <style>
+      @media (max-width: 620px) {
+        .theater-container { overflow: hidden; }
+        .seat-map-grid {
+          transform: scale(0.58);
+          transform-origin: top center;
+          margin-bottom: -100px;
+          overflow: visible;
+        }
+      }
+    </style>
   </head>
   <body>
     <header class="topbar is-scrolled" data-topbar>
@@ -113,11 +124,11 @@
       //  CONFIG — reemplaza estos valores con los tuyos
       // ══════════════════════════════════════════════
       const SUPABASE_URL = 'https://rpgagnnhsefwaethszfl.supabase.co';
-      const SUPABASE_ANON_KEY = 'REEMPLAZA_CON_TU_ANON_KEY';
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwZ2Fnbm5oc2Vmd2FldGhzemZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4MDAxMjcsImV4cCI6MjA5ODM3NjEyN30.YxXpLyJVFhObTmq30UNnpgBOD6cq2ubR1lIYS6A-Z1g';
 
       // Bold: API key secreta va en la Netlify Function, no aquí.
       // Este es el ID de tu link/botón de Bold (lo encuentras en tu dashboard de Bold).
-      const BOLD_API_KEY = 'REEMPLAZA_CON_TU_BOLD_API_KEY';
+      const BOLD_API_KEY = 'YymvFhYb2ih_o5UMwuRfzP5oIGZAzEZFQL4F_3z_ah8';
 
       const PRICE = 69000;
       const EVENT_ID = 'standup-therapy-bogota-2sep2026';
@@ -157,8 +168,10 @@
               .eq('event_id', EVENT_ID)
               .in('payment_status', ['paid', 'pending']);
 
+            console.log('Supabase reservations:', { data, error });
             if (!error && data) {
               data.forEach(r => takenSeats.add(r.seat_id));
+              console.log('Taken seats:', [...takenSeats]);
             }
           } catch (e) {
             console.warn('Supabase no disponible — mostrando todas como disponibles.');
