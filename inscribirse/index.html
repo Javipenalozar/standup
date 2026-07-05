@@ -359,12 +359,9 @@
         // ── Paso 3: Crear link de pago en Bold ──
         if (BOLD_API_KEY !== 'REEMPLAZA_CON_TU_BOLD_API_KEY') {
           try {
-            const res = await fetch('https://api.bold.co/online/link/v1', {
+            const res = await fetch('/.netlify/functions/crear-pago-bold', {
               method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'x-api-key ' + BOLD_API_KEY,
-              },
+              headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 amount_type: 'CLOSE',
                 amount: {
