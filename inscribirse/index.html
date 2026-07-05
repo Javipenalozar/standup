@@ -168,10 +168,8 @@
               .eq('event_id', EVENT_ID)
               .in('payment_status', ['paid', 'pending']);
 
-            console.log('Supabase reservations:', { data, error });
             if (!error && data) {
               data.forEach(r => takenSeats.add(r.seat_id));
-              console.log('Taken seats:', [...takenSeats]);
             }
           } catch (e) {
             console.warn('Supabase no disponible — mostrando todas como disponibles.');
