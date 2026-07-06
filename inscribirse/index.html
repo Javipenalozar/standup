@@ -386,7 +386,7 @@
             }
 
             console.error('Bold API response:', data);
-            alert('Error creando el pago. Intenta de nuevo.');
+            alert('Error creando el pago: ' + JSON.stringify(data));
             rollbackPending(orderRef);
             btn.disabled = false;
             btn.innerHTML = svgCard() + ' Pagar con Bold';
