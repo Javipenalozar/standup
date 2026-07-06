@@ -164,7 +164,7 @@
             document.getElementById('eyebrowText').textContent = '¡Gracias por tu compra!';
             document.getElementById('mainTitle').textContent = 'ELIGE TU SILLA';
             document.getElementById('welcomeMsg').textContent =
-              'Tu pago ha sido confirmado. Ahora selecciona ' + (data.max_seats > 1 ? 'hasta ' + data.max_seats + ' sillas' : 'tu silla') + ' para la noche del 2 de septiembre en Teatro Belarte.';
+              'Tu pago ha sido confirmado. Ahora selecciona ' + (data.max_seats > 1 ? 'hasta ' + data.max_seats + ' sillas' : 'tu silla') + ' para el 2 de septiembre a las 18:00 horas en Teatro Belarte.';
           } else {
             document.getElementById('welcomeMsg').textContent =
               '¡Hola ' + escapeHtml(data.guest_name) + '! Tienes ' + data.max_seats + ' silla(s) disponible(s). Selecciona donde quieres sentarte.';
@@ -344,7 +344,7 @@
         section.innerHTML =
           '<div class="qr-result-card">' +
             '<h3>RESERVA CONFIRMADA</h3>' +
-            '<p class="qr-subtitle">Presenta este QR en la entrada del Teatro Belarte el 2 de septiembre</p>' +
+            '<p class="qr-subtitle">Presenta este QR en la entrada del Teatro Belarte el 2 de septiembre a las 18:00 horas</p>' +
             '<div class="qr-canvas-wrap"><canvas id="qrCanvas"></canvas></div>' +
             '<div class="qr-info">' +
               '<div class="qr-info-item"><span>Nombre</span><strong>' + escapeHtml(name) + '</strong></div>' +
