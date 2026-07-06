@@ -373,7 +373,6 @@
                 payment_method: ['CARD', 'PSE', 'NEQUI', 'DAVIPLATA'],
                 order_reference: orderRef,
                 redirect_url: RETURN_URL + '?ref=' + encodeURIComponent(orderRef),
-                expiration_date: Date.now() + 30 * 60 * 1000,
                 payer_email: email,
               }),
             });
