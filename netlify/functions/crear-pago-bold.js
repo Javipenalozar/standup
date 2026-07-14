@@ -1,5 +1,45 @@
 const https = require('https');
 
+function requestJson({ method, hostname, path, headers, body }) {
+  return new Promise((resolve, reject) => {
+    const req = https.request({ method, hostname, path, headers }, (res) => {
+      let raw = '';
+      res.on('data', (chunk) => { raw += chunk; });
+      res.on('end', () => {
+        let data = raw;
+        try { data = raw ? JSON.parse(raw) : null; } catch {}
+        resolve({ status: res.statusCode, data });
+      });
+    });
+
+    req.on('error', reject);
+    if (body) req.write(JSON.stringify(body));
+    req.end();
+  });
+}
+
+async function saveBoldReference(orderReference, boldReference) {
+  const url = new URL(
+    '/rest/v1/reservations?qr_code=eq.' +
+      encodeURIComponent(orderReference) +
+      '&payment_status=eq.pending',
+    process.env.SUPABASE_URL
+  );
+
+  return requestJson({
+    method: 'PATCH',
+    hostname: url.hostname,
+    path: url.pathname + url.search,
+    headers: {
+      'Content-Type': 'application/json',
+      apikey: process.env.SUPABASE_KEY,
+      Authorization: 'Bearer ' + process.env.SUPABASE_KEY,
+      Prefer: 'return=representation',
+    },
+    body: { bold_reference: boldReference },
+  });
+}
+
 exports.handler = async function (event) {
   const headers = {
     'Content-Type': 'application/json',
@@ -13,34 +53,31 @@ exports.handler = async function (event) {
   try {
     const body = JSON.parse(event.body);
 
-    const boldBody = JSON.stringify(body);
-
-    console.log('Bold request body:', boldBody);
-    console.log('Bold API key present:', !!process.env.BOLD_API_KEY);
-
-    const result = await new Promise((resolve, reject) => {
-      const req = https.request({
-        method: 'POST',
-        hostname: 'integrations.api.bold.co',
-        path: '/online/link/v1',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'x-api-key ' + process.env.BOLD_API_KEY,
-        },
-      }, (res) => {
-        let data = '';
-        res.on('data', chunk => data += chunk);
-        res.on('end', () => {
-          try { resolve({ status: res.statusCode, data: JSON.parse(data) }); }
-          catch { resolve({ status: res.statusCode, data }); }
-        });
-      });
-      req.on('error', reject);
-      req.write(boldBody);
-      req.end();
+    const result = await requestJson({
+      method: 'POST',
+      hostname: 'integrations.api.bold.co',
+      path: '/online/link/v1',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'x-api-key ' + process.env.BOLD_API_KEY,
+      },
+      body,
     });
 
-    console.log('Bold response:', result.status, JSON.stringify(result.data));
+    const boldReference = result.data?.payload?.payment_link;
+    if (result.status >= 200 && result.status < 300 && boldReference) {
+      const mapping = await saveBoldReference(body.order_reference, boldReference);
+      if (mapping.status >= 400 || !Array.isArray(mapping.data) || mapping.data.length === 0) {
+        console.error('Could not save Bold reference mapping', mapping.status, mapping.data);
+        return {
+          statusCode: 500,
+          headers,
+          body: JSON.stringify({ error: 'No se pudo vincular el pago con la reserva' }),
+        };
+      }
+
+      console.info('Bold reference mapped', boldReference, body.order_reference);
+    }
 
     return {
       statusCode: result.status,

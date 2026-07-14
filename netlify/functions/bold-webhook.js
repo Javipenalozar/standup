@@ -69,13 +69,13 @@ function verifyBoldSignature(rawBody, signature) {
 function getReference(payload) {
   const data = payload.data || payload;
   return (
+    data.metadata?.reference ||
+    payload.metadata?.reference ||
     data.order_reference ||
     data.reference ||
     data.external_reference ||
-    data.metadata?.reference ||
     payload.order_reference ||
     payload.reference ||
-    payload.metadata?.reference ||
     null
   );
 }
@@ -94,37 +94,10 @@ function escapeHtml(value) {
     .replaceAll("'", '&#039;');
 }
 
-async function sendPaymentAlert(rows, reference, paymentId) {
+async function sendEmail({ to, subject, html, idempotencyKey }) {
   if (!process.env.RESEND_API_KEY) {
     throw new Error('RESEND_API_KEY is not configured');
   }
-
-  const first = rows[0];
-  const seats = rows
-    .map((row) => row.seat_id)
-    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
-  const total = rows.reduce((sum, row) => sum + Number(row.amount || 0), 0);
-  const ticketUrl =
-    'https://standup.eventosjv.com/inscribirse/?ref=' +
-    encodeURIComponent(reference);
-
-  const emailBody = {
-    from: process.env.RESEND_FROM,
-    to: [process.env.PAYMENT_ALERT_TO],
-    subject: 'Nuevo pago confirmado - ' + first.customer_name,
-    html: `
-      <div style="font-family:Arial,sans-serif;line-height:1.55;color:#111">
-        <h2>Nuevo pago confirmado</h2>
-        <p><strong>Nombre:</strong> ${escapeHtml(first.customer_name)}</p>
-        <p><strong>Correo:</strong> ${escapeHtml(first.customer_email)}</p>
-        <p><strong>Telefono:</strong> ${escapeHtml(first.customer_phone)}</p>
-        <p><strong>Sillas:</strong> ${escapeHtml(seats.join(', '))}</p>
-        <p><strong>Total:</strong> $${total.toLocaleString('es-CO')} COP</p>
-        <p><strong>Referencia:</strong> ${escapeHtml(reference)}</p>
-        <p><a href="${ticketUrl}">Ver entrada y QR</a></p>
-      </div>
-    `,
-  };
 
   return requestJson({
     method: 'POST',
@@ -133,10 +106,72 @@ async function sendPaymentAlert(rows, reference, paymentId) {
     headers: {
       'Content-Type': 'application/json',
       Authorization: 'Bearer ' + process.env.RESEND_API_KEY,
-      'Idempotency-Key': 'standup-payment-' + (paymentId || reference),
+      'Idempotency-Key': idempotencyKey,
     },
-    body: emailBody,
+    body: {
+      from: process.env.RESEND_FROM,
+      to: [to],
+      subject,
+      html,
+    },
   });
+}
+
+async function sendPaymentNotifications(rows, boldReference, paymentId) {
+  if (!process.env.PAYMENT_ALERT_TO || !process.env.RESEND_FROM) {
+    throw new Error('Resend sender or recipient is not configured');
+  }
+
+  const first = rows[0];
+  const seats = rows
+    .map((row) => row.seat_id)
+    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+  const total = rows.reduce((sum, row) => sum + Number(row.amount || 0), 0);
+  const ticketReference = first.qr_code;
+  const ticketUrl =
+    'https://standup.eventosjv.com/inscribirse/?ref=' +
+    encodeURIComponent(ticketReference);
+  const idempotencyBase = 'standup-payment-' + (paymentId || boldReference);
+
+  const adminEmail = await sendEmail({
+    to: process.env.PAYMENT_ALERT_TO,
+    subject: 'Nuevo pago confirmado - ' + first.customer_name,
+    html: `
+      <div style="font-family:Arial,sans-serif;line-height:1.55;color:#111">
+        <h2>Nuevo pago confirmado</h2>
+        <p><strong>Nombre:</strong> ${escapeHtml(first.customer_name)}</p>
+        <p><strong>Correo:</strong> ${escapeHtml(first.customer_email)}</p>
+        <p><strong>Tel&eacute;fono:</strong> ${escapeHtml(first.customer_phone)}</p>
+        <p><strong>Sillas:</strong> ${escapeHtml(seats.join(', '))}</p>
+        <p><strong>Total:</strong> $${total.toLocaleString('es-CO')} COP</p>
+        <p><strong>Referencia de entrada:</strong> ${escapeHtml(ticketReference)}</p>
+        <p><strong>Referencia Bold:</strong> ${escapeHtml(boldReference)}</p>
+        <p><a href="${ticketUrl}">Ver entrada y QR</a></p>
+      </div>
+    `,
+    idempotencyKey: idempotencyBase + '-admin',
+  });
+
+  const customerEmail = await sendEmail({
+    to: first.customer_email,
+    subject: 'Tus entradas para Stand-Up Therapy',
+    html: `
+      <div style="font-family:Arial,sans-serif;line-height:1.55;color:#111">
+        <h2>Tu reserva est&aacute; confirmada</h2>
+        <p>Hola ${escapeHtml(first.customer_name)},</p>
+        <p>Tu pago para Stand-Up Therapy fue confirmado.</p>
+        <p><strong>Fecha:</strong> 2 de septiembre de 2026, 6:00 p. m.</p>
+        <p><strong>Lugar:</strong> Teatro Belarte, Cra. 7 # 152-54, Bogot&aacute;</p>
+        <p><strong>Sillas:</strong> ${escapeHtml(seats.join(', '))}</p>
+        <p><strong>Total:</strong> $${total.toLocaleString('es-CO')} COP</p>
+        <p><a href="${ticketUrl}" style="display:inline-block;padding:12px 18px;background:#050608;color:#fff;text-decoration:none">Ver entrada y c&oacute;digo QR</a></p>
+        <p>Presenta el c&oacute;digo QR en la entrada del teatro.</p>
+      </div>
+    `,
+    idempotencyKey: idempotencyBase + '-customer',
+  });
+
+  return { adminEmail, customerEmail };
 }
 
 exports.handler = async function (event) {
@@ -181,6 +216,7 @@ exports.handler = async function (event) {
       status === 'ERROR';
 
     if (!approved && !rejected) {
+      console.info('Ignored Bold webhook event', eventType || status);
       return jsonResponse(200, { ok: true, ignored: eventType || status });
     }
 
@@ -194,13 +230,23 @@ exports.handler = async function (event) {
       return jsonResponse(200, { ok: true, status: 'cancelled' });
     }
 
-    const update = await supabaseRequest(
+    let update = await supabaseRequest(
       'PATCH',
-      '/rest/v1/reservations?qr_code=eq.' +
+      '/rest/v1/reservations?bold_reference=eq.' +
         encodeURIComponent(reference) +
         '&payment_status=eq.pending&select=*',
       { payment_status: 'paid' }
     );
+
+    if (update.status < 400 && Array.isArray(update.data) && update.data.length === 0) {
+      update = await supabaseRequest(
+        'PATCH',
+        '/rest/v1/reservations?qr_code=eq.' +
+          encodeURIComponent(reference) +
+          '&payment_status=eq.pending&select=*',
+        { payment_status: 'paid' }
+      );
+    }
 
     if (update.status >= 400) {
       console.error('Supabase update failed', update.status, update.data);
@@ -209,19 +255,21 @@ exports.handler = async function (event) {
 
     const updatedRows = Array.isArray(update.data) ? update.data : [];
     if (updatedRows.length === 0) {
+      console.warn('Bold webhook reference did not match pending reservations', reference);
       return jsonResponse(200, {
         ok: true,
-        status: 'paid',
-        duplicate: true,
+        status: 'unmatched',
       });
     }
 
     let notification = 'sent';
     try {
-      const email = await sendPaymentAlert(updatedRows, reference, paymentId);
-      if (email.status < 200 || email.status >= 300) {
+      const emails = await sendPaymentNotifications(updatedRows, reference, paymentId);
+      const failed = [emails.adminEmail, emails.customerEmail]
+        .find((email) => email.status < 200 || email.status >= 300);
+      if (failed) {
         notification = 'failed';
-        console.error('Resend alert failed', email.status, email.data);
+        console.error('Resend notification failed', failed.status, failed.data);
       }
     } catch (error) {
       notification = 'failed';
