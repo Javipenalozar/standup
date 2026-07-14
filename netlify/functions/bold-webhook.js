@@ -107,6 +107,7 @@ async function sendEmail({ to, subject, html, idempotencyKey }) {
       'Content-Type': 'application/json',
       Authorization: 'Bearer ' + process.env.RESEND_API_KEY,
       'Idempotency-Key': idempotencyKey,
+      'User-Agent': 'standup-therapy/1.0',
     },
     body: {
       from: process.env.RESEND_FROM,
@@ -253,18 +254,47 @@ exports.handler = async function (event) {
       return jsonResponse(500, { error: 'Could not update reservations' });
     }
 
-    const updatedRows = Array.isArray(update.data) ? update.data : [];
-    if (updatedRows.length === 0) {
-      console.warn('Bold webhook reference did not match pending reservations', reference);
-      return jsonResponse(200, {
-        ok: true,
-        status: 'unmatched',
-      });
+    let notificationRows = Array.isArray(update.data) ? update.data : [];
+    let duplicate = false;
+
+    if (notificationRows.length === 0) {
+      duplicate = true;
+      let existing = await supabaseRequest(
+        'GET',
+        '/rest/v1/reservations?bold_reference=eq.' +
+          encodeURIComponent(reference) +
+          '&payment_status=eq.paid&select=*',
+        null
+      );
+
+      if (existing.status < 400 && Array.isArray(existing.data) && existing.data.length === 0) {
+        existing = await supabaseRequest(
+          'GET',
+          '/rest/v1/reservations?qr_code=eq.' +
+            encodeURIComponent(reference) +
+            '&payment_status=eq.paid&select=*',
+          null
+        );
+      }
+
+      if (existing.status >= 400) {
+        console.error('Supabase lookup failed', existing.status, existing.data);
+        return jsonResponse(500, { error: 'Could not read reservations' });
+      }
+
+      notificationRows = Array.isArray(existing.data) ? existing.data : [];
+      if (notificationRows.length === 0) {
+        console.warn('Bold webhook reference did not match reservations', reference);
+        return jsonResponse(200, {
+          ok: true,
+          status: 'unmatched',
+        });
+      }
     }
 
     let notification = 'sent';
     try {
-      const emails = await sendPaymentNotifications(updatedRows, reference, paymentId);
+      const emails = await sendPaymentNotifications(notificationRows, reference, paymentId);
       const failed = [emails.adminEmail, emails.customerEmail]
         .find((email) => email.status < 200 || email.status >= 300);
       if (failed) {
@@ -279,7 +309,8 @@ exports.handler = async function (event) {
     return jsonResponse(200, {
       ok: true,
       status: 'paid',
-      seats: updatedRows.length,
+      seats: notificationRows.length,
+      duplicate,
       notification,
     });
   } catch (error) {
