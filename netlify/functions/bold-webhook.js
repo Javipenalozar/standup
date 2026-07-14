@@ -112,6 +112,7 @@ async function sendEmail({ to, subject, html, idempotencyKey }) {
     body: {
       from: process.env.RESEND_FROM,
       to: [to],
+      reply_to: process.env.RESEND_REPLY_TO || undefined,
       subject,
       html,
     },
