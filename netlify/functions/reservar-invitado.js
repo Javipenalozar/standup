@@ -77,7 +77,7 @@ function sendEmail({ to, subject, html, idempotencyKey }) {
   });
 }
 
-async function sendInvitationNotifications({ name, email, phone, seats, orderRef, company }) {
+async function sendInvitationNotifications({ name, attendeeNames, email, phone, seats, orderRef, company }) {
   const ticketUrl = 'https://standup.eventosjv.com/inscribirse/?ref=' + encodeURIComponent(orderRef);
   const companyText = company ? ' obsequiada por ' + escapeHtml(company) : '';
   const customer = await sendEmail({
@@ -90,7 +90,8 @@ async function sendInvitationNotifications({ name, email, phone, seats, orderRef
         <p>Tu entrada${companyText} ya est&aacute; registrada.</p>
         <p><strong>Fecha:</strong> 2 de septiembre de 2026, 6:00 p. m.</p>
         <p><strong>Lugar:</strong> Teatro Belarte, Cra. 7 # 152-54, Bogot&aacute;</p>
-        <p><strong>Silla:</strong> ${escapeHtml(seats.join(', '))}</p>
+        <p><strong>Asistentes:</strong> ${escapeHtml(attendeeNames.join(', '))}</p>
+        <p><strong>Sillas:</strong> ${escapeHtml(seats.join(', '))}</p>
         <p><a href="${ticketUrl}" style="display:inline-block;padding:12px 18px;background:#050608;color:#fff;text-decoration:none">Ver entrada y c&oacute;digo QR</a></p>
         <p>Presenta el c&oacute;digo QR en la entrada del teatro.</p>
       </div>
@@ -110,7 +111,8 @@ async function sendInvitationNotifications({ name, email, phone, seats, orderRef
           <p><strong>Nombre:</strong> ${escapeHtml(name)}</p>
           <p><strong>Correo:</strong> ${escapeHtml(email)}</p>
           <p><strong>Tel&eacute;fono:</strong> ${escapeHtml(phone)}</p>
-          <p><strong>Silla:</strong> ${escapeHtml(seats.join(', '))}</p>
+          <p><strong>Asistentes:</strong> ${escapeHtml(attendeeNames.join(', '))}</p>
+          <p><strong>Sillas:</strong> ${escapeHtml(seats.join(', '))}</p>
           <p><a href="${ticketUrl}">Ver entrada y QR</a></p>
         </div>
       `,
@@ -141,7 +143,7 @@ exports.handler = async function (event) {
   if (event.httpMethod !== 'POST') return { statusCode: 405, headers, body: '{"error":"POST only"}' };
 
   try {
-    const { code, seats, name, email, phone } = JSON.parse(event.body);
+    const { code, seats, name, attendeeNames, email, phone } = JSON.parse(event.body);
 
     if (!code || !seats || !seats.length || !name || !email) {
       return { statusCode: 400, headers, body: '{"error":"Datos incompletos"}' };
@@ -173,13 +175,15 @@ exports.handler = async function (event) {
     let remainingSeats = null;
 
     if (inv.total_quota) {
+      const corporateAttendees = Array.isArray(attendeeNames) ? attendeeNames : [name];
       const corporateResult = await supabaseRequest(
         'POST',
-        '/rest/v1/rpc/reserve_corporate_invitation',
+        '/rest/v1/rpc/reserve_corporate_invitation_v2',
         {
           p_code: code,
           p_event_id: EVENT_ID,
           p_seats: seats,
+          p_attendee_names: corporateAttendees,
           p_name: name,
           p_email: email,
           p_phone: phone || '',
@@ -230,6 +234,7 @@ exports.handler = async function (event) {
     try {
       emailSent = await sendInvitationNotifications({
         name,
+        attendeeNames: inv.total_quota && Array.isArray(attendeeNames) ? attendeeNames : [name],
         email,
         phone: phone || '',
         seats,
@@ -250,6 +255,7 @@ exports.handler = async function (event) {
         email,
         emailSent,
         remainingSeats,
+        attendeeNames: inv.total_quota && Array.isArray(attendeeNames) ? attendeeNames : [name],
       }),
     };
   } catch (e) {

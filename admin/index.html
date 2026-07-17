@@ -399,8 +399,12 @@
         // Agrupar por qr_code
         const groups = {};
         data.forEach(r => {
-          if (!groups[r.qr_code]) groups[r.qr_code] = { ...r, seats: [], total: 0 };
+          if (!groups[r.qr_code]) groups[r.qr_code] = { ...r, seats: [], attendees: [], total: 0 };
           groups[r.qr_code].seats.push(r.seat_id);
+          const attendee = r.attendee_name || r.customer_name;
+          if (!groups[r.qr_code].attendees.includes(attendee)) {
+            groups[r.qr_code].attendees.push(attendee);
+          }
           groups[r.qr_code].total += Number(r.amount || 0);
         });
 
@@ -412,7 +416,9 @@
             ? 'Empresa · ' + esc(invitationName)
             : g.total === 0 ? 'Invitación' : '$' + g.total.toLocaleString('es-CO');
           html += '<tr>' +
-            '<td>' + esc(g.customer_name) + '<br><span style="font-size:0.75rem;color:var(--muted);">' + esc(g.customer_email) + '</span></td>' +
+            '<td>' + esc(g.customer_name) +
+              (g.attendees.length > 1 ? '<br><span style="font-size:0.75rem;color:var(--muted);">Asistentes: ' + g.attendees.map(esc).join(', ') + '</span>' : '') +
+              '<br><span style="font-size:0.75rem;color:var(--muted);">' + esc(g.customer_email) + '</span></td>' +
             '<td>' + g.seats.sort(sortSeats).join(', ') + '</td>' +
             '<td><span class="badge ' + status.className + '">' + status.label + '</span>' + status.time + '</td>' +
             '<td>' + type + '</td>' +

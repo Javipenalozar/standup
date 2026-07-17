@@ -87,6 +87,7 @@
             </div>
             <div><label>Correo electrónico</label><input type="email" id="email" placeholder="tu@correo.com" required /></div>
             <div><label>WhatsApp / Celular</label><input type="tel" id="phone" placeholder="+57 300 000 0000" required /></div>
+            <div id="companionsFields" data-count="0"></div>
             <div class="checkout-actions">
               <button type="button" class="btn-bold" id="btnConfirm" disabled style="background:#87f2ff;color:#000;font-weight:700;padding:14px 32px;border:none;border-radius:8px;cursor:pointer;font-size:1rem;">
                 Confirmar asistencia
@@ -164,7 +165,7 @@
             document.getElementById('eyebrowText').textContent = 'Entrada empresarial · ' + data.guest_name;
             document.getElementById('mainTitle').textContent = 'ELIGE TU SILLA';
             document.getElementById('welcomeMsg').textContent =
-              data.guest_name + ' te obsequia una entrada para Stand-Up Therapy. Registra tus datos y elige una silla. Quedan ' + data.remaining_seats + ' de ' + data.total_quota + ' entradas disponibles para el grupo.';
+              data.guest_name + ' te obsequia entradas para Stand-Up Therapy. Puedes elegir hasta ' + data.max_seats + ' sillas para ti y tus acompañantes. Quedan ' + data.remaining_seats + ' de ' + data.total_quota + ' entradas disponibles para el grupo.';
           } else if (data.multi_use) {
             document.getElementById('eyebrowText').textContent = '¡Gracias por tu compra!';
             document.getElementById('mainTitle').textContent = 'ELIGE TU SILLA';
@@ -271,13 +272,43 @@
           title.textContent = 'Selecciona tus sillas arriba';
           total.textContent = '';
           form.style.display = 'none';
-        } else {
-          const seats = [...selectedSeats].sort();
-          title.textContent = seats.length + ' silla(s): ' + seats.map(s => s.replace('-', ' #')).join(', ');
-          total.innerHTML = '<span style="color:var(--accent);font-weight:700;">CORTESÍA</span>';
-          form.style.display = 'block';
+          } else {
+            const seats = [...selectedSeats].sort();
+            title.textContent = seats.length + ' silla(s): ' + seats.map(s => s.replace('-', ' #')).join(', ');
+            total.innerHTML = '<span style="color:var(--accent);font-weight:700;">CORTESÍA</span>';
+            form.style.display = 'block';
+          }
+          renderCompanionFields();
+          validateForm();
         }
-        validateForm();
+
+      function renderCompanionFields() {
+        const container = document.getElementById('companionsFields');
+        const companionCount = invitationData && invitationData.corporate
+          ? Math.max(0, selectedSeats.size - 1)
+          : 0;
+        if (Number(container.dataset.count) === companionCount) return;
+
+        const previousValues = [...container.querySelectorAll('.companion-name')]
+          .map(input => input.value);
+        container.innerHTML = '';
+        container.dataset.count = String(companionCount);
+
+        for (let index = 0; index < companionCount; index += 1) {
+          const field = document.createElement('div');
+          const label = document.createElement('label');
+          const input = document.createElement('input');
+          label.textContent = 'Nombre completo del acompañante ' + (index + 1);
+          input.type = 'text';
+          input.className = 'companion-name';
+          input.placeholder = 'Nombre y apellido';
+          input.required = true;
+          input.value = previousValues[index] || '';
+          input.addEventListener('input', validateForm);
+          field.appendChild(label);
+          field.appendChild(input);
+          container.appendChild(field);
+        }
       }
 
       function validateForm() {
@@ -285,8 +316,10 @@
         const lname = document.getElementById('lname').value.trim();
         const email = document.getElementById('email').value.trim();
         const phone = document.getElementById('phone').value.trim();
+        const companionInputs = [...document.querySelectorAll('.companion-name')];
+        const companionsComplete = companionInputs.every(input => input.value.trim());
         const btn = document.getElementById('btnConfirm');
-        btn.disabled = !(selectedSeats.size > 0 && fname && lname && email && phone);
+        btn.disabled = !(selectedSeats.size > 0 && fname && lname && email && phone && companionsComplete);
       }
 
       document.querySelectorAll('#checkoutForm input').forEach(input => {
@@ -300,8 +333,13 @@
         const lname = document.getElementById('lname').value.trim();
         const email = document.getElementById('email').value.trim();
         const phone = document.getElementById('phone').value.trim();
+        const employeeName = fname + ' ' + lname;
+        const attendeeNames = [
+          employeeName,
+          ...[...document.querySelectorAll('.companion-name')].map(input => input.value.trim()),
+        ];
 
-        if (!fname || !lname || !email || !phone || selectedSeats.size === 0) return;
+        if (!fname || !lname || !email || !phone || selectedSeats.size === 0 || attendeeNames.some(name => !name)) return;
 
         btn.disabled = true;
         btn.textContent = 'Reservando...';
@@ -315,7 +353,8 @@
             body: JSON.stringify({
               code: code,
               seats: seats,
-              name: fname + ' ' + lname,
+              name: employeeName,
+              attendeeNames: attendeeNames,
               email: email,
               phone: phone,
             }),
@@ -330,7 +369,7 @@
             return;
           }
 
-          showQRResult(seats, fname + ' ' + lname, email, data);
+          showQRResult(seats, employeeName, email, data);
         } catch (e) {
           alert('Error de conexión. Intenta de nuevo.');
           btn.disabled = false;
@@ -354,6 +393,9 @@
             '<div class="qr-canvas-wrap"><canvas id="qrCanvas"></canvas></div>' +
             '<div class="qr-info">' +
               '<div class="qr-info-item"><span>Nombre</span><strong>' + escapeHtml(name) + '</strong></div>' +
+              (result.attendeeNames && result.attendeeNames.length > 1
+                ? '<div class="qr-info-item"><span>Asistentes</span><strong>' + result.attendeeNames.map(escapeHtml).join(', ') + '</strong></div>'
+                : '') +
               '<div class="qr-info-item"><span>Sillas</span><strong>' + seats.map(s => s.replace('-', ' #')).join(', ') + '</strong></div>' +
               '<div class="qr-info-item"><span>Tipo</span><strong style="color:var(--accent);">Invitación especial</strong></div>' +
               '<div class="qr-info-item"><span>Código</span><strong style="font-size:0.78rem;word-break:break-all;">' + escapeHtml(orderRef) + '</strong></div>' +
