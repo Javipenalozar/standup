@@ -48,7 +48,15 @@ exports.handler = async function (event) {
   if (event.httpMethod !== 'POST') return { statusCode: 405, headers, body: '{"error":"POST only"}' };
 
   try {
-    const { nombre, cantidad, password, multi_use, dry_run } = JSON.parse(event.body);
+    const {
+      nombre,
+      cantidad,
+      password,
+      multi_use,
+      corporate,
+      total_quota,
+      dry_run,
+    } = JSON.parse(event.body);
 
     if (password !== process.env.ADMIN_PASSWORD) {
       return { statusCode: 401, headers, body: '{"error":"Password incorrecto"}' };
@@ -62,14 +70,21 @@ exports.handler = async function (event) {
       return { statusCode: 400, headers, body: '{"error":"Nombre y cantidad (1-10) requeridos"}' };
     }
 
-    const code = (multi_use ? 'PAGO-' : 'INV-') + crypto.randomBytes(4).toString('hex').toUpperCase();
+    const corporateQuota = Number(total_quota);
+    if (corporate && (!Number.isInteger(corporateQuota) || corporateQuota < 1 || corporateQuota > 500)) {
+      return { statusCode: 400, headers, body: '{"error":"El cupo empresarial debe estar entre 1 y 500"}' };
+    }
+
+    const codePrefix = corporate ? 'EMP-' : multi_use ? 'PAGO-' : 'INV-';
+    const code = codePrefix + crypto.randomBytes(4).toString('hex').toUpperCase();
 
     const result = await supabasePost('/rest/v1/invitations', {
       code,
       guest_name: nombre,
       max_seats: cantidad,
       used: false,
-      multi_use: multi_use || false,
+      multi_use: corporate || multi_use || false,
+      total_quota: corporate ? corporateQuota : null,
     }, process.env.SUPABASE_KEY);
 
     if (result.status >= 400) {
@@ -82,7 +97,14 @@ exports.handler = async function (event) {
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify({ code, link, nombre, cantidad }),
+      body: JSON.stringify({
+        code,
+        link,
+        nombre,
+        cantidad,
+        corporate: Boolean(corporate),
+        total_quota: corporate ? corporateQuota : null,
+      }),
     };
   } catch (e) {
     console.error(e);

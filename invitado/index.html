@@ -160,7 +160,12 @@
           document.getElementById('loadingState').style.display = 'none';
           document.getElementById('mainContent').style.display = 'block';
 
-          if (data.multi_use) {
+          if (data.corporate) {
+            document.getElementById('eyebrowText').textContent = 'Entrada empresarial · ' + data.guest_name;
+            document.getElementById('mainTitle').textContent = 'ELIGE TU SILLA';
+            document.getElementById('welcomeMsg').textContent =
+              data.guest_name + ' te obsequia una entrada para Stand-Up Therapy. Registra tus datos y elige una silla. Quedan ' + data.remaining_seats + ' de ' + data.total_quota + ' entradas disponibles para el grupo.';
+          } else if (data.multi_use) {
             document.getElementById('eyebrowText').textContent = '¡Gracias por tu compra!';
             document.getElementById('mainTitle').textContent = 'ELIGE TU SILLA';
             document.getElementById('welcomeMsg').textContent =
@@ -325,7 +330,7 @@
             return;
           }
 
-          showQRResult(seats, fname + ' ' + lname, email, data.orderRef);
+          showQRResult(seats, fname + ' ' + lname, email, data);
         } catch (e) {
           alert('Error de conexión. Intenta de nuevo.');
           btn.disabled = false;
@@ -333,7 +338,8 @@
         }
       });
 
-      function showQRResult(seats, name, email, orderRef) {
+      function showQRResult(seats, name, email, result) {
+        const orderRef = result.orderRef;
         document.getElementById('checkoutPanel').style.display = 'none';
         document.querySelector('.theater-container').style.display = 'none';
         document.querySelector('#mainContent > div:first-child').style.display = 'none';
@@ -352,7 +358,11 @@
               '<div class="qr-info-item"><span>Tipo</span><strong style="color:var(--accent);">Invitación especial</strong></div>' +
               '<div class="qr-info-item"><span>Código</span><strong style="font-size:0.78rem;word-break:break-all;">' + escapeHtml(orderRef) + '</strong></div>' +
             '</div>' +
-            '<p class="qr-footer-note">Guarda una captura de pantalla de este QR</p>' +
+            '<p class="qr-footer-note">' +
+              (result.emailSent
+                ? 'También enviamos el enlace de tu entrada a ' + escapeHtml(email)
+                : 'Guarda una captura de pantalla de este QR') +
+            '</p>' +
             '<div style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">' +
               '<a class="button primary" href="/" style="display:inline-flex;">Volver al inicio</a>' +
               '<a class="button ghost" href="https://wa.me/573238016527?text=Hola%2C%20ya%20confirm%C3%A9%20mi%20asistencia%20a%20Stand-Up%20Therapy.%20Mi%20c%C3%B3digo%20es%20' + encodeURIComponent(orderRef) + '" target="_blank" rel="noreferrer" style="display:inline-flex;">Confirmar por WhatsApp</a>' +

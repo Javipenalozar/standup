@@ -33,6 +33,7 @@
       .badge.active { background: rgba(0,255,200,0.12); color: #87f2ff; }
       .badge.used { background: rgba(255,255,255,0.06); color: var(--muted); }
       .badge.multi { background: rgba(100,150,255,0.12); color: #8ab4ff; }
+      .badge.corporate { background: rgba(135,242,255,0.14); color: #87f2ff; }
       .badge.verifying { background: rgba(255,200,80,0.14); color: #ffd36b; }
       .badge.review { background: rgba(255,80,80,0.14); color: #ff8d8d; }
       .status-time { display: block; margin-top: 5px; color: var(--muted); font-size: 0.7rem; white-space: nowrap; }
@@ -100,6 +101,7 @@
               <select id="invType">
                 <option value="single">Individual (un solo uso)</option>
                 <option value="multi">Genérico (uso múltiple — para grupo de pagos externos)</option>
+                <option value="corporate">Empresa (cupo total y registro por empleado)</option>
               </select>
             </div>
             <div class="admin-field">
@@ -107,7 +109,7 @@
               <input type="text" id="invName" placeholder="Ej: Familia Penaloza, o Pagos externos" />
             </div>
             <div class="admin-field">
-              <label>Máximo de sillas por persona</label>
+              <label id="invSeatsLabel">Máximo de sillas por persona</label>
               <select id="invSeats">
                 <option value="1">1 silla</option>
                 <option value="2">2 sillas</option>
@@ -115,6 +117,10 @@
                 <option value="4">4 sillas</option>
                 <option value="5">5 sillas</option>
               </select>
+            </div>
+            <div class="admin-field" id="quotaField" style="display:none;">
+              <label>Cupo total de la empresa</label>
+              <input type="number" id="invQuota" min="1" max="500" value="28" inputmode="numeric" />
             </div>
             <button class="admin-btn" id="createBtn">Crear invitación</button>
 
@@ -223,13 +229,28 @@
       }
 
       // Create invitation
+      document.getElementById('invType').addEventListener('change', function () {
+        const corporate = this.value === 'corporate';
+        const seatSelect = document.getElementById('invSeats');
+        document.getElementById('quotaField').style.display = corporate ? 'block' : 'none';
+        document.getElementById('invSeatsLabel').textContent = corporate
+          ? 'Máximo de sillas por empleado'
+          : 'Máximo de sillas por persona';
+        if (corporate) seatSelect.value = '1';
+      });
+
       document.getElementById('createBtn').addEventListener('click', async () => {
         const btn = document.getElementById('createBtn');
         const name = document.getElementById('invName').value.trim();
         const seats = parseInt(document.getElementById('invSeats').value);
         const type = document.getElementById('invType').value;
+        const quota = parseInt(document.getElementById('invQuota').value);
 
         if (!name) { alert('Escribe un nombre'); return; }
+        if (type === 'corporate' && (!Number.isInteger(quota) || quota < 1 || quota > 500)) {
+          alert('Escribe un cupo empresarial entre 1 y 500');
+          return;
+        }
 
         btn.disabled = true;
         btn.textContent = 'Creando...';
@@ -243,6 +264,8 @@
               cantidad: seats,
               password: adminPassword,
               multi_use: type === 'multi',
+              corporate: type === 'corporate',
+              total_quota: type === 'corporate' ? quota : null,
             }),
           });
 
@@ -267,10 +290,14 @@
           };
 
           document.getElementById('copyWaBtn').onclick = () => {
-            const msg = '¡Hola! 🎭 Tu entrada para *Stand-Up Therapy* está confirmada.\n\n' +
+            const intro = data.corporate
+              ? '*'+ name + '* te obsequia una entrada para *Stand-Up Therapy*. 🎭\n\n'
+              : '¡Hola! 🎭 Tu entrada para *Stand-Up Therapy* está confirmada.\n\n';
+            const msg = intro +
               '📍 Teatro Belarte · Cra 7 #152-54, Bogotá\n' +
               '📅 2 de septiembre · 18:00 horas\n\n' +
-              'Elige tu silla y obtén tu QR de entrada aquí:\n' + link + '\n\n' +
+              'Registra tus datos, elige tu silla y recibe tu QR aquí:\n' + link + '\n\n' +
+              (data.corporate ? 'Enlace individual: máximo una entrada por correo.\n\n' : '') +
               '¡Nos vemos! 🎤';
             navigator.clipboard.writeText(msg);
             document.getElementById('copyWaBtn').textContent = '¡Copiado!';
@@ -287,10 +314,16 @@
 
       // History
       async function loadHistory() {
-        const { data, error } = await sb
-          .from('invitations')
-          .select('*')
-          .order('created_at', { ascending: false });
+        const [invitationResult, reservationResult] = await Promise.all([
+          sb.from('invitations').select('*').order('created_at', { ascending: false }),
+          sb.from('reservations')
+            .select('invitation_code')
+            .eq('event_id', EVENT_ID)
+            .in('payment_status', ['paid', 'pending'])
+            .not('invitation_code', 'is', null),
+        ]);
+        const data = invitationResult.data;
+        const error = invitationResult.error;
 
         const container = document.getElementById('historyList');
         if (!data || data.length === 0) {
@@ -298,9 +331,17 @@
           return;
         }
 
-        let html = '<table class="history-table"><thead><tr><th>Código</th><th>Nombre</th><th>Sillas</th><th>Estado</th></tr></thead><tbody>';
+        const counts = {};
+        (reservationResult.data || []).forEach(row => {
+          counts[row.invitation_code] = (counts[row.invitation_code] || 0) + 1;
+        });
+
+        let html = '<table class="history-table"><thead><tr><th>Código</th><th>Nombre</th><th>Uso</th><th>Estado</th></tr></thead><tbody>';
         data.forEach(inv => {
-          const status = inv.multi_use
+          const used = counts[inv.code] || 0;
+          const status = inv.total_quota
+            ? '<span class="badge corporate">' + (used >= inv.total_quota ? 'Completo' : 'Empresa') + '</span>'
+            : inv.multi_use
             ? '<span class="badge multi">Múltiple</span>'
             : inv.used
               ? '<span class="badge used">Usado</span>'
@@ -308,7 +349,7 @@
           html += '<tr>' +
             '<td style="font-family:monospace;font-size:0.8rem;">' + esc(inv.code) + '</td>' +
             '<td>' + esc(inv.guest_name) + '</td>' +
-            '<td>' + inv.max_seats + '</td>' +
+            '<td>' + (inv.total_quota ? used + ' / ' + inv.total_quota : inv.max_seats) + '</td>' +
             '<td>' + status + '</td>' +
             '</tr>';
         });
@@ -324,11 +365,18 @@
         refreshBtn.disabled = true;
         refreshBtn.classList.add('is-loading');
 
-        const { data, error } = await sb
-          .from('reservations')
-          .select('*')
-          .eq('event_id', EVENT_ID)
-          .order('created_at', { ascending: false });
+        const [reservationResult, invitationResult] = await Promise.all([
+          sb.from('reservations')
+            .select('*')
+            .eq('event_id', EVENT_ID)
+            .order('created_at', { ascending: false }),
+          sb.from('invitations').select('code, guest_name'),
+        ]);
+        const data = reservationResult.data;
+        const error = reservationResult.error;
+        const invitationNames = new Map(
+          (invitationResult.data || []).map(inv => [inv.code, inv.guest_name])
+        );
 
         const container = document.getElementById('reservasList');
         refreshBtn.disabled = false;
@@ -359,7 +407,10 @@
         let html = '<table class="history-table"><thead><tr><th>Nombre</th><th>Sillas</th><th>Estado</th><th>Total</th></tr></thead><tbody>';
         Object.values(groups).forEach(g => {
           const status = getReservationStatus(g);
-          const type = g.total === 0 ? 'Invitación' : '$' + g.total.toLocaleString('es-CO');
+          const invitationName = g.invitation_code && invitationNames.get(g.invitation_code);
+          const type = invitationName
+            ? 'Empresa · ' + esc(invitationName)
+            : g.total === 0 ? 'Invitación' : '$' + g.total.toLocaleString('es-CO');
           html += '<tr>' +
             '<td>' + esc(g.customer_name) + '<br><span style="font-size:0.75rem;color:var(--muted);">' + esc(g.customer_email) + '</span></td>' +
             '<td>' + g.seats.sort(sortSeats).join(', ') + '</td>' +

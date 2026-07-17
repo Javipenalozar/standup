@@ -47,6 +47,19 @@ exports.handler = async function (event) {
       return { statusCode: 410, headers, body: '{"error":"Este código ya fue utilizado"}' };
     }
 
+    let usedSeats = 0;
+    if (inv.total_quota) {
+      const reservations = await supabaseGet(
+        '/rest/v1/reservations?invitation_code=eq.' + encodeURIComponent(inv.code) +
+        '&payment_status=in.(paid,pending)&select=id'
+      );
+      usedSeats = Array.isArray(reservations) ? reservations.length : 0;
+
+      if (usedSeats >= inv.total_quota) {
+        return { statusCode: 410, headers, body: '{"error":"Los cupos de esta empresa ya fueron utilizados"}' };
+      }
+    }
+
     return {
       statusCode: 200,
       headers,
@@ -55,6 +68,10 @@ exports.handler = async function (event) {
         guest_name: inv.guest_name,
         max_seats: inv.max_seats,
         multi_use: inv.multi_use || false,
+        corporate: Boolean(inv.total_quota),
+        total_quota: inv.total_quota || null,
+        used_seats: usedSeats,
+        remaining_seats: inv.total_quota ? inv.total_quota - usedSeats : null,
       }),
     };
   } catch (e) {
