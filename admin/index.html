@@ -33,6 +33,14 @@
       .badge.active { background: rgba(0,255,200,0.12); color: #87f2ff; }
       .badge.used { background: rgba(255,255,255,0.06); color: var(--muted); }
       .badge.multi { background: rgba(100,150,255,0.12); color: #8ab4ff; }
+      .badge.verifying { background: rgba(255,200,80,0.14); color: #ffd36b; }
+      .badge.review { background: rgba(255,80,80,0.14); color: #ff8d8d; }
+      .status-time { display: block; margin-top: 5px; color: var(--muted); font-size: 0.7rem; white-space: nowrap; }
+      .reservas-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+      .reservas-heading h3 { margin-bottom: 0; }
+      .refresh-btn { width: 40px; height: 40px; display: inline-grid; place-items: center; padding: 0; font-size: 1.25rem; }
+      .refresh-btn.is-loading { opacity: 0.55; }
+      .refresh-meta { margin: 10px 0 4px; color: var(--muted); font-size: 0.75rem; }
       .tabs { display: flex; gap: 0; margin-bottom: 24px; }
       .tab-btn { flex: 1; padding: 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: var(--muted); font-weight: 600; cursor: pointer; font-size: 0.9rem; }
       .tab-btn:first-child { border-radius: 8px 0 0 8px; }
@@ -130,7 +138,11 @@
         <!-- Tab: Reservas -->
         <div class="tab-content" id="tab-reservas">
           <div class="admin-card">
-            <h3>Todas las reservas</h3>
+            <div class="reservas-heading">
+              <h3>Todas las reservas</h3>
+              <button class="admin-btn secondary refresh-btn" id="refreshReservasBtn" type="button" title="Actualizar reservas" aria-label="Actualizar reservas">↻</button>
+            </div>
+            <p class="refresh-meta" id="reservasUpdatedAt">Actualización automática cada 30 segundos</p>
             <div id="reservasList"><p style="color:var(--muted);">Cargando...</p></div>
           </div>
         </div>
@@ -147,6 +159,8 @@
       const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
       let adminPassword = '';
+      let refreshTimer = null;
+      let reservasLoading = false;
 
       // Login
       document.getElementById('loginBtn').addEventListener('click', tryLogin);
@@ -170,6 +184,12 @@
           loadStats();
           loadHistory();
           loadReservas();
+          if (!refreshTimer) {
+            refreshTimer = setInterval(() => {
+              loadStats();
+              loadReservas();
+            }, 30000);
+          }
         } catch (e) {
           document.getElementById('loginError').style.display = 'block';
         }
@@ -191,7 +211,7 @@
       async function loadStats() {
         const { data } = await sb
           .from('reservations')
-          .select('seat_id')
+          .select('seat_id, qr_code')
           .eq('event_id', EVENT_ID)
           .in('payment_status', ['paid', 'pending']);
 
@@ -298,6 +318,12 @@
 
       // Reservas
       async function loadReservas() {
+        if (reservasLoading) return;
+        reservasLoading = true;
+        const refreshBtn = document.getElementById('refreshReservasBtn');
+        refreshBtn.disabled = true;
+        refreshBtn.classList.add('is-loading');
+
         const { data, error } = await sb
           .from('reservations')
           .select('*')
@@ -305,6 +331,18 @@
           .order('created_at', { ascending: false });
 
         const container = document.getElementById('reservasList');
+        refreshBtn.disabled = false;
+        refreshBtn.classList.remove('is-loading');
+        reservasLoading = false;
+
+        if (error) {
+          container.innerHTML = '<p style="color:#ff8d8d;">No fue posible actualizar las reservas.</p>';
+          return;
+        }
+
+        document.getElementById('reservasUpdatedAt').textContent =
+          'Actualizado a las ' + new Date().toLocaleTimeString('es-CO', { hour: 'numeric', minute: '2-digit' });
+
         if (!data || data.length === 0) {
           container.innerHTML = '<p style="color:var(--muted);">No hay reservas aún.</p>';
           return;
@@ -313,24 +351,56 @@
         // Agrupar por qr_code
         const groups = {};
         data.forEach(r => {
-          if (!groups[r.qr_code]) groups[r.qr_code] = { ...r, seats: [] };
+          if (!groups[r.qr_code]) groups[r.qr_code] = { ...r, seats: [], total: 0 };
           groups[r.qr_code].seats.push(r.seat_id);
+          groups[r.qr_code].total += Number(r.amount || 0);
         });
 
-        let html = '<table class="history-table"><thead><tr><th>Nombre</th><th>Sillas</th><th>Estado</th><th>Tipo</th></tr></thead><tbody>';
+        let html = '<table class="history-table"><thead><tr><th>Nombre</th><th>Sillas</th><th>Estado</th><th>Total</th></tr></thead><tbody>';
         Object.values(groups).forEach(g => {
-          const statusClass = g.payment_status === 'paid' ? 'active' : 'used';
-          const type = g.amount === 0 ? 'Invitación' : '$' + g.amount.toLocaleString('es-CO');
+          const status = getReservationStatus(g);
+          const type = g.total === 0 ? 'Invitación' : '$' + g.total.toLocaleString('es-CO');
           html += '<tr>' +
             '<td>' + esc(g.customer_name) + '<br><span style="font-size:0.75rem;color:var(--muted);">' + esc(g.customer_email) + '</span></td>' +
-            '<td>' + g.seats.sort().join(', ') + '</td>' +
-            '<td><span class="badge ' + statusClass + '">' + g.payment_status + '</span></td>' +
+            '<td>' + g.seats.sort(sortSeats).join(', ') + '</td>' +
+            '<td><span class="badge ' + status.className + '">' + status.label + '</span>' + status.time + '</td>' +
             '<td>' + type + '</td>' +
             '</tr>';
         });
         html += '</tbody></table>';
         container.innerHTML = html;
       }
+
+      function getReservationStatus(reservation) {
+        if (reservation.payment_status === 'paid') {
+          return { className: 'active', label: 'Pagado', time: '' };
+        }
+
+        const createdAt = new Date(reservation.created_at).getTime();
+        const elapsedMinutes = Number.isFinite(createdAt)
+          ? Math.max(0, Math.floor((Date.now() - createdAt) / 60000))
+          : 0;
+        const time = '<span class="status-time">Hace ' + elapsedMinutes + ' min</span>';
+
+        if (elapsedMinutes < 15) {
+          return { className: 'verifying', label: 'Verificando pago', time };
+        }
+
+        return { className: 'review', label: 'Revisar en Bold', time };
+      }
+
+      function sortSeats(a, b) {
+        const [rowA, numberA] = a.split('-');
+        const [rowB, numberB] = b.split('-');
+        return rowA === rowB
+          ? Number(numberA) - Number(numberB)
+          : rowA.localeCompare(rowB);
+      }
+
+      document.getElementById('refreshReservasBtn').addEventListener('click', () => {
+        loadStats();
+        loadReservas();
+      });
 
       function esc(str) {
         const d = document.createElement('div');
