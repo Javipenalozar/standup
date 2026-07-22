@@ -1,5 +1,7 @@
 const https = require('https');
 
+const HOLD_DURATION_MS = 15 * 60 * 1000;
+
 function requestJson({ method, hostname, path, headers, body }) {
   return new Promise((resolve, reject) => {
     const req = https.request({ method, hostname, path, headers }, (res) => {
@@ -18,7 +20,7 @@ function requestJson({ method, hostname, path, headers, body }) {
   });
 }
 
-async function saveBoldReference(orderReference, boldReference) {
+async function saveBoldReference(orderReference, boldReference, expiresAt) {
   const url = new URL(
     '/rest/v1/reservations?qr_code=eq.' +
       encodeURIComponent(orderReference) +
@@ -36,7 +38,10 @@ async function saveBoldReference(orderReference, boldReference) {
       Authorization: 'Bearer ' + process.env.SUPABASE_KEY,
       Prefer: 'return=representation',
     },
-    body: { bold_reference: boldReference },
+    body: {
+      bold_reference: boldReference,
+      hold_expires_at: expiresAt.toISOString(),
+    },
   });
 }
 
@@ -52,6 +57,12 @@ exports.handler = async function (event) {
 
   try {
     const body = JSON.parse(event.body);
+    const expiresAt = new Date(Date.now() + HOLD_DURATION_MS);
+    const boldBody = {
+      ...body,
+      // Bold documents this value as Unix nanoseconds.
+      expiration_date: expiresAt.getTime() * 1e6,
+    };
 
     const result = await requestJson({
       method: 'POST',
@@ -61,12 +72,12 @@ exports.handler = async function (event) {
         'Content-Type': 'application/json',
         Authorization: 'x-api-key ' + process.env.BOLD_API_KEY,
       },
-      body,
+      body: boldBody,
     });
 
     const boldReference = result.data?.payload?.payment_link;
     if (result.status >= 200 && result.status < 300 && boldReference) {
-      const mapping = await saveBoldReference(body.order_reference, boldReference);
+      const mapping = await saveBoldReference(body.order_reference, boldReference, expiresAt);
       if (mapping.status >= 400 || !Array.isArray(mapping.data) || mapping.data.length === 0) {
         console.error('Could not save Bold reference mapping', mapping.status, mapping.data);
         return {
