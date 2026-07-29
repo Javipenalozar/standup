@@ -105,15 +105,9 @@
       <a href="https://wa.me/573238016527" target="_blank" rel="noreferrer">+57 323 801 6527</a>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
     <script>
     (function () {
-      const SUPABASE_URL = 'https://rpgagnnhsefwaethszfl.supabase.co';
-      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwZ2Fnbm5oc2Vmd2FldGhzemZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4MDAxMjcsImV4cCI6MjA5ODM3NjEyN30.YxXpLyJVFhObTmq30UNnpgBOD6cq2ubR1lIYS6A-Z1g';
-      const EVENT_ID = 'standup-therapy-bogota-2sep2026';
-      const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
       const ROWS = [
         { label: 'A', left: [1,2,3,4,5], center: [6,7,8,9,10,11,12,13,14,15,16,17], right: [18,19,20,21,22] },
         { label: 'B', left: [1,2,3,4,5], center: [6,7,8,9,10,11,12,13,14,15,16,17], right: [18,19,20,21,22] },
@@ -191,17 +185,16 @@
 
       async function loadTakenSeats() {
         try {
-          const { data, error } = await sb
-            .from('reservations')
-            .select('seat_id')
-            .eq('event_id', EVENT_ID)
-            .in('payment_status', ['paid', 'pending']);
-
-          if (!error && data) {
-            data.forEach(r => takenSeats.add(r.seat_id));
-          }
-        } catch (e) {
-          console.warn('Error cargando sillas:', e);
+          const res = await fetch('/.netlify/functions/public-seats', { cache: 'no-store' });
+          const data = await res.json();
+          if (!res.ok || !Array.isArray(data.seats)) throw new Error(data.error);
+          data.seats.forEach(seat => takenSeats.add(seat));
+        } catch (error) {
+          showError(
+            'Sillas no disponibles',
+            'No fue posible cargar el mapa de sillas. Recarga la página para intentarlo de nuevo.'
+          );
+          return;
         }
         renderSeatMap();
       }

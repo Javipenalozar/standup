@@ -68,7 +68,8 @@ exports.handler = async function (event) {
 
   try {
     const rows = await supabaseGet(
-      '/rest/v1/reservations?qr_code=eq.' + encodeURIComponent(ref) + '&select=payment_status&limit=1'
+      '/rest/v1/reservations?qr_code=eq.' + encodeURIComponent(ref) +
+      '&select=payment_status,seat_id,customer_name,customer_email,amount&order=seat_id.asc'
     );
 
     if (!rows || rows.length === 0) {
@@ -82,7 +83,13 @@ exports.handler = async function (event) {
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-      body: JSON.stringify({ status: rows[0].payment_status }),
+      body: JSON.stringify({
+        status: rows[0].payment_status,
+        seats: rows.map(row => row.seat_id),
+        name: rows[0].customer_name,
+        email: rows[0].customer_email,
+        amount: rows.reduce((total, row) => total + Number(row.amount || 0), 0),
+      }),
     };
 
   } catch (e) {

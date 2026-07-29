@@ -155,18 +155,32 @@
       </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
     <script>
     (function () {
-      const SUPABASE_URL = 'https://rpgagnnhsefwaethszfl.supabase.co';
-      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwZ2Fnbm5oc2Vmd2FldGhzemZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4MDAxMjcsImV4cCI6MjA5ODM3NjEyN30.YxXpLyJVFhObTmq30UNnpgBOD6cq2ubR1lIYS6A-Z1g';
-      const EVENT_ID = 'standup-therapy-bogota-2sep2026';
       const TOTAL_SEATS = 239;
-      const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
       let adminPassword = '';
       let refreshTimer = null;
       let reservasLoading = false;
+      let adminDataCache = null;
+      let adminDataCachedAt = 0;
+
+      async function fetchAdminData(forceRefresh) {
+        if (!forceRefresh && adminDataCache && Date.now() - adminDataCachedAt < 5000) {
+          return adminDataCache;
+        }
+
+        const res = await fetch('/.netlify/functions/admin-data', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: adminPassword }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'No fue posible consultar las reservas');
+        adminDataCache = data;
+        adminDataCachedAt = Date.now();
+        return data;
+      }
 
       // Login
       document.getElementById('loginBtn').addEventListener('click', tryLogin);
@@ -215,17 +229,21 @@
 
       // Stats
       async function loadStats() {
-        const { data } = await sb
-          .from('reservations')
-          .select('seat_id, qr_code')
-          .eq('event_id', EVENT_ID)
-          .in('payment_status', ['paid', 'pending']);
-
-        const occupied = data ? data.length : 0;
-        const unique = data ? new Set(data.map(r => r.qr_code || '')).size : 0;
-        document.getElementById('statTotal').textContent = unique;
-        document.getElementById('statSeats').textContent = occupied;
-        document.getElementById('statAvailable').textContent = TOTAL_SEATS - occupied;
+        try {
+          const payload = await fetchAdminData(false);
+          const active = payload.reservations.filter(
+            row => row.payment_status === 'paid' || row.payment_status === 'pending'
+          );
+          const occupied = active.length;
+          const unique = new Set(active.map(row => row.qr_code).filter(Boolean)).size;
+          document.getElementById('statTotal').textContent = unique;
+          document.getElementById('statSeats').textContent = occupied;
+          document.getElementById('statAvailable').textContent = Math.max(0, TOTAL_SEATS - occupied);
+        } catch (error) {
+          document.getElementById('statTotal').textContent = '—';
+          document.getElementById('statSeats').textContent = '—';
+          document.getElementById('statAvailable').textContent = '—';
+        }
       }
 
       // Create invitation
@@ -314,26 +332,28 @@
 
       // History
       async function loadHistory() {
-        const [invitationResult, reservationResult] = await Promise.all([
-          sb.from('invitations').select('*').order('created_at', { ascending: false }),
-          sb.from('reservations')
-            .select('invitation_code')
-            .eq('event_id', EVENT_ID)
-            .in('payment_status', ['paid', 'pending'])
-            .not('invitation_code', 'is', null),
-        ]);
-        const data = invitationResult.data;
-        const error = invitationResult.error;
-
         const container = document.getElementById('historyList');
+        let payload;
+        try {
+          payload = await fetchAdminData(false);
+        } catch (error) {
+          container.innerHTML = '<p style="color:#ff8d8d;">No fue posible actualizar las invitaciones.</p>';
+          return;
+        }
+        const data = payload.invitations;
         if (!data || data.length === 0) {
           container.innerHTML = '<p style="color:var(--muted);">No hay invitaciones creadas aún.</p>';
           return;
         }
 
         const counts = {};
-        (reservationResult.data || []).forEach(row => {
-          counts[row.invitation_code] = (counts[row.invitation_code] || 0) + 1;
+        payload.reservations.forEach(row => {
+          if (
+            row.invitation_code &&
+            (row.payment_status === 'paid' || row.payment_status === 'pending')
+          ) {
+            counts[row.invitation_code] = (counts[row.invitation_code] || 0) + 1;
+          }
         });
 
         let html = '<table class="history-table"><thead><tr><th>Código</th><th>Nombre</th><th>Uso</th><th>Estado</th></tr></thead><tbody>';
@@ -365,17 +385,16 @@
         refreshBtn.disabled = true;
         refreshBtn.classList.add('is-loading');
 
-        const [reservationResult, invitationResult] = await Promise.all([
-          sb.from('reservations')
-            .select('*')
-            .eq('event_id', EVENT_ID)
-            .order('created_at', { ascending: false }),
-          sb.from('invitations').select('code, guest_name'),
-        ]);
-        const data = reservationResult.data;
-        const error = reservationResult.error;
+        let payload;
+        let error = null;
+        try {
+          payload = await fetchAdminData(true);
+        } catch (requestError) {
+          error = requestError;
+        }
+        const data = payload ? payload.reservations : null;
         const invitationNames = new Map(
-          (invitationResult.data || []).map(inv => [inv.code, inv.guest_name])
+          ((payload && payload.invitations) || []).map(inv => [inv.code, inv.guest_name])
         );
 
         const container = document.getElementById('reservasList');
