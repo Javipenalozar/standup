@@ -56,6 +56,28 @@ function supabasePatch(path, body) {
   });
 }
 
+function getBoldLink(paymentLink) {
+  return new Promise((resolve, reject) => {
+    const options = {
+      hostname: 'integrations.api.bold.co',
+      path: '/online/link/v1/' + encodeURIComponent(paymentLink),
+      headers: {
+        Authorization: 'x-api-key ' + process.env.BOLD_API_KEY,
+      },
+    };
+
+    https.get(options, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        let parsed = null;
+        try { parsed = data ? JSON.parse(data) : null; } catch {}
+        resolve({ statusCode: res.statusCode, data: parsed });
+      });
+    }).on('error', reject);
+  });
+}
+
 exports.handler = async function (event) {
   const ref = event.queryStringParameters?.ref;
   if (!ref) {
@@ -69,7 +91,7 @@ exports.handler = async function (event) {
   try {
     const rows = await supabaseGet(
       '/rest/v1/reservations?qr_code=eq.' + encodeURIComponent(ref) +
-      '&select=payment_status,seat_id,customer_name,customer_email,amount&order=seat_id.asc'
+      '&select=payment_status,seat_id,customer_name,customer_email,amount,bold_reference&order=seat_id.asc'
     );
 
     if (!rows || rows.length === 0) {
@@ -78,6 +100,20 @@ exports.handler = async function (event) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'not_found' }),
       };
+    }
+
+    const boldReference = rows[0].bold_reference;
+    let providerStatus = null;
+    let checkoutUrl = null;
+
+    if (rows[0].payment_status === 'pending' && boldReference) {
+      const bold = await getBoldLink(boldReference);
+      if (bold.statusCode >= 200 && bold.statusCode < 300 && bold.data) {
+        providerStatus = String(bold.data.status || '').toUpperCase() || null;
+        if (providerStatus === 'ACTIVE' || providerStatus === 'PROCESSING') {
+          checkoutUrl = 'https://checkout.bold.co/' + encodeURIComponent(boldReference);
+        }
+      }
     }
 
     return {
@@ -89,6 +125,8 @@ exports.handler = async function (event) {
         name: rows[0].customer_name,
         email: rows[0].customer_email,
         amount: rows.reduce((total, row) => total + Number(row.amount || 0), 0),
+        providerStatus,
+        checkoutUrl,
       }),
     };
 

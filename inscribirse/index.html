@@ -105,6 +105,7 @@
               Pagar con Bold
             </button>
           </div>
+          <div id="paymentRecovery" aria-live="polite" style="display:none;"></div>
         </form>
       </div>
 
@@ -303,18 +304,25 @@
 
         btn.disabled = true;
         btn.textContent = 'Procesando...';
+        const recovery = document.getElementById('paymentRecovery');
+        recovery.style.display = 'none';
+        recovery.innerHTML = '';
 
         const seats = [...selectedSeats].sort();
         const randomPart = window.crypto && window.crypto.randomUUID
           ? window.crypto.randomUUID().slice(0, 8).toUpperCase()
           : Math.random().toString(36).slice(2, 10).toUpperCase();
         const orderRef =
-          'ST-' + Date.now().toString(36).toUpperCase() + '-' + randomPart + '-' + seats.join('_');
+          'ST-' + Date.now().toString(36).toUpperCase() + '-' + randomPart;
+        sessionStorage.setItem('standupPendingPaymentRef', orderRef);
 
         try {
+          const controller = new AbortController();
+          const timeout = window.setTimeout(() => controller.abort(), 20000);
           const res = await fetch('/.netlify/functions/crear-pago-bold', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            signal: controller.signal,
             body: JSON.stringify({
               order_reference: orderRef,
               seats,
@@ -325,10 +333,12 @@
               },
             }),
           });
+          window.clearTimeout(timeout);
           const data = await res.json();
 
-          if (res.ok && data.payload && data.payload.url) {
-            window.location.href = data.payload.url;
+          if (res.ok && data.checkoutUrl) {
+            showPaymentRecovery(data.checkoutUrl, orderRef);
+            window.location.assign(data.checkoutUrl);
             return;
           }
 
@@ -336,12 +346,42 @@
           alert(data.error || 'Error creando el pago. Intenta de nuevo.');
         } catch (error) {
           console.error('Payment connection error:', error);
-          alert('No se pudo conectar con Bold. Intenta de nuevo.');
+          const recovered = await recoverPaymentLink(orderRef);
+          if (recovered) return;
+          alert('La conexión tardó demasiado. No vuelvas a reservar todavía; escríbenos por WhatsApp para revisar el pago.');
         }
 
         btn.disabled = false;
         btn.innerHTML = svgCard() + ' Pagar con Bold';
       });
+
+      function showPaymentRecovery(checkoutUrl, orderRef) {
+        const recovery = document.getElementById('paymentRecovery');
+        const safeUrl = String(checkoutUrl).replace(/"/g, '&quot;');
+        recovery.innerHTML =
+          '<p style="color:var(--muted);margin:0 0 12px;">Si Bold no se abre automáticamente:</p>' +
+          '<a class="button primary" style="display:inline-flex;" href="' + safeUrl + '">Continuar al pago</a>' +
+          '<a class="button ghost" style="display:inline-flex;margin-left:8px;" href="https://wa.me/573238016527?text=Hola%2C%20mi%20pago%20no%20abri%C3%B3.%20Referencia%3A%20' + encodeURIComponent(orderRef) + '" target="_blank" rel="noreferrer">Ayuda</a>';
+        recovery.style.display = 'block';
+      }
+
+      async function recoverPaymentLink(orderRef) {
+        try {
+          const response = await fetch(
+            '/.netlify/functions/verify-bold-payment?ref=' + encodeURIComponent(orderRef),
+            { cache: 'no-store' }
+          );
+          const data = await response.json();
+          if (response.ok && data.checkoutUrl) {
+            showPaymentRecovery(data.checkoutUrl, orderRef);
+            document.getElementById('btnPay').textContent = 'Enlace de pago creado';
+            return true;
+          }
+        } catch (error) {
+          console.warn('No fue posible recuperar el enlace de pago', error);
+        }
+        return false;
+      }
 
       function svgCard() {
         return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>';

@@ -143,9 +143,9 @@ exports.handler = async function (event) {
         tip_amount: 0,
       },
       description: 'Stand-Up Therapy - ' + seats.length + ' silla(s): ' + seats.join(', '),
-      payment_method: ['CARD', 'PSE', 'NEQUI', 'DAVIPLATA'],
-      order_reference: orderReference,
-      redirect_url:
+      payment_methods: ['CREDIT_CARD', 'PSE', 'BOTON_BANCOLOMBIA', 'NEQUI'],
+      reference: orderReference,
+      callback_url:
         'https://standup.eventosjv.com/inscribirse/?ref=' +
         encodeURIComponent(orderReference),
       payer_email: String(customer.email).trim().toLowerCase(),
@@ -182,10 +182,24 @@ exports.handler = async function (event) {
       await rollbackReservation(orderReference);
     }
 
+    if (result.status >= 200 && result.status < 300 && boldReference) {
+      const checkoutUrl = result.data?.payload?.url ||
+        'https://checkout.bold.co/' + encodeURIComponent(boldReference);
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({
+          paymentLink: boldReference,
+          checkoutUrl,
+        }),
+      };
+    }
+
+    console.error('Bold link creation failed', result.status, result.data);
     return {
-      statusCode: result.status,
+      statusCode: result.status >= 400 ? result.status : 502,
       headers,
-      body: JSON.stringify(result.data),
+      body: JSON.stringify({ error: 'Bold no pudo crear el enlace de pago' }),
     };
   } catch (e) {
     console.error('Bold proxy error:', e);
