@@ -53,6 +53,18 @@ async function getBoldLink(paymentLink) {
   });
 }
 
+async function getCheckoutStatus(paymentLink) {
+  const checkout = await requestJson({
+    method: 'GET',
+    hostname: 'checkout.bold.co',
+    path: '/' + encodeURIComponent(paymentLink),
+    headers: {
+      'User-Agent': 'Stand-Up-Therapy/1.0',
+    },
+  });
+  return checkout.status;
+}
+
 async function deletePending(reference, expiresAt) {
   return supabaseRequest(
     'DELETE',
@@ -129,6 +141,16 @@ export default async () => {
       if (deletion.status < 400) released += 1;
       else console.error('Could not release expired hold', reference, deletion.status);
       continue;
+    }
+
+    if (status === 'ACTIVE') {
+      const checkoutStatus = await getCheckoutStatus(hold.bold_reference);
+      if (checkoutStatus === 404 || checkoutStatus === 410) {
+        const deletion = await deletePending(reference, hold.hold_expires_at);
+        if (deletion.status < 400) released += 1;
+        else console.error('Could not release unavailable checkout', reference, deletion.status);
+        continue;
+      }
     }
 
     retained += 1;
