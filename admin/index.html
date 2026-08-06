@@ -53,6 +53,11 @@
       .stat-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 16px; text-align: center; }
       .stat-card .num { font-family: 'Anton', sans-serif; font-size: 2rem; color: #87f2ff; }
       .stat-card .label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+      .admin-header-actions { display: flex; align-items: center; gap: 10px; }
+      .admin-header-actions .nav-cta { position: static; transform: none; }
+      @media (max-width: 620px) {
+        .admin-header-actions .nav-cta:last-child { display: none; }
+      }
     </style>
   </head>
   <body>
@@ -74,7 +79,10 @@
           <span class="brand-icon">ST</span>
           <span>Admin</span>
         </a>
-        <a class="nav-cta" href="/" target="_blank">Ver sitio</a>
+        <div class="admin-header-actions">
+          <a class="nav-cta" href="/admin/check-in/">Check-in</a>
+          <a class="nav-cta" href="/" target="_blank">Ver sitio</a>
+        </div>
       </header>
 
       <div class="admin-container">

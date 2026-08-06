@@ -1,0 +1,513 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#050608" />
+    <title>Check-in | Stand-Up Therapy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/styles.css" />
+    <style>
+      :root { color-scheme: dark; }
+      body { background: #050608; }
+      .checkin-shell { width: min(760px, 100%); margin: 0 auto; padding: 92px 18px 80px; }
+      .checkin-login { width: min(420px, calc(100% - 32px)); margin: 0 auto; padding: 140px 0 60px; }
+      .checkin-login h1, .checkin-title { font-family: 'Anton', sans-serif; text-transform: uppercase; letter-spacing: 0; }
+      .checkin-login h1 { font-size: 2.3rem; margin-bottom: 8px; }
+      .checkin-login p { color: var(--muted); margin-bottom: 24px; }
+      .checkin-card { background: #101215; border: 1px solid #292d32; border-radius: 8px; padding: 22px; margin-bottom: 16px; }
+      .checkin-card h2 { font-family: 'Anton', sans-serif; text-transform: uppercase; font-size: 1.45rem; margin-bottom: 14px; }
+      .checkin-field { margin-bottom: 14px; }
+      .checkin-field label { display: block; margin-bottom: 6px; color: #a7aeb8; font-size: .78rem; font-weight: 800; text-transform: uppercase; }
+      .checkin-field input { width: 100%; min-height: 50px; border: 1px solid #343a41; border-radius: 7px; padding: 10px 13px; background: #191c20; color: #fff; font: inherit; font-size: 1rem; }
+      .checkin-field input:focus { outline: 2px solid #87f2ff; outline-offset: 1px; }
+      .checkin-button { min-height: 48px; border: 0; border-radius: 7px; padding: 10px 18px; background: #87f2ff; color: #050608; font: inherit; font-weight: 900; cursor: pointer; }
+      .checkin-button:disabled { opacity: .45; cursor: wait; }
+      .checkin-button.secondary { background: #25292e; color: #fff; border: 1px solid #373d44; }
+      .checkin-button.danger { background: #3a1c20; color: #ff9ca5; border: 1px solid #663038; }
+      .checkin-button.full { width: 100%; }
+      .checkin-top-actions { display: flex; gap: 8px; }
+      .checkin-top-actions a { text-decoration: none; }
+      .checkin-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+      .checkin-header p { color: var(--muted); font-size: .88rem; }
+      .checkin-title { font-size: 2rem; }
+      .checkin-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
+      .checkin-stat { min-width: 0; padding: 14px 8px; text-align: center; border: 1px solid #292d32; border-radius: 7px; background: #101215; }
+      .checkin-stat strong { display: block; color: #87f2ff; font-family: 'Anton', sans-serif; font-size: 1.8rem; }
+      .checkin-stat span { display: block; color: #959da8; font-size: .68rem; font-weight: 800; text-transform: uppercase; }
+      .scan-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+      #reader { width: 100%; overflow: hidden; border-radius: 7px; margin-top: 14px; background: #050608; }
+      #reader video { object-fit: cover; }
+      #reader__dashboard_section_csr button, #reader__dashboard_section_swaplink { font-family: 'Inter', sans-serif !important; }
+      .manual-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+      .manual-row input { min-width: 0; }
+      .feedback { display: none; margin-bottom: 16px; padding: 13px 15px; border-radius: 7px; font-weight: 700; }
+      .feedback.show { display: block; }
+      .feedback.success { background: #0c3128; color: #8ef6cf; border: 1px solid #1f6655; }
+      .feedback.error { background: #35191d; color: #ff9ca5; border: 1px solid #663038; }
+      .feedback.info { background: #182b31; color: #9aebf6; border: 1px solid #31545d; }
+      .ticket-card { border-width: 2px; }
+      .ticket-card.valid { border-color: #258d72; }
+      .ticket-card.partial { border-color: #b89937; }
+      .ticket-card.used { border-color: #9a3f49; }
+      .ticket-card.invalid { border-color: #9a3f49; }
+      .ticket-status { display: inline-block; margin-bottom: 12px; padding: 5px 10px; border-radius: 999px; font-size: .75rem; font-weight: 900; text-transform: uppercase; }
+      .ticket-card.valid .ticket-status { background: #0c3128; color: #8ef6cf; }
+      .ticket-card.partial .ticket-status { background: #342c15; color: #f5d77a; }
+      .ticket-card.used .ticket-status, .ticket-card.invalid .ticket-status { background: #35191d; color: #ff9ca5; }
+      .ticket-name { font-size: 1.35rem; font-weight: 900; margin-bottom: 3px; }
+      .ticket-email, .ticket-code { color: #969eaa; font-size: .84rem; overflow-wrap: anywhere; }
+      .ticket-code { margin-top: 5px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+      .seat-list { display: grid; gap: 8px; margin: 18px 0; }
+      .seat-row { display: grid; grid-template-columns: 28px 1fr auto; align-items: center; gap: 10px; min-height: 58px; padding: 10px 12px; background: #191c20; border: 1px solid #30353b; border-radius: 7px; }
+      .seat-row input { width: 21px; height: 21px; accent-color: #87f2ff; }
+      .seat-id { font-weight: 900; }
+      .seat-meta { color: #9da5af; font-size: .74rem; margin-top: 2px; }
+      .seat-used { color: #ff9ca5; font-size: .75rem; font-weight: 800; }
+      .undo-seat { min-height: 36px; padding: 6px 10px; font-size: .75rem; }
+      .search-results { display: grid; gap: 8px; }
+      .search-result { width: 100%; text-align: left; background: #191c20; border: 1px solid #30353b; border-radius: 7px; color: #fff; padding: 12px 14px; cursor: pointer; }
+      .search-result strong { display: block; }
+      .search-result span { color: #9ca4af; font-size: .78rem; }
+      .empty-state { color: var(--muted); }
+      .recent-list { display: grid; }
+      .recent-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; padding: 12px 0; border-top: 1px solid #292d32; }
+      .recent-row strong, .recent-row span { display: block; }
+      .recent-row span { margin-top: 3px; color: #9ca4af; font-size: .78rem; }
+      .recent-time { color: #87f2ff; font-weight: 900; white-space: nowrap; }
+      @media (max-width: 560px) {
+        .checkin-shell { padding-top: 78px; }
+        .checkin-card { padding: 18px; }
+        .checkin-header { align-items: center; }
+        .checkin-title { font-size: 1.65rem; }
+        .checkin-top-actions .panel-link { display: none; }
+        .manual-row { grid-template-columns: 1fr; }
+        .scan-actions { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section id="loginScreen" class="checkin-login">
+        <h1>Check-in</h1>
+        <p>Stand-Up Therapy · Teatro Belarte</p>
+        <div class="checkin-field">
+          <label for="operatorInput">Operador</label>
+          <input id="operatorInput" type="text" autocomplete="name" placeholder="Ej. Puerta 1 · Javi" maxlength="80" />
+        </div>
+        <div class="checkin-field">
+          <label for="passwordInput">Contraseña</label>
+          <input id="passwordInput" type="password" autocomplete="current-password" placeholder="Contraseña administrativa" />
+        </div>
+        <button id="loginButton" class="checkin-button full" type="button">Ingresar</button>
+        <div id="loginFeedback" class="feedback error" role="alert"></div>
+      </section>
+
+      <section id="checkinApp" class="checkin-shell" hidden>
+        <div class="checkin-header">
+          <div>
+            <h1 class="checkin-title">Control de ingreso</h1>
+            <p id="operatorLabel"></p>
+          </div>
+          <div class="checkin-top-actions">
+            <a class="checkin-button secondary panel-link" href="/admin/">Panel</a>
+            <button id="logoutButton" class="checkin-button secondary" type="button">Salir</button>
+          </div>
+        </div>
+
+        <div class="checkin-stats" aria-label="Resumen de ingresos">
+          <div class="checkin-stat"><strong id="statChecked">-</strong><span>Ingresaron</span></div>
+          <div class="checkin-stat"><strong id="statPending">-</strong><span>Por ingresar</span></div>
+          <div class="checkin-stat"><strong id="statTotal">-</strong><span>Confirmadas</span></div>
+        </div>
+
+        <div id="feedback" class="feedback" role="status" aria-live="polite"></div>
+
+        <section class="checkin-card">
+          <h2>Escanear QR</h2>
+          <div class="scan-actions">
+            <button id="startScannerButton" class="checkin-button" type="button">Activar cámara</button>
+            <button id="stopScannerButton" class="checkin-button secondary" type="button" disabled>Detener cámara</button>
+          </div>
+          <div id="reader" hidden></div>
+        </section>
+
+        <section class="checkin-card">
+          <h2>Búsqueda manual</h2>
+          <div class="manual-row">
+            <div class="checkin-field" style="margin:0;">
+              <label for="manualInput">Código, nombre, correo o silla</label>
+              <input id="manualInput" type="search" autocomplete="off" placeholder="Ej. F-21 o correo@ejemplo.com" />
+            </div>
+            <button id="searchButton" class="checkin-button" type="button">Buscar</button>
+          </div>
+          <div id="searchResults" class="search-results" style="margin-top:12px;"></div>
+        </section>
+
+        <section id="ticketResult" aria-live="polite"></section>
+
+        <section class="checkin-card">
+          <h2>Ingresos recientes</h2>
+          <div id="recentList" class="recent-list">
+            <p class="empty-state">Todavía no hay entradas validadas.</p>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script src="/assets/html5-qrcode.min.js"></script>
+    <script>
+    (function () {
+      let password = '';
+      let operatorName = '';
+      let currentTicket = null;
+      let scanner = null;
+      let scannerRunning = false;
+      let scanLocked = false;
+      let statsTimer = null;
+
+      const loginScreen = document.getElementById('loginScreen');
+      const checkinApp = document.getElementById('checkinApp');
+      const feedback = document.getElementById('feedback');
+      const ticketResult = document.getElementById('ticketResult');
+
+      document.getElementById('operatorInput').value = sessionStorage.getItem('checkinOperator') || '';
+      document.getElementById('loginButton').addEventListener('click', login);
+      document.getElementById('passwordInput').addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') login();
+      });
+      document.getElementById('logoutButton').addEventListener('click', function () {
+        stopScanner();
+        password = '';
+        location.reload();
+      });
+      document.getElementById('startScannerButton').addEventListener('click', startScanner);
+      document.getElementById('stopScannerButton').addEventListener('click', stopScanner);
+      document.getElementById('searchButton').addEventListener('click', searchManual);
+      document.getElementById('manualInput').addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') searchManual();
+      });
+      document.getElementById('searchResults').addEventListener('click', function (event) {
+        const button = event.target.closest('[data-code]');
+        if (button) lookupTicket(button.dataset.code);
+      });
+      ticketResult.addEventListener('click', handleTicketAction);
+
+      async function api(action, payload) {
+        const response = await fetch('/.netlify/functions/check-in', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          cache: 'no-store',
+          body: JSON.stringify(Object.assign({ action: action, password: password }, payload || {})),
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          const error = new Error(data.error || 'No fue posible completar la operación');
+          error.status = response.status;
+          throw error;
+        }
+        return data;
+      }
+
+      async function login() {
+        const button = document.getElementById('loginButton');
+        const loginFeedback = document.getElementById('loginFeedback');
+        operatorName = document.getElementById('operatorInput').value.trim();
+        password = document.getElementById('passwordInput').value;
+        loginFeedback.className = 'feedback error';
+        loginFeedback.textContent = '';
+
+        if (!operatorName || !password) {
+          loginFeedback.textContent = 'Completa operador y contraseña.';
+          loginFeedback.classList.add('show');
+          return;
+        }
+
+        button.disabled = true;
+        button.textContent = 'Ingresando...';
+        try {
+          const stats = await api('stats');
+          sessionStorage.setItem('checkinOperator', operatorName);
+          loginScreen.hidden = true;
+          checkinApp.hidden = false;
+          document.getElementById('operatorLabel').textContent = operatorName;
+          renderStats(stats);
+          clearInterval(statsTimer);
+          statsTimer = setInterval(refreshStats, 15000);
+        } catch (error) {
+          loginFeedback.textContent = error.status === 401
+            ? 'Contraseña incorrecta.'
+            : 'No fue posible abrir el control de ingreso.';
+          loginFeedback.classList.add('show');
+        } finally {
+          button.disabled = false;
+          button.textContent = 'Ingresar';
+        }
+      }
+
+      async function refreshStats() {
+        try { renderStats(await api('stats')); } catch (error) { console.warn(error); }
+      }
+
+      function renderStats(stats) {
+        document.getElementById('statChecked').textContent = stats.checkedIn;
+        document.getElementById('statPending').textContent = stats.pending;
+        document.getElementById('statTotal').textContent = stats.total;
+        renderRecent(stats.recent || []);
+      }
+
+      function renderRecent(rows) {
+        const container = document.getElementById('recentList');
+        if (!rows.length) {
+          container.innerHTML = '<p class="empty-state">Todavía no hay entradas validadas.</p>';
+          return;
+        }
+        container.innerHTML = rows.map(function (row) {
+          return '<div class="recent-row">' +
+            '<div><strong>' + esc(row.name || 'Asistente') + ' · ' + esc(row.seatId) + '</strong>' +
+              '<span>Registró: ' + esc(row.checkedInBy || 'Equipo') + '</span></div>' +
+            '<div class="recent-time">' + esc(formatShortTime(row.checkedInAt)) + '</div>' +
+          '</div>';
+        }).join('');
+      }
+
+      async function startScanner() {
+        clearFeedback();
+        if (typeof Html5Qrcode === 'undefined') {
+          showFeedback('La cámara no está disponible. Usa la búsqueda manual.', 'error');
+          return;
+        }
+
+        const reader = document.getElementById('reader');
+        reader.hidden = false;
+        document.getElementById('startScannerButton').disabled = true;
+        document.getElementById('stopScannerButton').disabled = false;
+        scanLocked = false;
+        scanner = scanner || new Html5Qrcode('reader');
+
+        try {
+          await scanner.start(
+            { facingMode: 'environment' },
+            {
+              fps: 10,
+              qrbox: function (width, height) {
+                const size = Math.floor(Math.min(width, height) * 0.72);
+                return { width: size, height: size };
+              },
+              aspectRatio: 1,
+            },
+            async function (decodedText) {
+              if (scanLocked) return;
+              scanLocked = true;
+              if (navigator.vibrate) navigator.vibrate(80);
+              await stopScanner();
+              await lookupTicket(decodedText);
+            },
+            function () {}
+          );
+          scannerRunning = true;
+        } catch (error) {
+          scannerRunning = false;
+          showFeedback('No fue posible activar la cámara. Revisa el permiso o usa la búsqueda manual.', 'error');
+          await stopScanner();
+        }
+      }
+
+      async function stopScanner() {
+        if (scanner && scannerRunning) {
+          try { await scanner.stop(); } catch (error) { console.warn(error); }
+          scannerRunning = false;
+        }
+        document.getElementById('reader').hidden = true;
+        document.getElementById('startScannerButton').disabled = false;
+        document.getElementById('stopScannerButton').disabled = true;
+      }
+
+      async function searchManual() {
+        const input = document.getElementById('manualInput');
+        const query = input.value.trim();
+        if (!query) return;
+        document.getElementById('searchButton').disabled = true;
+        clearFeedback();
+
+        try {
+          if (/^(https?:\/\/|ST-|INV-|CORT-|ADMIN-)/i.test(query)) {
+            await lookupTicket(query);
+            document.getElementById('searchResults').innerHTML = '';
+          } else {
+            const data = await api('search', { query: query });
+            renderSearchResults(data.tickets);
+          }
+        } catch (error) {
+          showFeedback(error.message, 'error');
+        } finally {
+          document.getElementById('searchButton').disabled = false;
+        }
+      }
+
+      function renderSearchResults(tickets) {
+        const container = document.getElementById('searchResults');
+        if (!tickets || tickets.length === 0) {
+          container.innerHTML = '<p class="empty-state">No se encontraron entradas confirmadas.</p>';
+          return;
+        }
+        container.innerHTML = tickets.map(function (ticket) {
+          return '<button class="search-result" type="button" data-code="' + esc(ticket.qrCode) + '">' +
+            '<strong>' + esc(ticket.name) + '</strong>' +
+            '<span>' + esc(ticket.email) + ' · ' + ticket.seats.map(function (seat) { return esc(seat.seatId); }).join(', ') + '</span>' +
+          '</button>';
+        }).join('');
+      }
+
+      async function lookupTicket(code) {
+        ticketResult.innerHTML = '<div class="checkin-card"><p class="empty-state">Consultando entrada...</p></div>';
+        clearFeedback();
+        try {
+          const data = await api('lookup', { code: code });
+          currentTicket = data.ticket;
+          renderTicket(currentTicket);
+        } catch (error) {
+          currentTicket = null;
+          ticketResult.innerHTML = '<div class="checkin-card ticket-card invalid">' +
+            '<span class="ticket-status">No válida</span>' +
+            '<p class="ticket-name">' + esc(error.message) + '</p>' +
+          '</div>';
+          if (navigator.vibrate) navigator.vibrate([120, 80, 120]);
+        }
+      }
+
+      function renderTicket(ticket) {
+        const checkedCount = ticket.seats.filter(function (seat) { return seat.checkedInAt; }).length;
+        let cardClass = 'valid';
+        let status = 'Entrada válida';
+        if (ticket.paymentStatus !== 'paid') {
+          cardClass = 'invalid';
+          status = 'Pago no confirmado';
+        } else if (checkedCount === ticket.seats.length) {
+          cardClass = 'used';
+          status = 'Ya utilizada';
+        } else if (checkedCount > 0) {
+          cardClass = 'partial';
+          status = 'Ingreso parcial';
+        }
+
+        const availableSeats = ticket.seats.filter(function (seat) { return !seat.checkedInAt; });
+        let html = '<div class="checkin-card ticket-card ' + cardClass + '">' +
+          '<span class="ticket-status">' + status + '</span>' +
+          '<p class="ticket-name">' + esc(ticket.name) + '</p>' +
+          '<p class="ticket-email">' + esc(ticket.email) + '</p>' +
+          '<p class="ticket-code">' + esc(ticket.qrCode) + '</p>' +
+          '<div class="seat-list">';
+
+        ticket.seats.forEach(function (seat) {
+          const attendee = seat.attendeeName && seat.attendeeName !== ticket.name
+            ? '<div class="seat-meta">' + esc(seat.attendeeName) + '</div>'
+            : '';
+          if (seat.checkedInAt) {
+            html += '<div class="seat-row">' +
+              '<span aria-hidden="true">✓</span>' +
+              '<div><div class="seat-id">Silla ' + esc(seat.seatId) + '</div>' + attendee +
+                '<div class="seat-used">Ingreso: ' + esc(formatDate(seat.checkedInAt)) + '</div></div>' +
+              '<button class="checkin-button danger undo-seat" type="button" data-undo-seat="' + esc(seat.seatId) + '">Corregir</button>' +
+            '</div>';
+          } else {
+            html += '<label class="seat-row">' +
+              '<input type="checkbox" data-seat="' + esc(seat.seatId) + '" checked />' +
+              '<div><div class="seat-id">Silla ' + esc(seat.seatId) + '</div>' + attendee + '</div>' +
+              '<span></span>' +
+            '</label>';
+          }
+        });
+
+        html += '</div>';
+        if (ticket.paymentStatus === 'paid' && availableSeats.length > 0) {
+          html += '<button id="registerCheckinButton" class="checkin-button full" type="button">Registrar ingreso</button>';
+        }
+        html += '</div>';
+        ticketResult.innerHTML = html;
+      }
+
+      async function handleTicketAction(event) {
+        const undoButton = event.target.closest('[data-undo-seat]');
+        if (undoButton) {
+          const seatId = undoButton.dataset.undoSeat;
+          if (!confirm('¿Corregir el ingreso de la silla ' + seatId + '?')) return;
+          await mutateTicket('undo', [seatId], undoButton);
+          return;
+        }
+
+        const checkinButton = event.target.closest('#registerCheckinButton');
+        if (!checkinButton || !currentTicket) return;
+        const selected = [...ticketResult.querySelectorAll('[data-seat]:checked')]
+          .map(function (input) { return input.dataset.seat; });
+        if (selected.length === 0) {
+          showFeedback('Selecciona al menos una silla.', 'error');
+          return;
+        }
+        await mutateTicket('checkin', selected, checkinButton);
+      }
+
+      async function mutateTicket(action, seatIds, button) {
+        button.disabled = true;
+        clearFeedback();
+        try {
+          const data = await api(action, {
+            code: currentTicket.qrCode,
+            seatIds: seatIds,
+            operator: operatorName,
+          });
+          currentTicket = data.ticket;
+          renderTicket(currentTicket);
+          const changed = data.changedSeats || [];
+          if (changed.length > 0) {
+            showFeedback(
+              action === 'checkin'
+                ? 'Ingreso registrado: ' + changed.join(', ')
+                : 'Ingreso corregido: ' + changed.join(', '),
+              'success'
+            );
+            if (navigator.vibrate) navigator.vibrate(80);
+          } else {
+            showFeedback('La entrada ya había sido actualizada desde otro dispositivo.', 'info');
+          }
+          refreshStats();
+        } catch (error) {
+          showFeedback(error.message, 'error');
+          button.disabled = false;
+        }
+      }
+
+      function showFeedback(message, type) {
+        feedback.textContent = message;
+        feedback.className = 'feedback show ' + type;
+      }
+
+      function clearFeedback() {
+        feedback.textContent = '';
+        feedback.className = 'feedback';
+      }
+
+      function formatDate(value) {
+        return new Date(value).toLocaleTimeString('es-CO', {
+          hour: 'numeric', minute: '2-digit', second: '2-digit'
+        });
+      }
+
+      function formatShortTime(value) {
+        return new Date(value).toLocaleTimeString('es-CO', {
+          hour: 'numeric', minute: '2-digit'
+        });
+      }
+
+      function esc(value) {
+        const element = document.createElement('div');
+        element.textContent = value == null ? '' : String(value);
+        return element.innerHTML;
+      }
+    })();
+    </script>
+  </body>
+</html>
