@@ -2,11 +2,19 @@
 // El frontend llama aquí cuando el usuario vuelve de Bold
 // para confirmar que el pago fue exitoso.
 //
-// Variables de entorno requeridas:
-//   SUPABASE_URL  — https://rpgagnnhsefwaethszfl.supabase.co
-//   SUPABASE_KEY  — tu service_role key de Supabase
+// Variables de entorno requeridas: SUPABASE_URL, SUPABASE_KEY y BOLD_API_KEY.
 
 const https = require('https');
+const { EVENT, realPaymentsEnabled } = require('../lib/event-config');
+
+function maskEmail(value) {
+  const email = String(value || '');
+  const at = email.indexOf('@');
+  if (at <= 0) return '';
+  const local = email.slice(0, at);
+  const domain = email.slice(at + 1);
+  return local.slice(0, 2) + '***@' + domain;
+}
 
 function supabaseGet(path) {
   return new Promise((resolve, reject) => {
@@ -79,6 +87,13 @@ function getBoldLink(paymentLink) {
 }
 
 exports.handler = async function (event) {
+  if (!realPaymentsEnabled()) {
+    return {
+      statusCode: 503,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ error: 'Los pagos permanecen bloqueados' }),
+    };
+  }
   const ref = event.queryStringParameters?.ref;
   if (!ref) {
     return {
@@ -90,7 +105,8 @@ exports.handler = async function (event) {
 
   try {
     const rows = await supabaseGet(
-      '/rest/v1/reservations?qr_code=eq.' + encodeURIComponent(ref) +
+      '/rest/v1/st_event_reservations?event_id=eq.' + encodeURIComponent(EVENT.id) +
+      '&qr_code=eq.' + encodeURIComponent(ref) +
       '&select=payment_status,seat_id,customer_name,customer_email,amount,bold_reference&order=seat_id.asc'
     );
 
@@ -123,7 +139,7 @@ exports.handler = async function (event) {
         status: rows[0].payment_status,
         seats: rows.map(row => row.seat_id),
         name: rows[0].customer_name,
-        email: rows[0].customer_email,
+        email: maskEmail(rows[0].customer_email),
         amount: rows.reduce((total, row) => total + Number(row.amount || 0), 0),
         providerStatus,
         checkoutUrl,

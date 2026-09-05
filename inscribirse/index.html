@@ -3,11 +3,11 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Elegir silla | Stand-Up Therapy</title>
-    <meta name="description" content="Elige tu silla en Teatro Belarte para Stand-Up Therapy. Paga en línea y recibe tu QR de entrada." />
-    <meta property="og:title" content="Elige tu silla — Stand-Up Therapy" />
-    <meta property="og:description" content="Selecciona tu silla en Teatro Belarte para la noche de Stand-Up Therapy. 2 de septiembre, Bogotá." />
-    <meta property="og:image" content="https://standup.eventosjv.com/assets/standup-poster.jpeg" />
+    <title>Elegir silla | Deja de joder a tu pareja</title>
+    <meta name="description" content="Elige tu silla en Teatro Belarte para Stand-Up Therapy: Deja de joder a tu pareja. Paga en línea y recibe tu QR de entrada." />
+    <meta property="og:title" content="Elige tu silla — Deja de joder a tu pareja" />
+    <meta property="og:description" content="Selecciona tu silla para el 5 de noviembre de 2026 en Teatro Belarte, Bogotá." />
+    <meta property="og:image" content="/assets/standup-cosmic-hero-v1.jpg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
@@ -33,20 +33,23 @@
       <nav class="nav" aria-label="Navegación principal">
         <a href="/#experiencia">Experiencia</a>
         <a href="/#fecha">Fecha</a>
-        <a href="/#boletas">Boletas</a>
+        <a href="/inscribirse/">Boletas</a>
       </nav>
-      <a class="nav-cta" href="https://wa.me/573238016527?text=Hola%2C%20quiero%20informacion%20de%20Stand-Up%20Therapy" target="_blank" rel="noreferrer">
+      <a class="nav-cta" href="https://wa.me/573238016527?text=Hola%2C%20quiero%20informacion%20de%20Deja%20de%20joder%20a%20tu%20pareja" target="_blank" rel="noreferrer">
         WhatsApp
       </a>
     </header>
 
     <main class="subpage">
       <div style="margin-bottom: 40px;">
-        <p class="eyebrow">2 de septiembre · 18:00 horas · Teatro Belarte · Cra 7 # 152-54, Bogotá</p>
+        <p class="eyebrow">Jueves 5 de noviembre de 2026 · 7:00 p. m. · Teatro Belarte · Carrera 7 #152-54, Bogotá</p>
         <h2 style="font-size: clamp(2rem, 5vw, 4rem);">Elige tu silla</h2>
         <p style="color: var(--muted); max-width: 600px; margin-top: 10px;">
           Selecciona donde quieres sentarte, completa tus datos y paga en línea.
           Recibirás un QR único para presentar en la entrada.
+        </p>
+        <p id="localPreviewNotice" style="display:none;color:var(--yellow);max-width:680px;margin-top:18px;font-weight:800;">
+          Vista de prueba: puedes usar el selector y el formulario. Los pagos reales permanecen bloqueados.
         </p>
       </div>
 
@@ -67,8 +70,7 @@
             <span>↓ Salida</span>
           </div>
 
-          <div class="map-legend">
-            <div><div class="legend-swatch sw-available"></div>Disponible</div>
+          <div class="map-legend" id="priceLegend">
             <div><div class="legend-swatch sw-selected"></div>Tu selección</div>
             <div><div class="legend-swatch sw-taken"></div>Ocupada</div>
           </div>
@@ -99,6 +101,16 @@
             <label for="phone">WhatsApp / Celular</label>
             <input type="tel" id="phone" placeholder="3001234567" required />
           </div>
+          <div class="legal-consent full-width">
+            <label>
+              <input type="checkbox" id="privacyConsent" required />
+              <span>Autorizo el tratamiento de mis datos para gestionar la reserva, el pago, la entrada y la información operativa del evento. <a href="/legal/#privacidad" target="_blank">Ver política de privacidad</a>.</span>
+            </label>
+            <label>
+              <input type="checkbox" id="termsAccepted" required />
+              <span>Acepto los <a href="/legal/#terminos" target="_blank">términos de compra y asistencia</a>.</span>
+            </label>
+          </div>
           <div class="checkout-actions">
             <button type="button" class="btn-bold" id="btnPay" disabled>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
@@ -114,13 +126,21 @@
 
     <footer class="footer">
       <p>Javi Penaloza - Sí es posible</p>
-      <a href="https://wa.me/573238016527" target="_blank" rel="noreferrer">+57 323 801 6527</a>
+      <div class="footer-links"><a href="/legal/">Privacidad y términos</a><a href="https://wa.me/573238016527" target="_blank" rel="noreferrer">+57 323 801 6527</a></div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
+    <script src="/seat-pricing.js?v=3"></script>
     <script>
     (function () {
-      const PRICE = 69000;
+      const PRICING = window.StandupSeatPricing;
+      let PREVIEW_MODE = ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
+
+      if (!PRICING) {
+        document.getElementById('seatMapLoading').innerHTML =
+          '<p style="color:#ff8d8d;">No fue posible cargar la configuración de precios.</p>';
+        return;
+      }
 
       // ── Theater layout (Teatro Belarte — Cra 7 # 152-54) ──
       const ROWS = [
@@ -145,10 +165,22 @@
       //  1. CARGAR SILLAS OCUPADAS DESDE EL SERVIDOR
       // ══════════════════════════════════════════════
       async function loadTakenSeats() {
+        if (PREVIEW_MODE) {
+          document.getElementById('localPreviewNotice').style.display = 'block';
+          renderSeatMap();
+          document.getElementById('seatMapLoading').style.display = 'none';
+          document.getElementById('seatMapContainer').style.display = 'block';
+          return;
+        }
+
         try {
           const res = await fetch('/.netlify/functions/public-seats', { cache: 'no-store' });
           const data = await res.json();
           if (!res.ok || !Array.isArray(data.seats)) throw new Error(data.error);
+          if (data.preview === true) {
+            PREVIEW_MODE = true;
+            document.getElementById('localPreviewNotice').style.display = 'block';
+          }
           data.seats.forEach(seat => takenSeats.add(seat));
         } catch (error) {
           document.getElementById('seatMapLoading').innerHTML =
@@ -168,6 +200,8 @@
       function renderSeatMap() {
         const map = document.getElementById('seatMap');
 
+        renderPriceLegend();
+
         ROWS.forEach(row => {
           const rowEl = document.createElement('div');
           rowEl.className = 'seat-map-row';
@@ -185,8 +219,11 @@
               const seatId = row.label + '-' + num;
               btn.className = 'seat-btn';
               btn.textContent = num;
-              btn.title = 'Fila ' + row.label + ', Silla ' + num;
-              btn.setAttribute('aria-label', 'Fila ' + row.label + ' Silla ' + num);
+              const tier = PRICING.getTierForSeat(seatId);
+              btn.dataset.priceTier = tier.id;
+              btn.style.setProperty('--seat-tier-color', tier.color);
+              btn.title = 'Fila ' + row.label + ', Silla ' + num + ' · ' + tier.label + ' · ' + formatCop(tier.price);
+              btn.setAttribute('aria-label', 'Fila ' + row.label + ' Silla ' + num + ', ' + tier.label + ', ' + formatCop(tier.price));
 
               if (takenSeats.has(seatId)) {
                 btn.classList.add('is-taken');
@@ -214,6 +251,28 @@
 
           map.appendChild(rowEl);
         });
+      }
+
+      function formatCop(amount) {
+        return '$' + Number(amount).toLocaleString('es-CO') + ' COP';
+      }
+
+      function renderPriceLegend() {
+        const legend = document.getElementById('priceLegend');
+        const stateItems = [...legend.children];
+        legend.textContent = '';
+
+        PRICING.tiers.forEach(tier => {
+          const item = document.createElement('div');
+          const swatch = document.createElement('span');
+          swatch.className = 'legend-swatch sw-price';
+          swatch.style.setProperty('--seat-tier-color', tier.color);
+          item.appendChild(swatch);
+          item.appendChild(document.createTextNode(tier.label + ' · ' + formatCop(tier.price)));
+          legend.appendChild(item);
+        });
+
+        stateItems.forEach(item => legend.appendChild(item));
       }
 
       function toggleSeat(seatId) {
@@ -248,9 +307,9 @@
         }
 
         const count = selectedSeats.size;
-        const amount = count * PRICE;
+        const pricing = PRICING.summarizeSeats([...selectedSeats]);
         title.textContent = count + (count === 1 ? ' silla seleccionada' : ' sillas seleccionadas');
-        total.textContent = '$' + amount.toLocaleString('es-CO') + ' COP';
+        total.textContent = formatCop(pricing.total);
 
         const sorted = [...selectedSeats].sort((a, b) => {
           const [ra, sa] = a.split('-');
@@ -258,7 +317,10 @@
           return ra === rb ? Number(sa) - Number(sb_) : ra.localeCompare(rb);
         });
 
-        list.textContent = sorted.map(s => 'Fila ' + s.replace('-', ' · Silla ')).join('  ·  ');
+        list.textContent = sorted.map(s => {
+          const tier = PRICING.getTierForSeat(s);
+          return 'Fila ' + s.replace('-', ' · Silla ') + ' · ' + formatCop(tier.price);
+        }).join('  ·  ');
         form.style.display = 'grid';
         validateForm();
       }
@@ -269,7 +331,11 @@
         const lname = document.getElementById('lname').value.trim();
         const email = document.getElementById('email').value.trim();
         const phone = document.getElementById('phone').value.trim();
-        btn.disabled = !(selectedSeats.size > 0 && fname && lname && email && phone);
+        const privacyConsent = document.getElementById('privacyConsent').checked;
+        const termsAccepted = document.getElementById('termsAccepted').checked;
+        btn.disabled = PREVIEW_MODE || !(
+          selectedSeats.size > 0 && fname && lname && email && phone && privacyConsent && termsAccepted
+        );
       }
 
       document.querySelectorAll('#checkoutForm input').forEach(input => {
@@ -294,6 +360,8 @@
       // ══════════════════════════════════════════════
 
       document.getElementById('btnPay').addEventListener('click', async function () {
+        if (PREVIEW_MODE) return;
+
         const btn = this;
         const fname = document.getElementById('fname').value.trim();
         const lname = document.getElementById('lname').value.trim();
@@ -330,6 +398,8 @@
                 name: fname + ' ' + lname,
                 email,
                 phone,
+                privacyConsent: document.getElementById('privacyConsent').checked,
+                termsAccepted: document.getElementById('termsAccepted').checked,
               },
             }),
           });
@@ -432,7 +502,7 @@
           '<h2 style="font-size:clamp(2rem,5vw,4rem);">Estamos verificando</h2>' +
           '<p style="color:var(--muted);max-width:500px;">Tu pago está siendo procesado. Recibirás tu QR por correo electrónico cuando Bold confirme la transacción. Si no lo recibes, escríbenos por WhatsApp.</p>' +
           '<div style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;">' +
-            '<a class="button primary" href="https://wa.me/573238016527?text=Hola%2C%20hice%20un%20pago%20para%20Stand-Up%20Therapy%20con%20referencia%20' + orderRef + '" target="_blank" rel="noreferrer">WhatsApp</a>' +
+            '<a class="button primary" href="https://wa.me/573238016527?text=Hola%2C%20hice%20un%20pago%20para%20Deja%20de%20joder%20a%20tu%20pareja%20con%20referencia%20' + orderRef + '" target="_blank" rel="noreferrer">WhatsApp</a>' +
             '<a class="button ghost" href="/">Volver al inicio</a>' +
           '</div>';
       }
@@ -452,7 +522,7 @@
         section.innerHTML =
           '<div class="qr-result-card">' +
             '<h3>RESERVA CONFIRMADA</h3>' +
-            '<p class="qr-subtitle">Presenta este QR en la entrada del Teatro Belarte el 2 de septiembre a las 18:00 horas</p>' +
+          '<p class="qr-subtitle">Presenta este QR en la entrada del Teatro Belarte el 5 de noviembre de 2026 a las 7:00 p. m.</p>' +
             '<div class="qr-canvas-wrap"><canvas id="qrCanvas"></canvas></div>' +
             '<div class="qr-info">' +
               '<div class="qr-info-item"><span>Nombre</span><strong>' + escapeHtml(name) + '</strong></div>' +
@@ -463,7 +533,7 @@
             '<p class="qr-footer-note">También enviamos la confirmación a <strong>' + escapeHtml(email) + '</strong></p>' +
             '<div style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">' +
               '<a class="button primary" href="/" style="display:inline-flex;">Volver al inicio</a>' +
-              '<a class="button ghost" href="https://wa.me/573238016527?text=Hola%2C%20ya%20pagu%C3%A9%20mi%20boleta%20para%20Stand-Up%20Therapy.%20Mi%20c%C3%B3digo%20es%20' + encodeURIComponent(code) + '" target="_blank" rel="noreferrer" style="display:inline-flex;">Confirmar por WhatsApp</a>' +
+              '<a class="button ghost" href="https://wa.me/573238016527?text=Hola%2C%20ya%20pagu%C3%A9%20mi%20boleta%20para%20Deja%20de%20joder%20a%20tu%20pareja.%20Mi%20c%C3%B3digo%20es%20' + encodeURIComponent(code) + '" target="_blank" rel="noreferrer" style="display:inline-flex;">Confirmar por WhatsApp</a>' +
             '</div>' +
           '</div>';
 

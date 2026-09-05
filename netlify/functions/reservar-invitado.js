@@ -3,6 +3,13 @@
 // Body: { code, seats: ["A-10","A-11"], name, email, phone }
 
 const https = require('https');
+const {
+  EVENT,
+  LEGAL,
+  eventDetailsHtml,
+  eventOperationsEnabled,
+  publicUrl,
+} = require('../lib/event-config');
 
 function supabaseRequest(method, path, body) {
   return new Promise((resolve, reject) => {
@@ -78,18 +85,17 @@ function sendEmail({ to, subject, html, idempotencyKey }) {
 }
 
 async function sendInvitationNotifications({ name, attendeeNames, email, phone, seats, orderRef, company }) {
-  const ticketUrl = 'https://standup.eventosjv.com/inscribirse/?ref=' + encodeURIComponent(orderRef);
+  const ticketUrl = publicUrl('/inscribirse/', { ref: orderRef });
   const companyText = company ? ' obsequiada por ' + escapeHtml(company) : '';
   const customer = await sendEmail({
     to: email,
-    subject: 'Tu entrada para Stand-Up Therapy',
+    subject: 'Tu entrada para ' + EVENT.name,
     html: `
       <div style="font-family:Arial,sans-serif;line-height:1.55;color:#111">
         <h2>Tu entrada est&aacute; confirmada</h2>
         <p>Hola ${escapeHtml(name)},</p>
         <p>Tu entrada${companyText} ya est&aacute; registrada.</p>
-        <p><strong>Fecha:</strong> 2 de septiembre de 2026, 6:00 p. m.</p>
-        <p><strong>Lugar:</strong> Teatro Belarte, Cra. 7 # 152-54, Bogot&aacute;</p>
+        ${eventDetailsHtml()}
         <p><strong>Asistentes:</strong> ${escapeHtml(attendeeNames.join(', '))}</p>
         <p><strong>Sillas:</strong> ${escapeHtml(seats.join(', '))}</p>
         <p><a href="${ticketUrl}" style="display:inline-block;padding:12px 18px;background:#050608;color:#fff;text-decoration:none">Ver entrada y c&oacute;digo QR</a></p>
@@ -124,12 +130,13 @@ async function sendInvitationNotifications({ name, attendeeNames, email, phone, 
     admin.status >= 200 && admin.status < 300;
 }
 
-function corporateError(data) {
+function reservationError(data) {
   const message = typeof data === 'object' && data ? data.message : '';
   if (message.includes('correo')) return message;
   if (message.includes('cupos')) return message;
   if (message.includes('silla')) return message;
-  return 'No fue posible registrar la entrada empresarial';
+  if (message.includes('código') || message.includes('Código')) return message;
+  return 'No fue posible registrar la invitación';
 }
 
 exports.handler = async function (event) {
@@ -141,17 +148,38 @@ exports.handler = async function (event) {
 
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers, body: '' };
   if (event.httpMethod !== 'POST') return { statusCode: 405, headers, body: '{"error":"POST only"}' };
+  if (!eventOperationsEnabled()) {
+    return { statusCode: 503, headers, body: '{"error":"Las operaciones del evento permanecen bloqueadas"}' };
+  }
 
   try {
-    const { code, seats, name, attendeeNames, email, phone } = JSON.parse(event.body);
+    const {
+      code,
+      seats,
+      name,
+      attendeeNames,
+      email,
+      phone,
+      privacyConsent,
+      termsAccepted,
+    } = JSON.parse(event.body);
 
-    if (!code || !seats || !seats.length || !name || !email) {
+    if (
+      !code ||
+      !Array.isArray(seats) ||
+      !seats.length ||
+      !name ||
+      !email ||
+      privacyConsent !== true ||
+      termsAccepted !== true
+    ) {
       return { statusCode: 400, headers, body: '{"error":"Datos incompletos"}' };
     }
 
     // Validar invitación
     const invResult = await supabaseRequest('GET',
-      '/rest/v1/invitations?code=eq.' + encodeURIComponent(code) + '&select=*&limit=1'
+      '/rest/v1/st_event_invitations?event_id=eq.' + encodeURIComponent(EVENT.id) +
+      '&code=eq.' + encodeURIComponent(code) + '&select=*&limit=1'
     );
 
     // GET returns array directly, not wrapped
@@ -171,70 +199,42 @@ exports.handler = async function (event) {
     }
 
     const orderRef = 'INV-' + code + '-' + Date.now().toString(36).toUpperCase();
-    const EVENT_ID = 'standup-therapy-bogota-2sep2026';
-    let remainingSeats = null;
-
-    if (inv.total_quota) {
-      const corporateAttendees = Array.isArray(attendeeNames) ? attendeeNames : [name];
-      const corporateResult = await supabaseRequest(
-        'POST',
-        '/rest/v1/rpc/reserve_corporate_invitation_v2',
-        {
-          p_code: code,
-          p_event_id: EVENT_ID,
-          p_seats: seats,
-          p_attendee_names: corporateAttendees,
-          p_name: name,
-          p_email: email,
-          p_phone: phone || '',
-          p_order_ref: orderRef,
-        }
-      );
-
-      if (corporateResult.status >= 400) {
-        console.error('Corporate reservation error:', corporateResult.data);
-        return {
-          statusCode: 409,
-          headers,
-          body: JSON.stringify({ error: corporateError(corporateResult.data) }),
-        };
+    const EVENT_ID = EVENT.id;
+    const normalizedAttendees = Array.isArray(attendeeNames) && attendeeNames.length
+      ? attendeeNames
+      : seats.map(() => name);
+    const reservationResult = await supabaseRequest(
+      'POST',
+      '/rest/v1/rpc/st_reserve_invitation',
+      {
+        p_code: code,
+        p_event_id: EVENT_ID,
+        p_seats: seats,
+        p_attendee_names: normalizedAttendees,
+        p_name: name,
+        p_email: email,
+        p_phone: phone || '',
+        p_order_ref: orderRef,
+        p_privacy_policy_version: LEGAL.privacyPolicyVersion,
+        p_terms_version: LEGAL.termsVersion,
       }
-      remainingSeats = corporateResult.data?.remaining ?? null;
-    } else {
-      // Crear reservas como pagadas directamente
-      const reservations = seats.map(seatId => ({
-        event_id: EVENT_ID,
-        seat_id: seatId,
-        customer_name: name,
-        customer_email: email,
-        customer_phone: phone || '',
-        payment_status: 'paid',
-        qr_code: orderRef,
-        amount: 0,
-        invitation_code: code,
-      }));
+    );
 
-      const insertResult = await supabaseRequest('POST', '/rest/v1/reservations', reservations);
-
-      if (insertResult.status >= 400) {
-        console.error('Insert error:', insertResult.data);
-        return { statusCode: 409, headers, body: '{"error":"Algunas sillas ya están ocupadas"}' };
-      }
-
-      // Marcar invitación como usada (solo si no es multi_use)
-      if (!inv.multi_use) {
-        await supabaseRequest('PATCH',
-          '/rest/v1/invitations?code=eq.' + encodeURIComponent(code),
-          { used: true }
-        );
-      }
+    if (reservationResult.status >= 400) {
+      console.error('Invitation reservation error:', reservationResult.data);
+      return {
+        statusCode: 409,
+        headers,
+        body: JSON.stringify({ error: reservationError(reservationResult.data) }),
+      };
     }
+    const remainingSeats = reservationResult.data?.remaining ?? null;
 
     let emailSent = false;
     try {
       emailSent = await sendInvitationNotifications({
         name,
-        attendeeNames: inv.total_quota && Array.isArray(attendeeNames) ? attendeeNames : [name],
+        attendeeNames: normalizedAttendees,
         email,
         phone: phone || '',
         seats,
@@ -255,7 +255,7 @@ exports.handler = async function (event) {
         email,
         emailSent,
         remainingSeats,
-        attendeeNames: inv.total_quota && Array.isArray(attendeeNames) ? attendeeNames : [name],
+        attendeeNames: normalizedAttendees,
       }),
     };
   } catch (e) {

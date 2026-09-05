@@ -1,8 +1,9 @@
 const https = require('https');
+const { EVENT, LEGAL, publicUrl, realPaymentsEnabled } = require('../lib/event-config');
+const seatPricing = require('../../seat-pricing');
 
 const HOLD_DURATION_MS = 15 * 60 * 1000;
-const EVENT_ID = 'standup-therapy-bogota-2sep2026';
-const PRICE = 69000;
+const EVENT_ID = EVENT.id;
 
 function requestJson({ method, hostname, path, headers, body }) {
   return new Promise((resolve, reject) => {
@@ -24,7 +25,7 @@ function requestJson({ method, hostname, path, headers, body }) {
 
 async function saveBoldReference(orderReference, boldReference, expiresAt) {
   const url = new URL(
-    '/rest/v1/reservations?qr_code=eq.' +
+    '/rest/v1/st_event_reservations?qr_code=eq.' +
       encodeURIComponent(orderReference) +
       '&payment_status=eq.pending',
     process.env.SUPABASE_URL
@@ -66,7 +67,7 @@ async function supabaseRequest(method, path, body, prefer = 'return=representati
 async function rollbackReservation(orderReference) {
   return supabaseRequest(
     'DELETE',
-    '/rest/v1/reservations?qr_code=eq.' + encodeURIComponent(orderReference) +
+    '/rest/v1/st_event_reservations?qr_code=eq.' + encodeURIComponent(orderReference) +
       '&payment_status=eq.pending',
     null,
     'return=minimal'
@@ -82,6 +83,13 @@ exports.handler = async function (event) {
 
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers, body: '' };
   if (event.httpMethod !== 'POST') return { statusCode: 405, headers, body: '{"error":"POST only"}' };
+  if (!realPaymentsEnabled()) {
+    return {
+      statusCode: 503,
+      headers,
+      body: JSON.stringify({ error: 'Los pagos todavía no están habilitados para este evento' }),
+    };
+  }
 
   try {
     const body = JSON.parse(event.body || '{}');
@@ -92,14 +100,16 @@ exports.handler = async function (event) {
     const orderReference = String(body.order_reference || '');
     const validSeats = seats.length > 0 &&
       seats.length <= 10 &&
-      seats.every(seat => /^(?:[A-J]-(?:[1-9]|1\d|2[0-2])|K-(?:[1-9]|1\d))$/.test(seat));
+      seats.every(seat => seatPricing.isValidSeat(seat));
 
     if (
       !validSeats ||
       !orderReference.startsWith('ST-') ||
       !customer.name ||
       !customer.email ||
-      !customer.phone
+      !customer.phone ||
+      customer.privacyConsent !== true ||
+      customer.termsAccepted !== true
     ) {
       return {
         statusCode: 400,
@@ -108,7 +118,21 @@ exports.handler = async function (event) {
       };
     }
 
+    if (seatPricing.EVENT_ID !== EVENT_ID) {
+      console.error('Seat pricing event mismatch', seatPricing.EVENT_ID, EVENT_ID);
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({ error: 'La configuración de precios no corresponde a este evento' }),
+      };
+    }
+
+    const pricing = seatPricing.summarizeSeats(seats);
+    const priceBySeat = new Map(pricing.items.map(item => [item.seatId, item.price]));
+
+    const callbackUrl = publicUrl('/inscribirse/', { ref: orderReference });
     const expiresAt = new Date(Date.now() + HOLD_DURATION_MS);
+    const acceptedAt = new Date().toISOString();
     const reservations = seats.map(seatId => ({
       event_id: EVENT_ID,
       seat_id: seatId,
@@ -117,12 +141,16 @@ exports.handler = async function (event) {
       customer_phone: String(customer.phone).trim(),
       payment_status: 'pending',
       qr_code: orderReference,
-      amount: PRICE,
+      amount: priceBySeat.get(seatId),
       hold_expires_at: expiresAt.toISOString(),
+      privacy_consent_at: acceptedAt,
+      privacy_policy_version: LEGAL.privacyPolicyVersion,
+      terms_accepted_at: acceptedAt,
+      terms_version: LEGAL.termsVersion,
     }));
     const reservationResult = await supabaseRequest(
       'POST',
-      '/rest/v1/reservations',
+      '/rest/v1/st_event_reservations',
       reservations
     );
 
@@ -139,15 +167,13 @@ exports.handler = async function (event) {
       amount_type: 'CLOSE',
       amount: {
         currency: 'COP',
-        total_amount: seats.length * PRICE,
+        total_amount: pricing.total,
         tip_amount: 0,
       },
-      description: 'Stand-Up Therapy - ' + seats.length + ' silla(s): ' + seats.join(', '),
+      description: EVENT.name + ' - ' + seats.length + ' silla(s): ' + seats.join(', '),
       payment_methods: ['CREDIT_CARD', 'PSE', 'BOTON_BANCOLOMBIA', 'NEQUI'],
       reference: orderReference,
-      callback_url:
-        'https://standup.eventosjv.com/inscribirse/?ref=' +
-        encodeURIComponent(orderReference),
+      callback_url: callbackUrl,
       payer_email: String(customer.email).trim().toLowerCase(),
       // Bold documents this value as Unix nanoseconds.
       expiration_date: expiresAt.getTime() * 1e6,
@@ -191,6 +217,8 @@ exports.handler = async function (event) {
         body: JSON.stringify({
           paymentLink: boldReference,
           checkoutUrl,
+          totalAmount: pricing.total,
+          pricing: pricing.breakdown,
         }),
       };
     }

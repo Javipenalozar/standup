@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Invitación | Stand-Up Therapy</title>
+    <title>Invitación | Deja de joder a tu pareja</title>
     <meta name="robots" content="noindex, nofollow" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -88,6 +88,16 @@
             <div><label>Correo electrónico</label><input type="email" id="email" placeholder="tu@correo.com" required /></div>
             <div><label>WhatsApp / Celular</label><input type="tel" id="phone" placeholder="+57 300 000 0000" required /></div>
             <div id="companionsFields" data-count="0"></div>
+            <div class="legal-consent">
+              <label>
+                <input type="checkbox" id="privacyConsent" required />
+                <span>Autorizo el tratamiento de mis datos para gestionar la invitación, la entrada y la información operativa del evento. <a href="/legal/#privacidad" target="_blank">Ver política de privacidad</a>.</span>
+              </label>
+              <label>
+                <input type="checkbox" id="termsAccepted" required />
+                <span>Acepto los <a href="/legal/#terminos" target="_blank">términos de asistencia</a>.</span>
+              </label>
+            </div>
             <div class="checkout-actions">
               <button type="button" class="btn-bold" id="btnConfirm" disabled style="background:#87f2ff;color:#000;font-weight:700;padding:14px 32px;border:none;border-radius:8px;cursor:pointer;font-size:1rem;">
                 Confirmar asistencia
@@ -102,7 +112,7 @@
 
     <footer class="footer">
       <p>Javi Penaloza - Sí es posible</p>
-      <a href="https://wa.me/573238016527" target="_blank" rel="noreferrer">+57 323 801 6527</a>
+      <div class="footer-links"><a href="/legal/">Privacidad y términos</a><a href="https://wa.me/573238016527" target="_blank" rel="noreferrer">+57 323 801 6527</a></div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
@@ -159,12 +169,12 @@
             document.getElementById('eyebrowText').textContent = 'Entrada empresarial · ' + data.guest_name;
             document.getElementById('mainTitle').textContent = 'ELIGE TU SILLA';
             document.getElementById('welcomeMsg').textContent =
-              data.guest_name + ' te obsequia entradas para Stand-Up Therapy. Puedes elegir hasta ' + data.max_seats + ' sillas para ti y tus acompañantes. Quedan ' + data.remaining_seats + ' de ' + data.total_quota + ' entradas disponibles para el grupo.';
+              data.guest_name + ' te obsequia entradas para Deja de joder a tu pareja. Puedes elegir hasta ' + data.max_seats + ' sillas para ti y tus acompañantes. Quedan ' + data.remaining_seats + ' de ' + data.total_quota + ' entradas disponibles para el grupo.';
           } else if (data.multi_use) {
             document.getElementById('eyebrowText').textContent = '¡Gracias por tu compra!';
             document.getElementById('mainTitle').textContent = 'ELIGE TU SILLA';
             document.getElementById('welcomeMsg').textContent =
-              'Tu pago ha sido confirmado. Ahora selecciona ' + (data.max_seats > 1 ? 'hasta ' + data.max_seats + ' sillas' : 'tu silla') + ' para el 2 de septiembre a las 18:00 horas en Teatro Belarte.';
+              'Tu pago ha sido confirmado. Ahora selecciona ' + (data.max_seats > 1 ? 'hasta ' + data.max_seats + ' sillas' : 'tu silla') + ' para el 5 de noviembre de 2026 a las 7:00 p. m. en Teatro Belarte.';
           } else {
             document.getElementById('welcomeMsg').textContent =
               '¡Hola ' + escapeHtml(data.guest_name) + '! Tienes ' + data.max_seats + ' silla(s) disponible(s). Selecciona donde quieres sentarte.';
@@ -309,10 +319,15 @@
         const lname = document.getElementById('lname').value.trim();
         const email = document.getElementById('email').value.trim();
         const phone = document.getElementById('phone').value.trim();
+        const privacyConsent = document.getElementById('privacyConsent').checked;
+        const termsAccepted = document.getElementById('termsAccepted').checked;
         const companionInputs = [...document.querySelectorAll('.companion-name')];
         const companionsComplete = companionInputs.every(input => input.value.trim());
         const btn = document.getElementById('btnConfirm');
-        btn.disabled = !(selectedSeats.size > 0 && fname && lname && email && phone && companionsComplete);
+        btn.disabled = !(
+          selectedSeats.size > 0 && fname && lname && email && phone && companionsComplete &&
+          privacyConsent && termsAccepted
+        );
       }
 
       document.querySelectorAll('#checkoutForm input').forEach(input => {
@@ -350,6 +365,8 @@
               attendeeNames: attendeeNames,
               email: email,
               phone: phone,
+              privacyConsent: document.getElementById('privacyConsent').checked,
+              termsAccepted: document.getElementById('termsAccepted').checked,
             }),
           });
 
@@ -382,7 +399,7 @@
         section.innerHTML =
           '<div class="qr-result-card">' +
             '<h3>RESERVA CONFIRMADA</h3>' +
-            '<p class="qr-subtitle">Presenta este QR en la entrada del Teatro Belarte el 2 de septiembre a las 18:00 horas</p>' +
+            '<p class="qr-subtitle">Presenta este QR en la entrada del Teatro Belarte el 5 de noviembre de 2026 a las 7:00 p. m.</p>' +
             '<div class="qr-canvas-wrap"><canvas id="qrCanvas"></canvas></div>' +
             '<div class="qr-info">' +
               '<div class="qr-info-item"><span>Nombre</span><strong>' + escapeHtml(name) + '</strong></div>' +

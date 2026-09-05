@@ -5,28 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="robots" content="noindex, nofollow" />
     <meta name="theme-color" content="#050608" />
-    <title>Check-in | Stand-Up Therapy</title>
+    <title>Check-in | Deja de joder a tu pareja</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/styles.css" />
     <style>
       :root { color-scheme: dark; }
-      body { background: #050608; }
+      body { background: #170313; }
       .checkin-shell { width: min(760px, 100%); margin: 0 auto; padding: 92px 18px 80px; }
       .checkin-login { width: min(420px, calc(100% - 32px)); margin: 0 auto; padding: 140px 0 60px; }
       .checkin-login h1, .checkin-title { font-family: 'Anton', sans-serif; text-transform: uppercase; letter-spacing: 0; }
       .checkin-login h1 { font-size: 2.3rem; margin-bottom: 8px; }
       .checkin-login p { color: var(--muted); margin-bottom: 24px; }
-      .checkin-card { background: #101215; border: 1px solid #292d32; border-radius: 8px; padding: 22px; margin-bottom: 16px; }
+      .checkin-card { background: #230619; border: 1px solid #5b0b3d; border-radius: 8px; padding: 22px; margin-bottom: 16px; }
       .checkin-card h2 { font-family: 'Anton', sans-serif; text-transform: uppercase; font-size: 1.45rem; margin-bottom: 14px; }
       .checkin-field { margin-bottom: 14px; }
       .checkin-field label { display: block; margin-bottom: 6px; color: #a7aeb8; font-size: .78rem; font-weight: 800; text-transform: uppercase; }
-      .checkin-field input { width: 100%; min-height: 50px; border: 1px solid #343a41; border-radius: 7px; padding: 10px 13px; background: #191c20; color: #fff; font: inherit; font-size: 1rem; }
-      .checkin-field input:focus { outline: 2px solid #87f2ff; outline-offset: 1px; }
-      .checkin-button { min-height: 48px; border: 0; border-radius: 7px; padding: 10px 18px; background: #87f2ff; color: #050608; font: inherit; font-weight: 900; cursor: pointer; }
+      .checkin-field input { width: 100%; min-height: 50px; border: 1px solid #71395e; border-radius: 7px; padding: 10px 13px; background: #390528; color: #fff0d6; font: inherit; font-size: 1rem; }
+      .checkin-field input:focus { outline: 2px solid #f9b609; outline-offset: 1px; }
+      .checkin-button { min-height: 48px; border: 0; border-radius: 7px; padding: 10px 18px; background: #f9b609; color: #230619; font: inherit; font-weight: 900; cursor: pointer; }
       .checkin-button:disabled { opacity: .45; cursor: wait; }
-      .checkin-button.secondary { background: #25292e; color: #fff; border: 1px solid #373d44; }
+      .checkin-button.secondary { background: #390528; color: #fff0d6; border: 1px solid #71395e; }
       .checkin-button.danger { background: #3a1c20; color: #ff9ca5; border: 1px solid #663038; }
       .checkin-button.full { width: 100%; }
       .checkin-top-actions { display: flex; gap: 8px; }
@@ -35,8 +35,8 @@
       .checkin-header p { color: var(--muted); font-size: .88rem; }
       .checkin-title { font-size: 2rem; }
       .checkin-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
-      .checkin-stat { min-width: 0; padding: 14px 8px; text-align: center; border: 1px solid #292d32; border-radius: 7px; background: #101215; }
-      .checkin-stat strong { display: block; color: #87f2ff; font-family: 'Anton', sans-serif; font-size: 1.8rem; }
+      .checkin-stat { min-width: 0; padding: 14px 8px; text-align: center; border: 1px solid #5b0b3d; border-radius: 7px; background: #230619; }
+      .checkin-stat strong { display: block; color: #f9b609; font-family: 'Anton', sans-serif; font-size: 1.8rem; }
       .checkin-stat span { display: block; color: #959da8; font-size: .68rem; font-weight: 800; text-transform: uppercase; }
       .scan-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
       #reader { width: 100%; overflow: hidden; border-radius: 7px; margin-top: 14px; background: #050608; }
@@ -46,38 +46,38 @@
       .manual-row input { min-width: 0; }
       .feedback { display: none; margin-bottom: 16px; padding: 13px 15px; border-radius: 7px; font-weight: 700; }
       .feedback.show { display: block; }
-      .feedback.success { background: #0c3128; color: #8ef6cf; border: 1px solid #1f6655; }
+      .feedback.success { background: #3b2610; color: #ffd15c; border: 1px solid #8d6410; }
       .feedback.error { background: #35191d; color: #ff9ca5; border: 1px solid #663038; }
-      .feedback.info { background: #182b31; color: #9aebf6; border: 1px solid #31545d; }
+      .feedback.info { background: #390528; color: #f0c38d; border: 1px solid #71395e; }
       .ticket-card { border-width: 2px; }
-      .ticket-card.valid { border-color: #258d72; }
+      .ticket-card.valid { border-color: #f9b609; }
       .ticket-card.partial { border-color: #b89937; }
       .ticket-card.used { border-color: #9a3f49; }
       .ticket-card.invalid { border-color: #9a3f49; }
       .ticket-status { display: inline-block; margin-bottom: 12px; padding: 5px 10px; border-radius: 999px; font-size: .75rem; font-weight: 900; text-transform: uppercase; }
-      .ticket-card.valid .ticket-status { background: #0c3128; color: #8ef6cf; }
+      .ticket-card.valid .ticket-status { background: #3b2610; color: #ffd15c; }
       .ticket-card.partial .ticket-status { background: #342c15; color: #f5d77a; }
       .ticket-card.used .ticket-status, .ticket-card.invalid .ticket-status { background: #35191d; color: #ff9ca5; }
       .ticket-name { font-size: 1.35rem; font-weight: 900; margin-bottom: 3px; }
       .ticket-email, .ticket-code { color: #969eaa; font-size: .84rem; overflow-wrap: anywhere; }
       .ticket-code { margin-top: 5px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
       .seat-list { display: grid; gap: 8px; margin: 18px 0; }
-      .seat-row { display: grid; grid-template-columns: 28px 1fr auto; align-items: center; gap: 10px; min-height: 58px; padding: 10px 12px; background: #191c20; border: 1px solid #30353b; border-radius: 7px; }
-      .seat-row input { width: 21px; height: 21px; accent-color: #87f2ff; }
+      .seat-row { display: grid; grid-template-columns: 28px 1fr auto; align-items: center; gap: 10px; min-height: 58px; padding: 10px 12px; background: #390528; border: 1px solid #71395e; border-radius: 7px; }
+      .seat-row input { width: 21px; height: 21px; accent-color: #f9b609; }
       .seat-id { font-weight: 900; }
       .seat-meta { color: #9da5af; font-size: .74rem; margin-top: 2px; }
       .seat-used { color: #ff9ca5; font-size: .75rem; font-weight: 800; }
       .undo-seat { min-height: 36px; padding: 6px 10px; font-size: .75rem; }
       .search-results { display: grid; gap: 8px; }
-      .search-result { width: 100%; text-align: left; background: #191c20; border: 1px solid #30353b; border-radius: 7px; color: #fff; padding: 12px 14px; cursor: pointer; }
+      .search-result { width: 100%; text-align: left; background: #390528; border: 1px solid #71395e; border-radius: 7px; color: #fff0d6; padding: 12px 14px; cursor: pointer; }
       .search-result strong { display: block; }
       .search-result span { color: #9ca4af; font-size: .78rem; }
       .empty-state { color: var(--muted); }
       .recent-list { display: grid; }
-      .recent-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; padding: 12px 0; border-top: 1px solid #292d32; }
+      .recent-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; padding: 12px 0; border-top: 1px solid #5b0b3d; }
       .recent-row strong, .recent-row span { display: block; }
       .recent-row span { margin-top: 3px; color: #9ca4af; font-size: .78rem; }
-      .recent-time { color: #87f2ff; font-weight: 900; white-space: nowrap; }
+      .recent-time { color: #f9b609; font-weight: 900; white-space: nowrap; }
       @media (max-width: 560px) {
         .checkin-shell { padding-top: 78px; }
         .checkin-card { padding: 18px; }
@@ -93,7 +93,7 @@
     <main>
       <section id="loginScreen" class="checkin-login">
         <h1>Check-in</h1>
-        <p>Stand-Up Therapy · Teatro Belarte</p>
+        <p>Deja de joder a tu pareja · Teatro Belarte · 5 de noviembre de 2026</p>
         <div class="checkin-field">
           <label for="operatorInput">Operador</label>
           <input id="operatorInput" type="text" autocomplete="name" placeholder="Ej. Puerta 1 · Javi" maxlength="80" />
@@ -161,7 +161,6 @@
     <script src="/assets/html5-qrcode.min.js"></script>
     <script>
     (function () {
-      let password = '';
       let operatorName = '';
       let currentTicket = null;
       let scanner = null;
@@ -179,9 +178,12 @@
       document.getElementById('passwordInput').addEventListener('keydown', function (event) {
         if (event.key === 'Enter') login();
       });
-      document.getElementById('logoutButton').addEventListener('click', function () {
+      document.getElementById('logoutButton').addEventListener('click', async function () {
         stopScanner();
-        password = '';
+        await fetch('/.netlify/functions/admin-session', {
+          method: 'DELETE',
+          credentials: 'same-origin',
+        }).catch(function () {});
         location.reload();
       });
       document.getElementById('startScannerButton').addEventListener('click', startScanner);
@@ -201,10 +203,16 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           cache: 'no-store',
-          body: JSON.stringify(Object.assign({ action: action, password: password }, payload || {})),
+          credentials: 'same-origin',
+          body: JSON.stringify(Object.assign({ action: action }, payload || {})),
         });
         const data = await response.json();
         if (!response.ok) {
+          if (response.status === 401) {
+            clearInterval(statsTimer);
+            loginScreen.hidden = false;
+            checkinApp.hidden = true;
+          }
           const error = new Error(data.error || 'No fue posible completar la operación');
           error.status = response.status;
           throw error;
@@ -216,7 +224,7 @@
         const button = document.getElementById('loginButton');
         const loginFeedback = document.getElementById('loginFeedback');
         operatorName = document.getElementById('operatorInput').value.trim();
-        password = document.getElementById('passwordInput').value;
+        const password = document.getElementById('passwordInput').value;
         loginFeedback.className = 'feedback error';
         loginFeedback.textContent = '';
 
@@ -229,7 +237,20 @@
         button.disabled = true;
         button.textContent = 'Ingresando...';
         try {
+          const sessionResponse = await fetch('/.netlify/functions/admin-session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin',
+            body: JSON.stringify({ password: password }),
+          });
+          const sessionData = await sessionResponse.json();
+          if (!sessionResponse.ok) {
+            const sessionError = new Error(sessionData.error || 'No fue posible iniciar sesión');
+            sessionError.status = sessionResponse.status;
+            throw sessionError;
+          }
           const stats = await api('stats');
+          document.getElementById('passwordInput').value = '';
           sessionStorage.setItem('checkinOperator', operatorName);
           loginScreen.hidden = true;
           checkinApp.hidden = false;
@@ -239,7 +260,9 @@
           statsTimer = setInterval(refreshStats, 15000);
         } catch (error) {
           loginFeedback.textContent = error.status === 401
-            ? 'Contraseña incorrecta.'
+            ? 'Credenciales incorrectas.'
+            : error.status === 429
+              ? 'Demasiados intentos. Espera 15 minutos.'
             : 'No fue posible abrir el control de ingreso.';
           loginFeedback.classList.add('show');
         } finally {

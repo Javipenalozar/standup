@@ -1,6 +1,6 @@
 import https from 'node:https';
 
-const EVENT_ID = 'standup-therapy-bogota-2sep2026';
+const EVENT_ID = 'standup-therapy-deja-de-joder-pareja-bogota-5nov2026';
 
 function env(name) {
   return globalThis.Netlify?.env?.get(name) || process.env[name];
@@ -65,32 +65,30 @@ async function getCheckoutStatus(paymentLink) {
   return checkout.status;
 }
 
-async function deletePending(reference, expiresAt) {
+async function cancelPending(reference, expiresAt) {
   return supabaseRequest(
-    'DELETE',
-    '/rest/v1/reservations?event_id=eq.' + encodeURIComponent(EVENT_ID) +
+    'PATCH',
+    '/rest/v1/st_event_reservations?event_id=eq.' + encodeURIComponent(EVENT_ID) +
       '&qr_code=eq.' + encodeURIComponent(reference) +
       '&payment_status=eq.pending' +
       '&hold_expires_at=lte.' + encodeURIComponent(expiresAt),
-    null
-  );
-}
-
-async function markPaid(paymentLink) {
-  return supabaseRequest(
-    'PATCH',
-    '/rest/v1/reservations?event_id=eq.' + encodeURIComponent(EVENT_ID) +
-      '&bold_reference=eq.' + encodeURIComponent(paymentLink) +
-      '&payment_status=eq.pending',
-    { payment_status: 'paid' }
+    { payment_status: 'cancelled', hold_expires_at: null }
   );
 }
 
 export default async () => {
+  if (
+    env('ENABLE_REAL_PAYMENTS') !== 'true' ||
+    env('EVENT_RELEASE_ID') !== EVENT_ID
+  ) {
+    console.info('Expired hold cleanup skipped because this event release is disabled');
+    return new Response('Disabled', { status: 503 });
+  }
+
   const now = new Date().toISOString();
   const lookup = await supabaseRequest(
     'GET',
-    '/rest/v1/reservations?event_id=eq.' + encodeURIComponent(EVENT_ID) +
+    '/rest/v1/st_event_reservations?event_id=eq.' + encodeURIComponent(EVENT_ID) +
       '&payment_status=eq.pending' +
       '&hold_expires_at=not.is.null' +
       '&hold_expires_at=lte.' + encodeURIComponent(now) +
@@ -115,9 +113,9 @@ export default async () => {
 
   for (const [reference, hold] of holds) {
     if (!hold.bold_reference) {
-      const deletion = await deletePending(reference, hold.hold_expires_at);
-      if (deletion.status < 400) released += 1;
-      else console.error('Could not release unmapped hold', reference, deletion.status);
+      const cancellation = await cancelPending(reference, hold.hold_expires_at);
+      if (cancellation.status < 400) released += 1;
+      else console.error('Could not release unmapped hold', reference, cancellation.status);
       continue;
     }
 
@@ -130,25 +128,25 @@ export default async () => {
 
     const status = String(bold.data.status || '').toUpperCase();
     if (status === 'PAID') {
-      const update = await markPaid(hold.bold_reference);
-      if (update.status < 400) paid += 1;
-      else console.error('Could not mark paid hold', reference, update.status);
+      paid += 1;
+      retained += 1;
+      console.error('Paid link still awaits its signed webhook', reference, hold.bold_reference);
       continue;
     }
 
     if (['EXPIRED', 'CANCELLED', 'REJECTED'].includes(status)) {
-      const deletion = await deletePending(reference, hold.hold_expires_at);
-      if (deletion.status < 400) released += 1;
-      else console.error('Could not release expired hold', reference, deletion.status);
+      const cancellation = await cancelPending(reference, hold.hold_expires_at);
+      if (cancellation.status < 400) released += 1;
+      else console.error('Could not release expired hold', reference, cancellation.status);
       continue;
     }
 
     if (status === 'ACTIVE') {
       const checkoutStatus = await getCheckoutStatus(hold.bold_reference);
       if (checkoutStatus === 404 || checkoutStatus === 410) {
-        const deletion = await deletePending(reference, hold.hold_expires_at);
-        if (deletion.status < 400) released += 1;
-        else console.error('Could not release unavailable checkout', reference, deletion.status);
+        const cancellation = await cancelPending(reference, hold.hold_expires_at);
+        if (cancellation.status < 400) released += 1;
+        else console.error('Could not release unavailable checkout', reference, cancellation.status);
         continue;
       }
     }
@@ -162,5 +160,5 @@ export default async () => {
 };
 
 export const config = {
-  schedule: '* * * * *',
+  schedule: '*/5 * * * *',
 };

@@ -2,3 +2,11 @@ node_modules/
 .env
 .DS_Store
 .netlify/
+dist/
+
+# Source posters and local design references are not shipped with the site.
+assets/bono-descuento-10-standup.jpg
+assets/deja-de-joder-pareja-2027.png
+assets/standup-cosmic-hero-v1.png
+assets/standup-poster.jpeg
+assets/standup-therapy-deja-de-joder-2027.png

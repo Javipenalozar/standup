@@ -1,6 +1,7 @@
 const https = require('https');
+const { EVENT, eventOperationsEnabled } = require('../lib/event-config');
 
-const EVENT_ID = 'standup-therapy-bogota-2sep2026';
+const EVENT_ID = EVENT.id;
 
 function supabaseGet(path) {
   return new Promise((resolve, reject) => {
@@ -34,10 +35,13 @@ exports.handler = async function (event) {
   if (event.httpMethod !== 'GET') {
     return { statusCode: 405, headers, body: JSON.stringify({ error: 'GET only' }) };
   }
+  if (!eventOperationsEnabled()) {
+    return { statusCode: 200, headers, body: JSON.stringify({ seats: [], preview: true }) };
+  }
 
   try {
     const result = await supabaseGet(
-      '/rest/v1/reservations?select=seat_id' +
+      '/rest/v1/st_event_reservations?select=seat_id' +
       '&event_id=eq.' + encodeURIComponent(EVENT_ID) +
       '&payment_status=in.(paid,pending)'
     );

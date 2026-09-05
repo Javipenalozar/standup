@@ -1,39 +1,73 @@
 const topbar = document.querySelector("[data-topbar]");
-const countdownNodes = document.querySelectorAll("[data-countdown]");
-const offerKey = "standupTherapyOfferEndsAt";
-const offerDurationMs = 20 * 60 * 1000;
+const progress = document.querySelector("[data-progress]");
+const hero = document.querySelector("[data-hero]");
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-const updateTopbar = () => {
-  topbar?.classList.toggle("is-scrolled", window.scrollY > 24);
-};
+let frameRequested = false;
 
-const getOfferEnd = () => {
-  const savedEnd = Number.parseInt(window.localStorage.getItem(offerKey) || "", 10);
+const updateViewportEffects = () => {
+  const scrollY = window.scrollY;
+  const scrollRange = document.documentElement.scrollHeight - window.innerHeight;
 
-  if (Number.isFinite(savedEnd) && savedEnd > Date.now()) {
-    return savedEnd;
+  topbar?.classList.toggle("is-scrolled", scrollY > 24);
+
+  if (progress) {
+    const value = scrollRange > 0 ? Math.min(scrollY / scrollRange, 1) : 0;
+    progress.style.transform = `scaleX(${value})`;
   }
 
-  const nextEnd = Date.now() + offerDurationMs;
-  window.localStorage.setItem(offerKey, String(nextEnd));
-  return nextEnd;
+  if (hero && !reduceMotion.matches) {
+    const shift = Math.min(scrollY * 0.1, 90);
+    hero.style.setProperty("--hero-shift", `${shift}px`);
+  }
+
+  frameRequested = false;
 };
 
-const offerEnd = getOfferEnd();
+const requestViewportUpdate = () => {
+  if (frameRequested) return;
+  frameRequested = true;
+  window.requestAnimationFrame(updateViewportEffects);
+};
 
-const updateCountdown = () => {
-  const remaining = Math.max(0, offerEnd - Date.now());
-  const minutes = Math.floor(remaining / 60000);
-  const seconds = Math.floor((remaining % 60000) / 1000);
-  const display = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+const revealElements = document.querySelectorAll(".reveal");
 
-  countdownNodes.forEach((node) => {
-    node.textContent = display;
+if (reduceMotion.matches || !("IntersectionObserver" in window)) {
+  revealElements.forEach((element) => element.classList.add("is-visible"));
+} else {
+  const revealObserver = new IntersectionObserver(
+    (entries, observer) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("is-visible");
+        observer.unobserve(entry.target);
+      });
+    },
+    { rootMargin: "0px 0px -12%", threshold: 0.08 },
+  );
+
+  revealElements.forEach((element) => revealObserver.observe(element));
+}
+
+const canUseMagnet = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+
+if (canUseMagnet && !reduceMotion.matches) {
+  document.querySelectorAll(".magnetic").forEach((button) => {
+    button.addEventListener("pointermove", (event) => {
+      const bounds = button.getBoundingClientRect();
+      const x = (event.clientX - bounds.left - bounds.width / 2) * 0.1;
+      const y = (event.clientY - bounds.top - bounds.height / 2) * 0.15;
+      button.style.setProperty("--mx", `${x}px`);
+      button.style.setProperty("--my", `${y}px`);
+    });
+
+    button.addEventListener("pointerleave", () => {
+      button.style.setProperty("--mx", "0px");
+      button.style.setProperty("--my", "0px");
+    });
   });
-};
+}
 
-updateTopbar();
-updateCountdown();
-
-window.addEventListener("scroll", updateTopbar, { passive: true });
-window.setInterval(updateCountdown, 1000);
+updateViewportEffects();
+window.addEventListener("scroll", requestViewportUpdate, { passive: true });
+window.addEventListener("resize", requestViewportUpdate, { passive: true });

@@ -1,6 +1,8 @@
 const https = require('https');
+const { EVENT, eventOperationsEnabled } = require('../lib/event-config');
+const adminAuth = require('../lib/admin-auth');
 
-const EVENT_ID = 'standup-therapy-bogota-2sep2026';
+const EVENT_ID = EVENT.id;
 
 function supabaseGet(path) {
   return new Promise((resolve, reject) => {
@@ -33,34 +35,48 @@ exports.handler = async function (event) {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, headers, body: JSON.stringify({ error: 'POST only' }) };
   }
+  if (!eventOperationsEnabled()) {
+    return { statusCode: 503, headers, body: JSON.stringify({ error: 'Las operaciones del evento permanecen bloqueadas' }) };
+  }
 
   try {
-    const { password } = JSON.parse(event.body || '{}');
-    if (!password || password !== process.env.ADMIN_PASSWORD) {
-      return { statusCode: 401, headers, body: JSON.stringify({ error: 'No autorizado' }) };
+    if (!adminAuth.isAuthorizedEvent(event)) {
+      return { statusCode: 401, headers, body: JSON.stringify({ error: 'Sesión administrativa vencida' }) };
     }
 
-    const [reservationsResult, invitationsResult] = await Promise.all([
+    const [reservationsResult, invitationsResult, webhookEventsResult] = await Promise.all([
       supabaseGet(
-        '/rest/v1/reservations?select=*' +
+        '/rest/v1/st_event_reservations?select=*' +
         '&event_id=eq.' + encodeURIComponent(EVENT_ID) +
         '&order=created_at.desc'
       ),
-      supabaseGet('/rest/v1/invitations?select=*&order=created_at.desc'),
+      supabaseGet(
+        '/rest/v1/st_event_invitations?event_id=eq.' + encodeURIComponent(EVENT_ID) +
+        '&select=*&order=created_at.desc'
+      ),
+      supabaseGet(
+        '/rest/v1/st_payment_webhook_events?event_id=eq.' + encodeURIComponent(EVENT_ID) +
+        '&select=provider_event_id,event_type,payment_reference,status,notification_status,notification_error,created_at,processed_at' +
+        '&order=created_at.desc&limit=30'
+      ),
     ]);
 
     if (
       reservationsResult.status >= 400 ||
       invitationsResult.status >= 400 ||
+      webhookEventsResult.status >= 400 ||
       !Array.isArray(reservationsResult.data) ||
-      !Array.isArray(invitationsResult.data)
+      !Array.isArray(invitationsResult.data) ||
+      !Array.isArray(webhookEventsResult.data)
     ) {
       console.error(
         'Could not load admin data',
         reservationsResult.status,
         reservationsResult.data,
         invitationsResult.status,
-        invitationsResult.data
+        invitationsResult.data,
+        webhookEventsResult.status,
+        webhookEventsResult.data
       );
       return {
         statusCode: 502,
@@ -75,6 +91,7 @@ exports.handler = async function (event) {
       body: JSON.stringify({
         reservations: reservationsResult.data,
         invitations: invitationsResult.data,
+        webhookEvents: webhookEventsResult.data,
       }),
     };
   } catch (error) {

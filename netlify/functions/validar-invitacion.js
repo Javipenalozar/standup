@@ -2,6 +2,7 @@
 // GET /.netlify/functions/validar-invitacion?code=INV-XXXXXXXX
 
 const https = require('https');
+const { EVENT, eventOperationsEnabled } = require('../lib/event-config');
 
 function supabaseGet(path) {
   return new Promise((resolve, reject) => {
@@ -32,10 +33,14 @@ exports.handler = async function (event) {
 
   const code = event.queryStringParameters?.code;
   if (!code) return { statusCode: 400, headers, body: '{"error":"Missing code"}' };
+  if (!eventOperationsEnabled()) {
+    return { statusCode: 503, headers, body: '{"error":"Las operaciones del evento permanecen bloqueadas"}' };
+  }
 
   try {
     const rows = await supabaseGet(
-      '/rest/v1/invitations?code=eq.' + encodeURIComponent(code) + '&select=*&limit=1'
+      '/rest/v1/st_event_invitations?event_id=eq.' + encodeURIComponent(EVENT.id) +
+      '&code=eq.' + encodeURIComponent(code) + '&select=*&limit=1'
     );
 
     if (!rows || rows.length === 0) {
@@ -50,7 +55,8 @@ exports.handler = async function (event) {
     let usedSeats = 0;
     if (inv.total_quota) {
       const reservations = await supabaseGet(
-        '/rest/v1/reservations?invitation_code=eq.' + encodeURIComponent(inv.code) +
+        '/rest/v1/st_event_reservations?invitation_code=eq.' + encodeURIComponent(inv.code) +
+        '&event_id=eq.' + encodeURIComponent(EVENT.id) +
         '&payment_status=in.(paid,pending)&select=id'
       );
       usedSeats = Array.isArray(reservations) ? reservations.length : 0;

@@ -1,6 +1,8 @@
 const https = require('https');
+const { EVENT, eventDetailsHtml, eventOperationsEnabled, publicUrl } = require('../lib/event-config');
+const adminAuth = require('../lib/admin-auth');
 
-const EVENT_ID = 'standup-therapy-bogota-2sep2026';
+const EVENT_ID = EVENT.id;
 
 function requestJson({ method, hostname, path, headers, body }) {
   return new Promise((resolve, reject) => {
@@ -54,18 +56,25 @@ exports.handler = async function (event) {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, headers, body: JSON.stringify({ error: 'POST only' }) };
   }
+  if (!eventOperationsEnabled()) {
+    return {
+      statusCode: 503,
+      headers,
+      body: JSON.stringify({ error: 'Las operaciones del evento permanecen bloqueadas' }),
+    };
+  }
 
   try {
-    const { password, qrCode } = JSON.parse(event.body || '{}');
-    if (!password || password !== process.env.ADMIN_PASSWORD) {
-      return { statusCode: 401, headers, body: JSON.stringify({ error: 'No autorizado' }) };
+    const { qrCode } = JSON.parse(event.body || '{}');
+    if (!adminAuth.isAuthorizedEvent(event)) {
+      return { statusCode: 401, headers, body: JSON.stringify({ error: 'Sesión administrativa vencida' }) };
     }
     if (!qrCode) {
       return { statusCode: 400, headers, body: JSON.stringify({ error: 'Falta el código QR' }) };
     }
 
     const supabaseUrl = new URL(
-      '/rest/v1/reservations?select=customer_name,customer_email,seat_id,payment_status' +
+      '/rest/v1/st_event_reservations?select=customer_name,customer_email,seat_id,payment_status' +
       '&event_id=eq.' + encodeURIComponent(EVENT_ID) +
       '&qr_code=eq.' + encodeURIComponent(qrCode) +
       '&order=seat_id.asc',
@@ -99,8 +108,7 @@ exports.handler = async function (event) {
     const name = rows[0].customer_name;
     const email = rows[0].customer_email;
     const seats = rows.map(row => row.seat_id).sort(sortSeats);
-    const ticketUrl =
-      'https://standup.eventosjv.com/inscribirse/?ref=' + encodeURIComponent(qrCode);
+    const ticketUrl = publicUrl('/inscribirse/', { ref: qrCode });
     const emailResult = await requestJson({
       method: 'POST',
       hostname: 'api.resend.com',
@@ -116,14 +124,13 @@ exports.handler = async function (event) {
         from: process.env.RESEND_FROM,
         to: [email],
         reply_to: process.env.RESEND_REPLY_TO || undefined,
-        subject: 'Tu entrada para Stand-Up Therapy',
+        subject: 'Tu entrada para ' + EVENT.name,
         html: `
           <div style="font-family:Arial,sans-serif;line-height:1.55;color:#111">
             <h2>Tu entrada está confirmada</h2>
             <p>Hola ${escapeHtml(name)},</p>
-            <p>Te reenviamos la entrada para Stand-Up Therapy.</p>
-            <p><strong>Fecha:</strong> 2 de septiembre de 2026, 6:00 p. m.</p>
-            <p><strong>Lugar:</strong> Teatro Belarte, Cra. 7 # 152-54, Bogotá</p>
+            <p>Te reenviamos la entrada para ${EVENT.name}.</p>
+            ${eventDetailsHtml()}
             <p><strong>Sillas:</strong> ${escapeHtml(seats.join(', '))}</p>
             <p>
               <a href="${ticketUrl}" style="display:inline-block;padding:12px 18px;background:#050608;color:#fff;text-decoration:none">

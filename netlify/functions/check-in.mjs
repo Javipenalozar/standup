@@ -1,6 +1,6 @@
-import crypto from 'node:crypto';
+import adminAuth from '../lib/admin-auth.js';
 
-const EVENT_ID = 'standup-therapy-bogota-2sep2026';
+const EVENT_ID = 'standup-therapy-deja-de-joder-pareja-bogota-5nov2026';
 const SELECT_FIELDS = [
   'id',
   'seat_id',
@@ -24,15 +24,6 @@ function json(status, body) {
       'X-Content-Type-Options': 'nosniff',
     },
   });
-}
-
-function isAuthorized(password) {
-  const expected = process.env.ADMIN_PASSWORD || '';
-  const provided = String(password || '');
-  const expectedBuffer = Buffer.from(expected);
-  const providedBuffer = Buffer.from(provided);
-  if (!expected || expectedBuffer.length !== providedBuffer.length) return false;
-  return crypto.timingSafeEqual(expectedBuffer, providedBuffer);
 }
 
 async function supabase(path, options = {}) {
@@ -102,7 +93,7 @@ function formatTicket(rows) {
 
 async function loadTicket(code) {
   const result = await supabase(
-    '/rest/v1/reservations?select=' + SELECT_FIELDS +
+    '/rest/v1/st_event_reservations?select=' + SELECT_FIELDS +
       '&event_id=eq.' + encodeURIComponent(EVENT_ID) +
       '&qr_code=eq.' + encodeURIComponent(code) +
       '&order=seat_id.asc'
@@ -115,7 +106,7 @@ async function loadTicket(code) {
 
 async function loadPaidReservations() {
   const result = await supabase(
-    '/rest/v1/reservations?select=' + SELECT_FIELDS +
+    '/rest/v1/st_event_reservations?select=' + SELECT_FIELDS +
       '&event_id=eq.' + encodeURIComponent(EVENT_ID) +
       '&payment_status=eq.paid&order=seat_id.asc'
   );
@@ -204,7 +195,7 @@ async function handleMutation(action, codeInput, requestedSeats, operatorInput) 
     return json(400, { error: 'La selección contiene una silla inválida' });
   }
 
-  const result = await supabase('/rest/v1/rpc/st_record_checkin', {
+  const result = await supabase('/rest/v1/rpc/st_record_checkin_v2', {
     method: 'POST',
     headers: { Prefer: 'return=representation' },
     body: JSON.stringify({
@@ -233,11 +224,17 @@ async function handleMutation(action, codeInput, requestedSeats, operatorInput) 
 
 export default async function handler(request) {
   if (request.method !== 'POST') return json(405, { error: 'POST only' });
+  if (
+    process.env.ENABLE_EVENT_OPERATIONS !== 'true' ||
+    process.env.EVENT_RELEASE_ID !== EVENT_ID
+  ) {
+    return json(503, { error: 'Las operaciones del evento permanecen bloqueadas' });
+  }
 
   try {
     const body = await request.json();
-    if (!isAuthorized(body.password)) {
-      return json(401, { error: 'No autorizado' });
+    if (!adminAuth.isAuthorizedRequest(request)) {
+      return json(401, { error: 'Sesión administrativa vencida' });
     }
 
     switch (body.action) {

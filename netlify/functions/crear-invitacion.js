@@ -1,13 +1,15 @@
 // Netlify Function — Crear código de invitación
-// Solo accesible con la clave admin (BOLD_SECRET_KEY como password simple)
+// Solo accesible con una sesión administrativa firmada.
 //
 // POST /.netlify/functions/crear-invitacion
-// Body: { "nombre": "Juan Pérez", "cantidad": 2, "password": "tu-password" }
+// Body: { "nombre": "Juan Pérez", "cantidad": 2 }
 //
 // Responde con un link listo para enviar por WhatsApp.
 
 const https = require('https');
 const crypto = require('crypto');
+const { EVENT, eventOperationsEnabled, publicUrl } = require('../lib/event-config');
+const adminAuth = require('../lib/admin-auth');
 
 function supabasePost(path, body, key) {
   return new Promise((resolve, reject) => {
@@ -46,24 +48,21 @@ exports.handler = async function (event) {
 
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers, body: '' };
   if (event.httpMethod !== 'POST') return { statusCode: 405, headers, body: '{"error":"POST only"}' };
+  if (!eventOperationsEnabled()) {
+    return { statusCode: 503, headers, body: '{"error":"Las operaciones del evento permanecen bloqueadas"}' };
+  }
 
   try {
     const {
       nombre,
       cantidad,
-      password,
       multi_use,
       corporate,
       total_quota,
-      dry_run,
     } = JSON.parse(event.body);
 
-    if (password !== process.env.ADMIN_PASSWORD) {
-      return { statusCode: 401, headers, body: '{"error":"Password incorrecto"}' };
-    }
-
-    if (dry_run) {
-      return { statusCode: 200, headers, body: '{"ok":true}' };
+    if (!adminAuth.isAuthorizedEvent(event)) {
+      return { statusCode: 401, headers, body: '{"error":"Sesión administrativa vencida"}' };
     }
 
     if (!nombre || !cantidad || cantidad < 1 || cantidad > 10) {
@@ -78,7 +77,8 @@ exports.handler = async function (event) {
     const codePrefix = corporate ? 'EMP-' : multi_use ? 'PAGO-' : 'INV-';
     const code = codePrefix + crypto.randomBytes(4).toString('hex').toUpperCase();
 
-    const result = await supabasePost('/rest/v1/invitations', {
+    const result = await supabasePost('/rest/v1/st_event_invitations', {
+      event_id: EVENT.id,
       code,
       guest_name: nombre,
       max_seats: cantidad,
@@ -92,7 +92,7 @@ exports.handler = async function (event) {
       return { statusCode: 500, headers, body: '{"error":"Error guardando invitación"}' };
     }
 
-    const link = 'https://standup.eventosjv.com/invitado/?code=' + code;
+    const link = publicUrl('/invitado/', { code });
 
     return {
       statusCode: 200,
