@@ -166,6 +166,17 @@ test('ticket navigation opens the seat selector and inherited turquoise is absen
   assert.doesNotMatch(styles, /#3fa594|rgba\(63,\s*165,\s*148/i);
 });
 
+test('the mobile seat map scrolls without shrinking or clipping its legend', () => {
+  const selector = fs.readFileSync(path.join(root, 'inscribirse/index.html'), 'utf8');
+  const styles = fs.readFileSync(path.join(root, 'styles.css'), 'utf8');
+
+  assert.match(selector, /class="seat-map-scroll"[^>]*tabindex="0"/);
+  assert.match(selector, /Desliza el plano hacia los lados/);
+  assert.doesNotMatch(selector, /transform:\s*scale\([^)]*\)/);
+  assert.match(styles, /\.seat-map-scroll\s*\{[\s\S]*?overflow-x:\s*auto/);
+  assert.match(styles, /\.map-legend\s*\{[\s\S]*?grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/);
+});
+
 test('real operations remain guarded by default', async () => {
   const priorPayments = process.env.ENABLE_REAL_PAYMENTS;
   const priorOperations = process.env.ENABLE_EVENT_OPERATIONS;

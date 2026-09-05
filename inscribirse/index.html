@@ -12,17 +12,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/styles.css" />
-    <style>
-      @media (max-width: 620px) {
-        .theater-container { overflow: hidden; }
-        .seat-map-grid {
-          transform: scale(0.58);
-          transform-origin: top center;
-          margin-bottom: -100px;
-          overflow: visible;
-        }
-      }
-    </style>
   </head>
   <body>
     <header class="topbar is-scrolled" data-topbar>
@@ -63,7 +52,10 @@
         </div>
 
         <div id="seatMapContainer" style="display: none;">
-          <div class="seat-map-grid" id="seatMap"></div>
+          <p class="seat-map-hint">Desliza el plano hacia los lados para ver todas las sillas.</p>
+          <div class="seat-map-scroll" tabindex="0" aria-label="Plano de sillas con desplazamiento horizontal">
+            <div class="seat-map-grid" id="seatMap"></div>
+          </div>
 
           <div class="exit-row">
             <span>↓ Salida</span>

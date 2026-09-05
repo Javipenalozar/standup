@@ -823,8 +823,28 @@ blockquote {
   flex-direction: column;
   gap: 5px;
   align-items: center;
-  overflow-x: auto;
+  width: max-content;
+  margin-inline: auto;
   padding-bottom: 8px;
+}
+
+.seat-map-scroll {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scrollbar-color: var(--accent) transparent;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+.seat-map-scroll:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.seat-map-hint {
+  display: none;
 }
 
 .seat-map-row {
@@ -893,6 +913,7 @@ blockquote {
 
 .map-legend {
   display: flex;
+  flex-wrap: wrap;
   gap: 20px;
   justify-content: center;
   margin-top: 16px;
@@ -1421,21 +1442,63 @@ blockquote {
   }
 
   .seat-btn {
-    width: 22px;
-    height: 22px;
-    font-size: 0.5rem;
+    width: 32px;
+    height: 32px;
+    font-size: 0.64rem;
   }
 
   .seat-aisle {
-    width: 10px;
+    width: 12px;
   }
 
   .seat-section {
-    gap: 2px;
+    gap: 3px;
   }
 
   .seat-map-grid {
-    gap: 3px;
+    gap: 4px;
+    margin-inline: 0;
+    padding: 4px 0 12px;
+  }
+
+  .seat-map-scroll {
+    padding: 12px 8px 10px;
+    border: 1px solid rgba(249, 182, 9, 0.22);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.025);
+  }
+
+  .seat-map-hint {
+    display: block;
+    margin: 0 0 10px;
+    color: var(--muted);
+    font-size: 0.76rem;
+    font-weight: 700;
+    text-align: center;
+  }
+
+  .row-id {
+    width: 24px;
+    color: var(--cream);
+  }
+
+  .map-legend {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 14px;
+    justify-content: stretch;
+    margin-top: 18px;
+    font-size: 0.74rem;
+  }
+
+  .map-legend div {
+    min-width: 0;
+    align-items: flex-start;
+    line-height: 1.35;
+  }
+
+  .legend-swatch {
+    flex: 0 0 16px;
   }
 
   .checkout-panel {
