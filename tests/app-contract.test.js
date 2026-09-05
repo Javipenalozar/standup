@@ -118,7 +118,7 @@ test('the withdrawn 99 thousand price is absent from public and server sources',
   assert.doesNotMatch(sources, /99(?:\.000|000)/);
 });
 
-test('admin pages use one signed session and contain valid inline JavaScript', () => {
+test('admin pages use one signed session and a dedicated rate-limited login', async () => {
   for (const page of ['admin/index.html', 'admin/check-in/index.html']) {
     const html = fs.readFileSync(path.join(root, page), 'utf8');
     const scripts = [...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)]
@@ -126,9 +126,22 @@ test('admin pages use one signed session and contain valid inline JavaScript', (
       .filter(Boolean);
     scripts.forEach(source => assert.doesNotThrow(() => new Function(source)));
     assert.match(html, /\/\.netlify\/functions\/admin-session/);
+    assert.match(html, /\/\.netlify\/functions\/admin-login/);
     assert.doesNotMatch(html, /password:\s*adminPassword/);
     assert.doesNotMatch(html, /#87f2ff|rgba\(135,\s*242,\s*255/i);
   }
+
+  const login = await import('../netlify/functions/admin-login.mjs');
+  assert.equal(login.config.path, '/.netlify/functions/admin-login');
+  assert.deepEqual(login.config.rateLimit, {
+    action: 'rate_limit',
+    windowLimit: 5,
+    windowSize: 180,
+    aggregateBy: ['ip', 'domain'],
+  });
+
+  const sessionSource = fs.readFileSync(path.join(root, 'netlify/functions/admin-session.mjs'), 'utf8');
+  assert.doesNotMatch(sessionSource, /verifyPassword|recordFailure|createSession/);
 
   for (const name of [
     'admin-data.js',

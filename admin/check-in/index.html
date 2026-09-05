@@ -237,13 +237,13 @@
         button.disabled = true;
         button.textContent = 'Ingresando...';
         try {
-          const sessionResponse = await fetch('/.netlify/functions/admin-session', {
+          const sessionResponse = await fetch('/.netlify/functions/admin-login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'same-origin',
             body: JSON.stringify({ password: password }),
           });
-          const sessionData = await sessionResponse.json();
+          const sessionData = await sessionResponse.json().catch(function () { return {}; });
           if (!sessionResponse.ok) {
             const sessionError = new Error(sessionData.error || 'No fue posible iniciar sesión');
             sessionError.status = sessionResponse.status;
@@ -262,7 +262,7 @@
           loginFeedback.textContent = error.status === 401
             ? 'Credenciales incorrectas.'
             : error.status === 429
-              ? 'Demasiados intentos. Espera 15 minutos.'
+              ? 'Demasiados intentos. Espera unos minutos.'
             : 'No fue posible abrir el control de ingreso.';
           loginFeedback.classList.add('show');
         } finally {

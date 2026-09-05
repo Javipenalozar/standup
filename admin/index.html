@@ -208,15 +208,17 @@
         errorBox.style.display = 'none';
         loginBtn.disabled = true;
         try {
-          const res = await fetch('/.netlify/functions/admin-session', {
+          const res = await fetch('/.netlify/functions/admin-login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'same-origin',
             body: JSON.stringify({ password: pw }),
           });
-          const data = await res.json();
+          const data = await res.json().catch(() => ({}));
           if (!res.ok) {
-            errorBox.textContent = data.error || 'No fue posible iniciar sesión';
+            errorBox.textContent = data.error || (res.status === 429
+              ? 'Demasiados intentos. Espera unos minutos.'
+              : 'No fue posible iniciar sesión');
             errorBox.style.display = 'block';
             return;
           }
