@@ -1,14 +1,16 @@
 :root {
-  --landing-orange: #f04405;
-  --landing-flame: #ff5b09;
-  --landing-yellow: #f9b609;
-  --landing-plum: #390528;
-  --landing-wine: #5b0b3d;
-  --landing-teal: #003c40;
-  --landing-ink: #170313;
-  --landing-sand: #f0c38d;
-  --landing-cream: #fff0d6;
-  --landing-line: rgba(255, 240, 214, 0.26);
+  --landing-orange: #d54a03;
+  --landing-flame: #ef5a18;
+  --landing-yellow: #f4a30a;
+  --landing-blue: #0f5496;
+  --landing-blue-bright: #1874bf;
+  --landing-plum: #071822;
+  --landing-wine: #0b2d48;
+  --landing-teal: #0b426f;
+  --landing-ink: #0d1210;
+  --landing-sand: #d8d1cc;
+  --landing-cream: #fffaf2;
+  --landing-line: rgba(255, 250, 242, 0.25);
 }
 
 .landing-page {
@@ -23,7 +25,7 @@
 
 .landing-page .topbar {
   align-items: center;
-  background: linear-gradient(180deg, rgba(23, 3, 19, 0.74), transparent);
+  background: linear-gradient(180deg, rgba(7, 18, 24, 0.82), transparent);
   border-bottom-color: transparent;
   min-height: 84px;
   padding: 0 4.5vw;
@@ -31,7 +33,7 @@
 }
 
 .landing-page .topbar.is-scrolled {
-  background: rgba(23, 3, 19, 0.92);
+  background: rgba(7, 18, 24, 0.94);
   border-bottom-color: rgba(255, 240, 214, 0.16);
   min-height: 68px;
   -webkit-backdrop-filter: blur(18px);
@@ -47,16 +49,16 @@
 
 .landing-page .brand-icon {
   align-items: center;
-  background: var(--landing-yellow);
-  border: 0;
-  border-radius: 50%;
-  color: var(--landing-plum);
+  background: var(--landing-blue);
+  border: 2px solid rgba(255, 250, 242, 0.92);
+  border-radius: 9px;
+  color: var(--landing-cream);
   display: inline-flex;
   font-family: "Anton", sans-serif;
   height: 38px;
   justify-content: center;
   letter-spacing: 0.02em;
-  transform: rotate(-7deg);
+  transform: rotate(-3deg);
   width: 38px;
 }
 
@@ -73,14 +75,14 @@
 }
 
 .landing-page .nav a:hover {
-  color: var(--landing-yellow);
+  color: #78c4ff;
 }
 
 .landing-page .nav-cta {
-  background: var(--landing-yellow);
-  border: 1px solid var(--landing-yellow);
+  background: var(--landing-blue);
+  border: 1px solid rgba(255, 250, 242, 0.5);
   border-radius: 0;
-  color: var(--landing-plum);
+  color: var(--landing-cream);
   font-size: 0.74rem;
   font-weight: 900;
   letter-spacing: 0.1em;
@@ -99,7 +101,7 @@
 }
 
 .page-progress span {
-  background: var(--landing-yellow);
+  background: var(--landing-blue-bright);
   display: block;
   height: 100%;
   transform: scaleX(0);
@@ -109,7 +111,7 @@
 
 .landing-page .hero {
   align-items: stretch;
-  background: var(--landing-plum);
+  background: var(--landing-orange);
   display: block;
   isolation: isolate;
   min-height: max(860px, 100svh);
@@ -140,18 +142,27 @@
 
 .hero-wash {
   background:
-    linear-gradient(90deg, rgba(26, 2, 20, 0.94) 0%, rgba(46, 3, 27, 0.82) 31%, rgba(57, 5, 40, 0.24) 60%, rgba(0, 36, 39, 0.08) 100%),
-    linear-gradient(180deg, rgba(23, 3, 19, 0.25) 54%, rgba(23, 3, 19, 0.96) 100%);
+    linear-gradient(90deg, rgba(7, 18, 24, 0.72) 0%, rgba(7, 24, 34, 0.55) 31%, rgba(7, 24, 34, 0.08) 61%, transparent 100%),
+    linear-gradient(180deg, rgba(7, 18, 24, 0.16) 52%, rgba(7, 18, 24, 0.9) 100%);
   z-index: -2;
 }
 
 .hero-content {
   margin: 0 auto;
   max-width: 1500px;
-  padding: clamp(132px, 15vh, 180px) 5vw 230px;
+  padding: clamp(132px, 15vh, 180px) 5vw 150px;
   position: relative;
   width: 100%;
   z-index: 3;
+}
+
+.hero-series {
+  color: var(--landing-cream);
+  font-family: "Anton", sans-serif;
+  font-size: clamp(1.1rem, 1.8vw, 1.7rem);
+  letter-spacing: 0.08em;
+  margin: 0 0 13px;
+  text-transform: uppercase;
 }
 
 .hero-kicker {
@@ -167,15 +178,15 @@
 }
 
 .hero-kicker span {
-  background: var(--landing-yellow);
-  color: var(--landing-plum);
+  background: var(--landing-blue);
+  color: var(--landing-cream);
   padding: 7px 10px 6px;
 }
 
 .landing-page .hero-title {
   color: var(--landing-cream);
   font-family: "Anton", sans-serif;
-  font-size: clamp(5.3rem, 10.7vw, 10.8rem);
+  font-size: clamp(5.3rem, 9.2vw, 9.6rem);
   font-weight: 400;
   letter-spacing: -0.047em;
   line-height: 0.77;
@@ -189,13 +200,13 @@
 }
 
 .hero-line-main {
-  color: var(--landing-yellow);
+  color: var(--landing-cream);
   font-size: 1.08em;
   margin-left: -0.02em;
 }
 
 .hero-line-last {
-  color: var(--landing-sand);
+  color: var(--landing-cream);
   font-size: 0.7em;
   letter-spacing: -0.035em;
   line-height: 1.05;
@@ -224,9 +235,9 @@
 
 .landing-page .button.primary {
   align-items: center;
-  background: var(--landing-yellow);
-  border: 1px solid var(--landing-yellow);
-  color: var(--landing-plum);
+  background: var(--landing-blue);
+  border: 1px solid rgba(255, 250, 242, 0.48);
+  color: var(--landing-cream);
   display: inline-flex;
   font-size: 0.82rem;
   font-weight: 900;
@@ -245,6 +256,7 @@
 .landing-page .button.primary:hover {
   background: var(--landing-cream);
   border-color: var(--landing-cream);
+  color: var(--landing-blue);
 }
 
 .landing-page .button.large {
@@ -285,10 +297,10 @@
 .hero-ticket {
   align-items: stretch;
   backdrop-filter: blur(14px);
-  background: rgba(23, 3, 19, 0.7);
+  background: rgba(7, 24, 34, 0.82);
   border-bottom: 1px solid var(--landing-line);
   border-top: 1px solid var(--landing-line);
-  bottom: 42px;
+  bottom: 20px;
   display: grid;
   grid-template-columns: minmax(170px, 0.9fr) minmax(180px, 0.9fr) minmax(260px, 1.4fr);
   left: 5vw;
@@ -319,7 +331,7 @@
 }
 
 .hero-ticket strong {
-  color: var(--landing-yellow);
+  color: #78c4ff;
   font-family: "Anton", sans-serif;
   font-size: clamp(1.65rem, 2.3vw, 2.5rem);
   font-weight: 400;
@@ -473,7 +485,7 @@
 }
 
 .manifest-copy em {
-  color: var(--landing-yellow);
+  color: var(--landing-blue);
   font-family: "Playfair Display", serif;
   font-size: 0.8em;
   font-weight: 700;
@@ -593,7 +605,7 @@
 }
 
 .date-scene {
-  background: var(--landing-teal);
+  background: var(--landing-blue);
   color: var(--landing-cream);
   min-height: 920px;
   overflow: hidden;
@@ -647,7 +659,7 @@
 }
 
 .date-number span {
-  color: var(--landing-yellow);
+  color: var(--landing-cream);
   font-family: "Anton", sans-serif;
   font-size: clamp(3rem, 6vw, 7rem);
   line-height: 0.88;
@@ -704,7 +716,7 @@
 
 .tickets {
   align-items: stretch;
-  background: var(--landing-plum);
+  background: var(--landing-ink);
   display: grid;
   gap: 8vw;
   grid-template-columns: minmax(0, 1fr) minmax(390px, 0.72fr);
@@ -745,7 +757,7 @@
 }
 
 .purchase-panel::before {
-  background: var(--landing-orange);
+  background: var(--landing-blue-bright);
   content: "";
   height: 9px;
   left: -1px;
@@ -769,7 +781,7 @@
 }
 
 .purchase-price strong {
-  color: var(--landing-yellow);
+  color: #78c4ff;
   font-family: "Anton", sans-serif;
   font-size: clamp(4.5rem, 7vw, 7.5rem);
   font-weight: 400;
@@ -859,8 +871,8 @@
 }
 
 .closing .button {
-  background: var(--landing-plum);
-  border-color: var(--landing-plum);
+  background: var(--landing-blue);
+  border-color: var(--landing-blue);
   color: var(--landing-cream);
   margin: 56px 0 auto;
   position: relative;
@@ -959,8 +971,8 @@
 
   .hero-wash {
     background:
-      linear-gradient(90deg, rgba(26, 2, 20, 0.96) 0%, rgba(46, 3, 27, 0.82) 48%, rgba(57, 5, 40, 0.2) 100%),
-      linear-gradient(180deg, rgba(23, 3, 19, 0.2) 45%, rgba(23, 3, 19, 0.98) 100%);
+      linear-gradient(90deg, rgba(7, 18, 24, 0.78) 0%, rgba(7, 24, 34, 0.48) 48%, rgba(7, 24, 34, 0.05) 100%),
+      linear-gradient(180deg, rgba(7, 18, 24, 0.12) 45%, rgba(7, 18, 24, 0.94) 100%);
   }
 
   .hero-content { padding-bottom: 250px; }
@@ -995,18 +1007,18 @@
   }
 
   .hero-art {
-    height: 66%;
-    left: -47%;
+    height: 100%;
+    left: 0;
     top: 0;
-    width: 154%;
+    width: 100%;
   }
 
-  .hero-art img { object-position: 70% center; }
+  .hero-art img { object-position: center top; }
 
   .hero-wash {
     background:
-      linear-gradient(90deg, rgba(31, 2, 22, 0.86), rgba(31, 2, 22, 0.28)),
-      linear-gradient(180deg, rgba(23, 3, 19, 0.18) 26%, rgba(23, 3, 19, 0.94) 59%, var(--landing-ink) 76%);
+      linear-gradient(90deg, rgba(7, 18, 24, 0.74), rgba(7, 18, 24, 0.08)),
+      linear-gradient(180deg, rgba(7, 18, 24, 0.12) 32%, rgba(7, 18, 24, 0.82) 64%, var(--landing-ink) 88%);
   }
 
   .hero-content {
@@ -1014,6 +1026,7 @@
   }
 
   .hero-kicker { font-size: 0.64rem; margin-bottom: 20px; }
+  .hero-series { font-size: 0.9rem; margin-bottom: 10px; }
 
   .landing-page .hero-title {
     font-size: clamp(4.35rem, 22vw, 6rem);
@@ -1070,7 +1083,7 @@
 
   .experience-note { padding: 22px 20px 100px; }
   .landing-page .footer { display: none; }
-  .landing-page .mobile-buy { background: var(--landing-yellow); color: var(--landing-plum); }
+  .landing-page .mobile-buy { background: var(--landing-blue); color: var(--landing-cream); }
 }
 
 @media (prefers-reduced-motion: reduce) {

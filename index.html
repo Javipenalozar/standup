@@ -7,7 +7,7 @@
     <meta name="description" content="Stand-Up Therapy: Deja de joder a tu pareja. Jueves 5 de noviembre de 2026, 7:00 p. m., en Teatro Belarte, Bogotá." />
     <meta property="og:title" content="Deja de joder a tu pareja — Stand-Up Therapy" />
     <meta property="og:description" content="Una noche de humor sobre la vida en pareja. 5 de noviembre de 2026 · Teatro Belarte." />
-    <meta property="og:image" content="/assets/standup-cosmic-hero-v1.jpg" />
+    <meta property="og:image" content="/assets/standup-cosmic-hero-v2.jpg" />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -15,7 +15,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
     <script>document.documentElement.classList.add('js');</script>
     <link rel="stylesheet" href="styles.css" />
-    <link rel="stylesheet" href="landing.css?v=2" />
+    <link rel="stylesheet" href="landing.css?v=3" />
   </head>
   <body class="landing-page">
     <div class="page-progress" aria-hidden="true"><span data-progress></span></div>
@@ -29,11 +29,17 @@
 
     <main id="inicio">
       <section class="hero" data-hero>
-        <div class="hero-art" aria-hidden="true"><img src="assets/standup-cosmic-hero-v1.jpg" width="1672" height="941" fetchpriority="high" decoding="async" alt="" /></div>
+        <div class="hero-art" aria-hidden="true">
+          <picture>
+            <source media="(max-width: 680px)" srcset="assets/standup-cosmic-hero-mobile-v2.jpg" />
+            <img src="assets/standup-cosmic-hero-v2.jpg" width="1672" height="941" fetchpriority="high" decoding="async" alt="" />
+          </picture>
+        </div>
         <div class="hero-wash" aria-hidden="true"></div>
         <div class="orbit orbit-one" aria-hidden="true"></div><div class="orbit orbit-two" aria-hidden="true"></div>
         <span class="cosmic-dot dot-one" aria-hidden="true"></span><span class="cosmic-dot dot-two" aria-hidden="true"></span>
         <div class="hero-content">
+          <p class="hero-series hero-enter">Stand-Up Therapy</p>
           <p class="hero-kicker hero-enter"><span>Preventa</span> Bogotá · 2026</p>
           <h1 class="hero-title" aria-label="Deja de joder a tu pareja">
             <span class="hero-line hero-enter">Deja de</span><span class="hero-line hero-line-main hero-enter">joder</span><span class="hero-line hero-line-last hero-enter">a tu pareja</span>
@@ -104,6 +110,6 @@
     </main>
     <footer class="footer"><p>Javi Penaloza · Sí es posible</p><div class="footer-links"><a href="/legal/">Privacidad y términos</a><a href="https://wa.me/573238016527" target="_blank" rel="noreferrer">+57 323 801 6527</a></div></footer>
     <a class="mobile-buy" href="/inscribirse" aria-label="Elegir silla desde 49.000 pesos"><span>Desde · $49.000</span><strong>Elegir silla</strong></a>
-    <script src="script.js?v=2"></script>
+    <script src="script.js?v=3"></script>
   </body>
 </html>

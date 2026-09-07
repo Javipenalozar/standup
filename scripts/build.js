@@ -17,7 +17,8 @@ const files = [
   'admin/index.html',
   'admin/check-in/index.html',
   'legal/index.html',
-  'assets/standup-cosmic-hero-v1.jpg',
+  'assets/standup-cosmic-hero-v2.jpg',
+  'assets/standup-cosmic-hero-mobile-v2.jpg',
   'assets/html5-qrcode.min.js',
   'assets/html5-qrcode.LICENSE',
 ];

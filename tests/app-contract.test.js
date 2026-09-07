@@ -160,9 +160,17 @@ test('ticket navigation opens the seat selector and inherited turquoise is absen
   const landing = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
   const selector = fs.readFileSync(path.join(root, 'inscribirse/index.html'), 'utf8');
   const styles = fs.readFileSync(path.join(root, 'styles.css'), 'utf8');
+  const landingStyles = fs.readFileSync(path.join(root, 'landing.css'), 'utf8');
+  const build = fs.readFileSync(path.join(root, 'scripts/build.js'), 'utf8');
 
   assert.match(landing, /href="\/inscribirse\/">Boletas<\/a>/);
   assert.match(selector, /href="\/inscribirse\/">Boletas<\/a>/);
+  assert.match(landing, /standup-cosmic-hero-v2\.jpg/);
+  assert.match(landing, /standup-cosmic-hero-mobile-v2\.jpg/);
+  assert.doesNotMatch(landing, /standup-cosmic-hero-v1\.jpg/);
+  assert.match(landingStyles, /--landing-blue:\s*#0f5496/i);
+  assert.match(build, /assets\/standup-cosmic-hero-v2\.jpg/);
+  assert.match(build, /assets\/standup-cosmic-hero-mobile-v2\.jpg/);
   assert.doesNotMatch(styles, /#3fa594|rgba\(63,\s*165,\s*148/i);
 });
 

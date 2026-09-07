@@ -1,14 +1,15 @@
 :root {
-  --black: #230619;
-  --night: #011919;
-  --steel: #520938;
-  --mist: #e0b080;
-  --muted: #c09060;
-  --white: #f0d0a0;
-  --accent: #f9b609;
-  --red: #ee3601;
-  --pink: #e00c26;
-  --yellow: #f9b609;
+  --black: #0d1210;
+  --night: #071822;
+  --steel: #0f5496;
+  --mist: #eae5e2;
+  --muted: #bdb4ad;
+  --white: #fffaf2;
+  --accent: #0f67b1;
+  --accent-bright: #78c4ff;
+  --red: #d54a03;
+  --pink: #ef5a18;
+  --yellow: #f4a30a;
   --line: rgba(255, 255, 255, 0.14);
   --max: 1160px;
 }
@@ -59,7 +60,7 @@ a {
 }
 
 .topbar.is-scrolled {
-  background: rgba(35, 6, 25, 0.94);
+  background: rgba(7, 18, 24, 0.94);
   border-bottom: 1px solid var(--line);
   backdrop-filter: blur(16px);
 }
@@ -84,9 +85,9 @@ a {
   width: 38px;
   height: 38px;
   place-items: center;
-  border: 2px solid var(--accent);
+  border: 2px solid var(--accent-bright);
   border-radius: 10px;
-  color: var(--accent);
+  color: var(--accent-bright);
   font-size: 0.82rem;
 }
 
@@ -99,9 +100,9 @@ a {
 
 .nav-cta {
   padding: 11px 16px;
-  border: 1px solid rgba(249, 182, 9, 0.62);
+  border: 1px solid rgba(120, 196, 255, 0.58);
   border-radius: 999px;
-  color: var(--accent);
+  color: var(--accent-bright);
 }
 
 .hero {
@@ -154,7 +155,7 @@ a {
 .eyebrow,
 .section-label {
   margin: 0 0 14px;
-  color: var(--accent);
+  color: var(--accent-bright);
   font-size: 0.82rem;
   font-weight: 900;
   letter-spacing: 0;
@@ -429,7 +430,7 @@ h2 {
 }
 
 .cards span {
-  color: var(--accent);
+  color: var(--accent-bright);
   font-weight: 900;
 }
 
@@ -443,8 +444,8 @@ h3 {
 
 .quote-section {
   background:
-    linear-gradient(rgba(35, 6, 25, 0.72), rgba(35, 6, 25, 0.94)),
-    url("assets/standup-cosmic-hero-v1.jpg") center 38% / cover;
+    linear-gradient(rgba(7, 18, 24, 0.7), rgba(7, 18, 24, 0.94)),
+    url("assets/standup-cosmic-hero-v2.jpg") center 38% / cover;
   text-align: center;
 }
 
@@ -467,7 +468,7 @@ blockquote {
 .tickets {
   border: 1px solid var(--line);
   border-radius: 22px;
-  background: linear-gradient(145deg, rgba(82, 9, 56, 0.72), rgba(240, 208, 160, 0.035));
+  background: linear-gradient(145deg, rgba(15, 84, 150, 0.25), rgba(255, 250, 242, 0.025));
 }
 
 .details-panel {
@@ -548,7 +549,7 @@ blockquote {
 }
 
 .price-box strong {
-  color: var(--accent);
+  color: var(--accent-bright);
   font-size: 2.55rem;
 }
 
@@ -610,7 +611,7 @@ blockquote {
 .footer a,
 .legal-consent a,
 .legal-page a {
-  color: var(--accent);
+  color: var(--accent-bright);
 }
 
 .legal-consent {
@@ -746,7 +747,7 @@ blockquote {
 .thanks-card {
   border: 1px solid var(--line);
   border-radius: 22px;
-  background: linear-gradient(145deg, rgba(82, 9, 56, 0.72), rgba(240, 208, 160, 0.035));
+  background: linear-gradient(145deg, rgba(15, 84, 150, 0.25), rgba(255, 250, 242, 0.025));
 }
 
 .signup-steps article {
@@ -754,7 +755,7 @@ blockquote {
 }
 
 .signup-steps span {
-  color: var(--accent);
+  color: var(--accent-bright);
   font-weight: 900;
 }
 
@@ -806,11 +807,11 @@ blockquote {
 
 .stage-label {
   text-align: center;
-  background: linear-gradient(180deg, rgba(249, 182, 9, 0.2), rgba(249, 182, 9, 0.05));
-  border: 1px solid rgba(249, 182, 9, 0.34);
+  background: linear-gradient(180deg, rgba(15, 103, 177, 0.34), rgba(15, 84, 150, 0.1));
+  border: 1px solid rgba(87, 178, 255, 0.48);
   border-radius: 18px 18px 50% 50%;
   padding: 18px 20px 28px;
-  color: var(--accent);
+  color: var(--accent-bright);
   font-family: Anton, Impact, sans-serif;
   font-size: 1.4rem;
   text-transform: uppercase;
@@ -893,15 +894,15 @@ blockquote {
 .seat-btn:hover:not(.is-taken):not(.is-selected) {
   background: rgba(249, 182, 9, 0.2);
   border-color: var(--accent);
-  color: var(--accent);
+  color: var(--accent-bright);
   transform: scale(1.12);
 }
 
 .seat-btn.is-selected {
   background: var(--accent);
   border-color: var(--accent);
-  color: var(--black);
-  box-shadow: 0 0 12px rgba(249, 182, 9, 0.42);
+  color: var(--white);
+  box-shadow: 0 0 14px rgba(45, 143, 226, 0.48);
 }
 
 .seat-btn.is-taken {
@@ -969,7 +970,7 @@ blockquote {
   margin-top: 40px;
   border: 1px solid var(--line);
   border-radius: 22px;
-  background: linear-gradient(145deg, rgba(82, 9, 56, 0.72), rgba(240, 208, 160, 0.035));
+  background: linear-gradient(145deg, rgba(15, 84, 150, 0.24), rgba(255, 250, 242, 0.025));
   padding: clamp(24px, 4vw, 44px);
 }
 
@@ -989,7 +990,7 @@ blockquote {
 .checkout-total {
   font-family: Anton, Impact, sans-serif;
   font-size: 2rem;
-  color: var(--accent);
+  color: var(--accent-bright);
 }
 
 .selected-seats-list {
@@ -1061,7 +1062,7 @@ blockquote {
   border-radius: 14px;
   padding: 16px 28px;
   background: var(--accent);
-  color: var(--black);
+  color: var(--white);
   font-family: inherit;
   font-size: 1.05rem;
   font-weight: 900;
@@ -1071,7 +1072,7 @@ blockquote {
 
 .btn-bold:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 0 34px rgba(249, 182, 9, 0.36);
+  box-shadow: 0 0 34px rgba(45, 143, 226, 0.4);
 }
 
 .btn-bold:disabled {
@@ -1090,7 +1091,7 @@ blockquote {
   margin-top: 40px;
   border: 1px solid rgba(249, 182, 9, 0.36);
   border-radius: 22px;
-  background: linear-gradient(145deg, rgba(82, 9, 56, 0.72), rgba(240, 208, 160, 0.035));
+  background: linear-gradient(145deg, rgba(15, 84, 150, 0.24), rgba(255, 250, 242, 0.025));
   padding: clamp(30px, 5vw, 56px);
   text-align: center;
   box-shadow: 0 0 60px rgba(249, 182, 9, 0.16);
@@ -1098,7 +1099,7 @@ blockquote {
 
 .qr-result-card h3 {
   margin: 0 0 6px;
-  color: var(--accent);
+  color: var(--accent-bright);
 }
 
 .qr-result-card .qr-subtitle {
@@ -1424,7 +1425,7 @@ blockquote {
     padding: 13px 16px;
     border: 1px solid rgba(249, 182, 9, 0.75);
     border-radius: 16px;
-    background: rgba(35, 6, 25, 0.96);
+    background: rgba(7, 18, 24, 0.96);
     box-shadow: 0 16px 42px rgba(0, 0, 0, 0.42);
     backdrop-filter: blur(16px);
   }
