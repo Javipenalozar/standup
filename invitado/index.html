@@ -287,9 +287,8 @@
 
       function renderCompanionFields() {
         const container = document.getElementById('companionsFields');
-        const companionCount = invitationData && invitationData.corporate
-          ? Math.max(0, selectedSeats.size - 1)
-          : 0;
+        // Every seat needs an attendee name, including seats on personal gifts.
+        const companionCount = Math.max(0, selectedSeats.size - 1);
         if (Number(container.dataset.count) === companionCount) return;
 
         const previousValues = [...container.querySelectorAll('.companion-name')]

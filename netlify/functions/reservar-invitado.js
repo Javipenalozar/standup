@@ -135,6 +135,9 @@ function reservationError(data) {
   if (message.includes('correo')) return message;
   if (message.includes('cupos')) return message;
   if (message.includes('silla')) return message;
+  if (message.includes('asistente')) return message;
+  if (message.includes('aceptación legal')) return message;
+  if (message.includes('evento es obligatorio')) return message;
   if (message.includes('código') || message.includes('Código')) return message;
   return 'No fue posible registrar la invitación';
 }
