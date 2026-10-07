@@ -547,7 +547,7 @@
 
       function renderSystemAlerts(events) {
         const box = document.getElementById('systemAlert');
-        const reviewStatuses = new Set(['error', 'invalid_reference', 'unmatched', 'amount_mismatch']);
+        const reviewStatuses = new Set(['error', 'invalid_reference', 'unmatched', 'amount_mismatch', 'seat_conflict']);
         const problems = events.filter(event =>
           reviewStatuses.has(event.status) ||
           event.notification_status === 'failed' ||

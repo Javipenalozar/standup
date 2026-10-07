@@ -58,6 +58,34 @@ create index if not exists st_event_reservations_checkin_idx
   on public.st_event_reservations (event_id, checked_in_at)
   where payment_status = 'paid';
 
+-- Apartados administrativos para pagos en efectivo. No son tickets pagados
+-- ni registran consentimientos legales del asistente.
+create table if not exists public.st_event_seat_holds (
+  id uuid primary key default gen_random_uuid(),
+  event_id text not null,
+  seat_id text not null check (
+    seat_id ~ '^([A-J]-([1-9]|1[0-9]|2[0-2])|K-([1-9]|1[0-9]))$'
+  ),
+  holder_name text not null,
+  holder_email text not null,
+  payment_method text not null default 'cash' check (payment_method = 'cash'),
+  status text not null default 'active' check (status in ('active', 'released', 'expired')),
+  hold_expires_at timestamptz not null,
+  created_at timestamptz not null default now()
+);
+
+create unique index if not exists st_event_seat_holds_active_seat_uidx
+  on public.st_event_seat_holds (event_id, seat_id)
+  where status = 'active';
+
+create index if not exists st_event_seat_holds_expiry_idx
+  on public.st_event_seat_holds (event_id, hold_expires_at)
+  where status = 'active';
+
+alter table public.st_event_seat_holds enable row level security;
+revoke all on table public.st_event_seat_holds from public, anon, authenticated;
+grant select, insert, update on table public.st_event_seat_holds to service_role;
+
 create table if not exists public.st_event_invitations (
   id uuid primary key default gen_random_uuid(),
   event_id text not null,
@@ -386,6 +414,7 @@ declare
   v_expected integer;
   v_seats integer;
   v_pending integer;
+  v_conflicts integer;
   v_status text;
 begin
   insert into public.st_payment_webhook_events (
@@ -433,8 +462,7 @@ begin
       into v_seats, v_pending, v_expected
       from public.st_event_reservations
      where event_id = p_event_id
-       and (bold_reference = p_payment_reference or qr_code = p_payment_reference)
-       and payment_status in ('pending', 'paid');
+       and (bold_reference = p_payment_reference or qr_code = p_payment_reference);
 
     if v_seats = 0 then
       v_status := 'unmatched';
@@ -449,6 +477,62 @@ begin
         'receivedCurrency', upper(coalesce(p_currency, ''))
       );
     else
+      -- A late approval may arrive after the 15-minute hold cleanup. Expired
+      -- pending rows for these seats no longer own them and must not prevent
+      -- restoring the actual purchaser's reservation.
+      update public.st_event_reservations stale
+         set payment_status = 'cancelled',
+             hold_expires_at = null
+       where stale.event_id = p_event_id
+         and stale.payment_status = 'pending'
+         and stale.hold_expires_at is not null
+         and stale.hold_expires_at <= now()
+         and stale.seat_id in (
+           select own.seat_id
+             from public.st_event_reservations own
+            where own.event_id = p_event_id
+              and (own.bold_reference = p_payment_reference or own.qr_code = p_payment_reference)
+         )
+         and not (stale.bold_reference = p_payment_reference or stale.qr_code = p_payment_reference);
+
+      select count(*)::integer
+        into v_conflicts
+        from public.st_event_reservations own
+       where own.event_id = p_event_id
+         and (own.bold_reference = p_payment_reference or own.qr_code = p_payment_reference)
+         and (
+           exists (
+             select 1
+               from public.st_event_reservations other
+              where other.event_id = own.event_id
+                and other.seat_id = own.seat_id
+                and other.id <> own.id
+                and (
+                  other.payment_status = 'paid'
+                  or (other.payment_status = 'pending'
+                      and (other.hold_expires_at is null or other.hold_expires_at > now()))
+                )
+           )
+           or exists (
+             select 1
+               from public.st_event_seat_holds seat_hold
+              where seat_hold.event_id = own.event_id
+                and seat_hold.seat_id = own.seat_id
+                and seat_hold.status = 'active'
+                and seat_hold.hold_expires_at > now()
+           )
+         );
+
+      if v_conflicts > 0 then
+        v_status := 'seat_conflict';
+        v_result := jsonb_build_object(
+          'status', v_status,
+          'duplicate', false,
+          'seats', v_seats,
+          'conflictingSeats', v_conflicts,
+          'expectedAmount', v_expected
+        );
+      else
       update public.st_event_reservations
          set payment_status = 'paid',
              bold_payment_id = coalesce(nullif(p_payment_id, ''), bold_payment_id),
@@ -456,7 +540,7 @@ begin
              hold_expires_at = null
        where event_id = p_event_id
          and (bold_reference = p_payment_reference or qr_code = p_payment_reference)
-         and payment_status = 'pending';
+         and payment_status in ('pending', 'cancelled', 'paid');
 
       v_status := 'paid';
       v_result := jsonb_build_object(
@@ -465,6 +549,7 @@ begin
         'seats', v_seats,
         'expectedAmount', v_expected
       );
+      end if;
     end if;
   elsif v_type in ('SALE_REJECTED', 'PAYMENT_REJECTED', 'PAYMENT_ERROR') then
     update public.st_event_reservations
@@ -502,6 +587,14 @@ begin
 
   return v_result;
   exception
+    when unique_violation then
+      update public.st_payment_webhook_events
+         set status = 'seat_conflict',
+             result = jsonb_build_object('status', 'seat_conflict', 'duplicate', false),
+             processed_at = now(),
+             notification_status = 'not_required'
+       where id = v_audit_id;
+      return jsonb_build_object('status', 'seat_conflict', 'duplicate', false);
     when others then
       update public.st_payment_webhook_events
          set status = 'error',

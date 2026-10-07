@@ -92,6 +92,20 @@ test('the canonical SQL denies browser roles and exposes only service-role RPCs'
   assert.doesNotMatch(sql, /from public\.st_event_reservations\s+from public\.st_event_reservations/);
 });
 
+test('late Bold approvals recover released seats only when they remain unoccupied', () => {
+  const sql = fs.readFileSync(path.join(root, 'supabase-event-schema.sql'), 'utf8');
+  const admin = fs.readFileSync(path.join(root, 'admin/index.html'), 'utf8');
+  const processor = fs.readFileSync(path.join(root, 'netlify/functions/bold-webhook-process-background.js'), 'utf8');
+  const rpc = sql.slice(sql.indexOf('create or replace function public.st_apply_bold_webhook'));
+
+  assert.match(rpc, /payment_status in \('pending', 'cancelled', 'paid'\)/);
+  assert.match(rpc, /payment_status = 'cancelled'/);
+  assert.match(rpc, /status = 'seat_conflict'/);
+  assert.match(rpc, /public\.st_event_seat_holds/);
+  assert.match(admin, /'seat_conflict'/);
+  assert.match(processor, /'seat_conflict'/);
+});
+
 test('checkout and invitation require explicit legal acceptance', () => {
   for (const page of ['inscribirse/index.html', 'invitado/index.html']) {
     const html = fs.readFileSync(path.join(root, page), 'utf8');

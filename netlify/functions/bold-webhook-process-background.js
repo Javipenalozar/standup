@@ -253,7 +253,7 @@ exports.handler = async function handler(event) {
       }
     }
 
-    if (['amount_mismatch', 'unmatched', 'invalid_reference'].includes(result.data.status)) {
+    if (['amount_mismatch', 'unmatched', 'invalid_reference', 'seat_conflict'].includes(result.data.status)) {
       console.error('Bold webhook requires manual review', fields, result.data);
     }
 

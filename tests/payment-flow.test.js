@@ -237,3 +237,35 @@ test('background payment processing sends the audited amount and idempotent emai
     restoreEnvironment();
   }
 });
+
+test('a late approval with an occupied seat is flagged without issuing another ticket', async () => {
+  const restoreEnvironment = withEventEnvironment();
+  const payload = {
+    id: 'evt-seat-conflict',
+    type: 'SALE_APPROVED',
+    data: {
+      payment_id: 'PAY-SEAT-CONFLICT',
+      amount: { currency: 'COP', total: 49000 },
+      metadata: { reference: 'LNK_CONFLICT' },
+    },
+  };
+  const rawBody = JSON.stringify(payload);
+  const mock = useHttpsResponses([
+    { status: 200, data: { status: 'seat_conflict', duplicate: false, conflictingSeats: 1 } },
+  ]);
+
+  try {
+    const handler = require('../netlify/functions/bold-webhook-process-background').handler;
+    const response = await handler({
+      httpMethod: 'POST',
+      body: rawBody,
+      headers: { 'x-bold-signature': signatureFor(rawBody, process.env.BOLD_SECRET_KEY) },
+    });
+    assert.equal(response.statusCode, 200);
+    assert.equal(mock.requests.length, 1);
+    assert.equal(mock.requests[0].options.path, '/rest/v1/rpc/st_apply_bold_webhook');
+  } finally {
+    mock.restore();
+    restoreEnvironment();
+  }
+});
