@@ -727,6 +727,43 @@ blockquote {
   padding: 128px clamp(20px, 5vw, 64px) 70px;
 }
 
+.checkout-promotion {
+  align-items: center;
+  background: linear-gradient(135deg, rgba(15, 84, 150, 0.9), rgba(7, 24, 34, 0.96));
+  border: 1px solid rgba(120, 196, 255, 0.62);
+  display: flex;
+  gap: 18px;
+  justify-content: space-between;
+  margin-top: 22px;
+  max-width: 680px;
+  padding: 14px 17px;
+}
+
+.checkout-promotion[hidden] {
+  display: none;
+}
+
+.checkout-promotion strong {
+  color: var(--white);
+  font-family: Anton, Impact, sans-serif;
+  font-size: 1.15rem;
+  font-weight: 400;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+}
+
+.checkout-promotion span {
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.checkout-promotion b {
+  color: var(--accent-bright);
+  font-variant-numeric: tabular-nums;
+}
+
 .subhero {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(300px, 460px);
@@ -1391,6 +1428,16 @@ blockquote {
 
   .subpage {
     padding: 104px 20px 48px;
+  }
+
+  .checkout-promotion {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .checkout-promotion span {
+    white-space: normal;
   }
 
   .signup-steps {

@@ -127,11 +127,42 @@ exports.handler = async function (event) {
       };
     }
 
-    const pricing = seatPricing.summarizeSeats(seats);
+    const pricingTimestamp = Date.now();
+    const pricing = seatPricing.summarizeSeats(seats, pricingTimestamp);
     const priceBySeat = new Map(pricing.items.map(item => [item.seatId, item.price]));
+    const manualHoldsResult = await supabaseRequest(
+      'GET',
+      '/rest/v1/st_event_seat_holds?select=seat_id' +
+        '&event_id=eq.' + encodeURIComponent(EVENT_ID) +
+        '&status=eq.active' +
+        '&seat_id=in.(' + seats.join(',') + ')' +
+        '&hold_expires_at=gt.' + encodeURIComponent(new Date(pricingTimestamp).toISOString()),
+      null
+    );
+
+    if (manualHoldsResult.status >= 400 || !Array.isArray(manualHoldsResult.data)) {
+      console.error('Could not verify manual seat holds', manualHoldsResult.status, manualHoldsResult.data);
+      return {
+        statusCode: 503,
+        headers,
+        body: JSON.stringify({ error: 'No fue posible verificar la disponibilidad de las sillas' }),
+      };
+    }
+
+    if (manualHoldsResult.data.length > 0) {
+      return {
+        statusCode: 409,
+        headers,
+        body: JSON.stringify({ error: 'Algunas sillas están apartadas para pago en efectivo' }),
+      };
+    }
 
     const callbackUrl = publicUrl('/inscribirse/', { ref: orderReference });
-    const expiresAt = new Date(Date.now() + HOLD_DURATION_MS);
+    const regularHoldEnd = pricingTimestamp + HOLD_DURATION_MS;
+    const promotionEnd = pricing.promotion.active
+      ? Date.parse(pricing.promotion.endsAt)
+      : Number.POSITIVE_INFINITY;
+    const expiresAt = new Date(Math.min(regularHoldEnd, promotionEnd));
     const acceptedAt = new Date().toISOString();
     const reservations = seats.map(seatId => ({
       event_id: EVENT_ID,
@@ -219,6 +250,7 @@ exports.handler = async function (event) {
           checkoutUrl,
           totalAmount: pricing.total,
           pricing: pricing.breakdown,
+          promotion: pricing.promotion,
         }),
       };
     }

@@ -183,6 +183,17 @@
   padding: 7px 10px 6px;
 }
 
+.hero-kicker mark {
+  background: var(--landing-yellow);
+  color: var(--landing-ink);
+  font: inherit;
+  padding: 7px 10px 6px;
+}
+
+.hero-kicker mark[hidden] {
+  display: none;
+}
+
 .landing-page .hero-title {
   color: var(--landing-cream);
   font-family: "Anton", sans-serif;
@@ -218,6 +229,43 @@
   line-height: 1.55;
   margin: 34px 0 0;
   max-width: 600px;
+}
+
+.masterclass-offer {
+  align-items: center;
+  background: rgba(15, 84, 150, 0.9);
+  border: 1px solid rgba(255, 250, 242, 0.46);
+  display: flex;
+  gap: 18px;
+  margin-top: 24px;
+  max-width: 600px;
+  padding: 13px 16px;
+}
+
+.masterclass-offer[hidden] {
+  display: none;
+}
+
+.masterclass-offer strong {
+  color: var(--landing-cream);
+  font-family: "Anton", sans-serif;
+  font-size: 1.08rem;
+  font-weight: 400;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+}
+
+.masterclass-offer span {
+  color: rgba(255, 250, 242, 0.82);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.4;
+}
+
+.masterclass-offer b {
+  color: #a9d9ff;
+  font-variant-numeric: tabular-nums;
 }
 
 .hero-actions {
@@ -337,6 +385,12 @@
   font-weight: 400;
   line-height: 1.05;
   margin: 3px 0;
+}
+
+.hero-ticket [data-price-regular],
+.purchase-price [data-price-regular] {
+  color: rgba(255, 250, 242, 0.62);
+  text-decoration: line-through;
 }
 
 .hero-ticket del {
@@ -790,6 +844,11 @@
   margin: 12px 0 7px;
 }
 
+.purchase-price strong b,
+.mobile-buy b {
+  font: inherit;
+}
+
 .purchase-steps {
   border-bottom: 1px solid var(--landing-line);
   border-top: 1px solid var(--landing-line);
@@ -1025,7 +1084,7 @@
     padding: 112px 20px 300px;
   }
 
-  .hero-kicker { font-size: 0.64rem; margin-bottom: 20px; }
+  .hero-kicker { flex-wrap: wrap; font-size: 0.64rem; margin-bottom: 20px; }
   .hero-series { font-size: 0.9rem; margin-bottom: 10px; }
 
   .landing-page .hero-title {
@@ -1036,6 +1095,8 @@
 
   .hero-line-last { font-size: 0.63em; }
   .hero-lead { font-size: 0.93rem; line-height: 1.48; margin-top: 26px; max-width: 93%; }
+  .masterclass-offer { align-items: flex-start; flex-direction: column; gap: 5px; margin-top: 18px; max-width: 93%; padding: 11px 13px; }
+  .masterclass-offer strong { font-size: 0.94rem; }
   .hero-actions { align-items: flex-start; flex-direction: column; gap: 22px; margin-top: 26px; }
   .landing-page .hero-actions .button { min-width: 202px; padding: 16px 17px; }
 

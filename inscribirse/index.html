@@ -37,6 +37,10 @@
           Selecciona donde quieres sentarte, completa tus datos y paga en línea.
           Recibirás un QR único para presentar en la entrada.
         </p>
+        <div class="checkout-promotion" id="masterclassPromotion" hidden>
+          <strong>15% de descuento en tus entradas</strong>
+          <span>Hasta hoy, miércoles 14 de octubre, 10:00 p. m. · Hora de Colombia · <b id="promotionCountdown"></b></span>
+        </div>
         <p id="localPreviewNotice" style="display:none;color:var(--yellow);max-width:680px;margin-top:18px;font-weight:800;">
           Vista de prueba: puedes usar el selector y el formulario. Los pagos reales permanecen bloqueados.
         </p>
@@ -63,8 +67,8 @@
           </div>
 
           <div class="map-legend" id="priceLegend">
-            <div><div class="legend-swatch sw-selected"></div>Tu selección</div>
-            <div><div class="legend-swatch sw-taken"></div>Ocupada</div>
+            <div data-legend-state><div class="legend-swatch sw-selected"></div>Tu selección</div>
+            <div data-legend-state><div class="legend-swatch sw-taken"></div>Ocupada</div>
           </div>
         </div>
       </div>
@@ -122,11 +126,12 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
-    <script src="/seat-pricing.js?v=3"></script>
+    <script src="/seat-pricing.js?v=5"></script>
     <script>
     (function () {
       const PRICING = window.StandupSeatPricing;
       let PREVIEW_MODE = ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
+      let serverClockOffset = 0;
 
       if (!PRICING) {
         document.getElementById('seatMapLoading').innerHTML =
@@ -152,6 +157,15 @@
       const takenSeats = new Set();
       const selectedSeats = new Set();
       const seatButtons = {};
+      let lastPromotionActive = null;
+
+      function pricingNow() {
+        return Date.now() + serverClockOffset;
+      }
+
+      function pricingState() {
+        return PRICING.getPricingState(pricingNow());
+      }
 
       // ══════════════════════════════════════════════
       //  1. CARGAR SILLAS OCUPADAS DESDE EL SERVIDOR
@@ -160,6 +174,7 @@
         if (PREVIEW_MODE) {
           document.getElementById('localPreviewNotice').style.display = 'block';
           renderSeatMap();
+          refreshPricingUi();
           document.getElementById('seatMapLoading').style.display = 'none';
           document.getElementById('seatMapContainer').style.display = 'block';
           return;
@@ -169,6 +184,8 @@
           const res = await fetch('/.netlify/functions/public-seats', { cache: 'no-store' });
           const data = await res.json();
           if (!res.ok || !Array.isArray(data.seats)) throw new Error(data.error);
+          const serverTimestamp = Date.parse(data.serverTime);
+          if (Number.isFinite(serverTimestamp)) serverClockOffset = serverTimestamp - Date.now();
           if (data.preview === true) {
             PREVIEW_MODE = true;
             document.getElementById('localPreviewNotice').style.display = 'block';
@@ -182,6 +199,7 @@
         }
 
         renderSeatMap();
+        refreshPricingUi();
         document.getElementById('seatMapLoading').style.display = 'none';
         document.getElementById('seatMapContainer').style.display = 'block';
       }
@@ -251,10 +269,10 @@
 
       function renderPriceLegend() {
         const legend = document.getElementById('priceLegend');
-        const stateItems = [...legend.children];
+        const stateItems = [...legend.querySelectorAll('[data-legend-state]')];
         legend.textContent = '';
 
-        PRICING.tiers.forEach(tier => {
+        pricingState().tiers.forEach(tier => {
           const item = document.createElement('div');
           const swatch = document.createElement('span');
           swatch.className = 'legend-swatch sw-price';
@@ -265,6 +283,41 @@
         });
 
         stateItems.forEach(item => legend.appendChild(item));
+      }
+
+      function refreshPricingUi() {
+        const state = pricingState();
+        const promotion = document.getElementById('masterclassPromotion');
+        const countdown = document.getElementById('promotionCountdown');
+        promotion.hidden = !state.active;
+
+        if (state.active) {
+          const remaining = Math.max(0, Date.parse(state.endsAt) - pricingNow());
+          const hours = String(Math.floor(remaining / 3600000)).padStart(2, '0');
+          const minutes = String(Math.floor((remaining % 3600000) / 60000)).padStart(2, '0');
+          const seconds = String(Math.floor((remaining % 60000) / 1000)).padStart(2, '0');
+          countdown.textContent = hours + ':' + minutes + ':' + seconds;
+        } else {
+          countdown.textContent = '';
+        }
+
+        if (
+          state.active !== lastPromotionActive &&
+          document.getElementById('seatMap').children.length > 0
+        ) {
+          renderPriceLegend();
+          Object.entries(seatButtons).forEach(([seatId, button]) => {
+            const tier = PRICING.getTierForSeat(seatId, pricingNow());
+            const number = seatId.split('-')[1];
+            button.dataset.priceTier = tier.id;
+            button.style.setProperty('--seat-tier-color', tier.color);
+            button.title = 'Fila ' + seatId.replace('-', ', Silla ') + ' · ' + tier.label + ' · ' + formatCop(tier.price);
+            button.setAttribute('aria-label', 'Fila ' + seatId.replace('-', ' Silla ') + ', ' + tier.label + ', ' + formatCop(tier.price));
+            button.textContent = number;
+          });
+          if (selectedSeats.size > 0) updateCheckout();
+          lastPromotionActive = state.active;
+        }
       }
 
       function toggleSeat(seatId) {
@@ -299,7 +352,8 @@
         }
 
         const count = selectedSeats.size;
-        const pricing = PRICING.summarizeSeats([...selectedSeats]);
+        const priceAt = pricingNow();
+        const pricing = PRICING.summarizeSeats([...selectedSeats], priceAt);
         title.textContent = count + (count === 1 ? ' silla seleccionada' : ' sillas seleccionadas');
         total.textContent = formatCop(pricing.total);
 
@@ -310,7 +364,7 @@
         });
 
         list.textContent = sorted.map(s => {
-          const tier = PRICING.getTierForSeat(s);
+          const tier = PRICING.getTierForSeat(s, priceAt);
           return 'Fila ' + s.replace('-', ' · Silla ') + ' · ' + formatCop(tier.price);
         }).join('  ·  ');
         form.style.display = 'grid';
@@ -555,7 +609,8 @@
       if (boldRef) {
         handleBoldReturn(boldRef);
       } else {
-        loadTakenSeats();
+      loadTakenSeats();
+      window.setInterval(refreshPricingUi, 1000);
       }
 
       // ── Topbar scroll ──

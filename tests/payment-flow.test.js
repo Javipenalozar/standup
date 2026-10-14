@@ -88,9 +88,12 @@ function withEventEnvironment() {
   };
 }
 
-test('payment creation recalculates a mixed order on the server', async () => {
+test('payment creation applies the 15 percent discount and caps checkout at Wednesday 10pm', async () => {
   const restoreEnvironment = withEventEnvironment();
+  const originalNow = Date.now;
+  Date.now = () => Date.parse('2026-10-14T21:50:00-05:00');
   const mock = useHttpsResponses([
+    { status: 200, data: [] },
     { status: 201, data: [{ id: 'r1' }, { id: 'r2' }, { id: 'r3' }] },
     { status: 200, data: { payload: { payment_link: 'LNK_TEST', url: 'https://checkout.bold.co/LNK_TEST' } } },
     { status: 200, data: [{ id: 'r1' }, { id: 'r2' }, { id: 'r3' }] },
@@ -114,19 +117,25 @@ test('payment creation recalculates a mixed order on the server', async () => {
     });
     const body = JSON.parse(response.body);
     assert.equal(response.statusCode, 200);
-    assert.equal(body.totalAmount, 187000);
+    assert.equal(body.totalAmount, 158950);
+    assert.equal(body.promotion.active, true);
 
-    const reservationRows = JSON.parse(mock.requests[0].rawBody);
-    assert.deepEqual(reservationRows.map(row => row.amount), [49000, 59000, 79000]);
+    assert.equal(mock.requests[0].options.method, 'GET');
+    assert.match(mock.requests[0].options.path, /st_event_seat_holds/);
+    const reservationRows = JSON.parse(mock.requests[1].rawBody);
+    assert.deepEqual(reservationRows.map(row => row.amount), [41650, 50150, 67150]);
     assert.ok(reservationRows.every(row => row.privacy_policy_version === '2026-09-04'));
-    assert.equal(mock.requests[0].options.path, '/rest/v1/st_event_reservations');
+    assert.ok(reservationRows.every(row => row.hold_expires_at === '2026-10-15T03:00:00.000Z'));
+    assert.equal(mock.requests[1].options.path, '/rest/v1/st_event_reservations');
 
-    const boldBody = JSON.parse(mock.requests[1].rawBody);
-    assert.equal(boldBody.amount.total_amount, 187000);
+    const boldBody = JSON.parse(mock.requests[2].rawBody);
+    assert.equal(boldBody.amount.total_amount, 158950);
+    assert.equal(boldBody.expiration_date, Date.parse('2026-10-15T03:00:00.000Z') * 1e6);
     assert.equal(boldBody.reference, 'ST-TEST-MIXED');
-    assert.equal(mock.requests[1].options.hostname, 'integrations.api.bold.co');
+    assert.equal(mock.requests[2].options.hostname, 'integrations.api.bold.co');
   } finally {
     mock.restore();
+    Date.now = originalNow;
     restoreEnvironment();
   }
 });
