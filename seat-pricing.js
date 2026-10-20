@@ -14,11 +14,11 @@
   const EVENT_ID = 'standup-therapy-deja-de-joder-pareja-bogota-5nov2026';
   const SEAT_PATTERN = /^(?:[A-J]-(?:[1-9]|1\d|2[0-2])|K-(?:[1-9]|1\d))$/;
   const MASTERCLASS_PROMOTION = Object.freeze({
-    id: 'especial-15-octubre-15-2026',
+    id: 'especial-15-por-ciento-19-octubre-2026',
     label: 'Descuento especial del 15%',
     discountPercent: 15,
-    startsAt: '2026-10-15T17:00:00-05:00',
-    endsAt: '2026-10-15T18:00:00-05:00',
+    startsAt: '2026-10-19T21:05:58-05:00',
+    endsAt: '2026-10-19T23:00:00-05:00',
     timeZone: 'America/Bogota',
   });
 

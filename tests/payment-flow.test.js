@@ -88,10 +88,10 @@ function withEventEnvironment() {
   };
 }
 
-test('payment creation applies the 15 percent discount and caps checkout at Thursday 6pm', async () => {
+test('payment creation applies the 15 percent discount and caps checkout at Monday 11pm', async () => {
   const restoreEnvironment = withEventEnvironment();
   const originalNow = Date.now;
-  Date.now = () => Date.parse('2026-10-15T17:50:00-05:00');
+  Date.now = () => Date.parse('2026-10-19T22:50:00-05:00');
   const mock = useHttpsResponses([
     { status: 200, data: [] },
     { status: 201, data: [{ id: 'r1' }, { id: 'r2' }, { id: 'r3' }] },
@@ -125,12 +125,12 @@ test('payment creation applies the 15 percent discount and caps checkout at Thur
     const reservationRows = JSON.parse(mock.requests[1].rawBody);
     assert.deepEqual(reservationRows.map(row => row.amount), [41650, 50150, 67150]);
     assert.ok(reservationRows.every(row => row.privacy_policy_version === '2026-09-04'));
-    assert.ok(reservationRows.every(row => row.hold_expires_at === '2026-10-15T23:00:00.000Z'));
+    assert.ok(reservationRows.every(row => row.hold_expires_at === '2026-10-20T04:00:00.000Z'));
     assert.equal(mock.requests[1].options.path, '/rest/v1/st_event_reservations');
 
     const boldBody = JSON.parse(mock.requests[2].rawBody);
     assert.equal(boldBody.amount.total_amount, 158950);
-    assert.equal(boldBody.expiration_date, Date.parse('2026-10-15T23:00:00.000Z') * 1e6);
+    assert.equal(boldBody.expiration_date, Date.parse('2026-10-20T04:00:00.000Z') * 1e6);
     assert.equal(boldBody.reference, 'ST-TEST-MIXED');
     assert.equal(mock.requests[2].options.hostname, 'integrations.api.bold.co');
   } finally {

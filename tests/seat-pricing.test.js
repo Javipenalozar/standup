@@ -2,8 +2,9 @@
 
 const assert = require('assert');
 const pricing = require('../seat-pricing');
-const PROMOTION_ACTIVE_AT = '2026-10-15T17:30:00-05:00';
-const PROMOTION_EXPIRED_AT = '2026-10-15T18:00:00-05:00';
+const PROMOTION_ACTIVE_AT = '2026-10-19T22:30:00-05:00';
+const PROMOTION_START_AT = '2026-10-19T21:05:58-05:00';
+const PROMOTION_EXPIRED_AT = '2026-10-19T23:00:00-05:00';
 
 assert.strictEqual(pricing.EVENT_ID, 'standup-therapy-deja-de-joder-pareja-bogota-5nov2026');
 assert.strictEqual(pricing.getTierForSeat('A-1').id, 'lateral');
@@ -26,9 +27,9 @@ assert.strictEqual(pricing.getPriceForSeat('A-4', PROMOTION_ACTIVE_AT), 50150);
 assert.strictEqual(pricing.getPriceForSeat('A-6', PROMOTION_ACTIVE_AT), 67150);
 assert.strictEqual(pricing.summarizeSeats(['A-1', 'A-4', 'A-6'], PROMOTION_ACTIVE_AT).total, 158950);
 assert.equal(pricing.getPricingState(PROMOTION_ACTIVE_AT).active, true);
-assert.equal(pricing.getPricingState('2026-10-15T16:59:59-05:00').active, false);
-assert.equal(pricing.getPricingState('2026-10-15T17:00:00-05:00').active, true);
-assert.equal(pricing.getPricingState('2026-10-15T17:59:59-05:00').active, true);
+assert.equal(pricing.getPricingState('2026-10-19T21:05:57-05:00').active, false);
+assert.equal(pricing.getPricingState(PROMOTION_START_AT).active, true);
+assert.equal(pricing.getPricingState('2026-10-19T22:59:59-05:00').active, true);
 assert.equal(pricing.getPricingState(PROMOTION_EXPIRED_AT).active, false);
 assert.throws(() => pricing.getPriceForSeat('K-20'), /Silla inválida/);
 assert.throws(() => pricing.summarizeSeats(['A-1', 'A-1']), /repetidas/);
