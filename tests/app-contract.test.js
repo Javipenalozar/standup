@@ -199,6 +199,15 @@ test('the mobile seat map scrolls without shrinking or clipping its legend', () 
   assert.match(styles, /\.map-legend\s*\{[\s\S]*?grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/);
 });
 
+test('the invitation seat map scrolls on mobile without clipping seats', () => {
+  const invitation = fs.readFileSync(path.join(root, 'invitado/index.html'), 'utf8');
+
+  assert.match(invitation, /class="seat-map-hint"[^>]*>Desliza el plano hacia los lados/);
+  assert.match(invitation, /class="seat-map-scroll"[^>]*tabindex="0"[\s\S]*?<div class="seat-map-grid" id="seatMap"><\/div>[\s\S]*?<\/div>/);
+  assert.doesNotMatch(invitation, /transform:\s*scale\([^)]*\)/);
+  assert.doesNotMatch(invitation, /\.theater-container\s*\{\s*overflow:\s*hidden/);
+});
+
 test('real operations remain guarded by default', async () => {
   const priorPayments = process.env.ENABLE_REAL_PAYMENTS;
   const priorOperations = process.env.ENABLE_EVENT_OPERATIONS;
