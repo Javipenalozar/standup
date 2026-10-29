@@ -826,7 +826,7 @@
           groups[r.qr_code].total += Number(r.amount || 0);
         });
 
-        let html = '<table class="history-table"><thead><tr><th>Nombre</th><th>Sillas</th><th>Estado</th><th>Total</th></tr></thead><tbody>';
+        let html = '<table class="history-table"><thead><tr><th>Nombre</th><th>Sillas</th><th>Estado</th><th>Total</th><th>QR</th></tr></thead><tbody>';
         Object.values(groups).forEach(g => {
           const status = getReservationStatus(g);
           const invitationName = g.invitation_code && invitationNames.get(g.invitation_code);
@@ -836,6 +836,9 @@
             : transferPayment
               ? 'Transferencia · $' + g.total.toLocaleString('es-CO') + ' · ' + esc(transferPayment.receipt_reference)
             : g.total === 0 ? 'Invitación' : '$' + g.total.toLocaleString('es-CO');
+          const resendButton = g.payment_status === 'paid' && g.qr_code
+            ? '<button class="copy-btn" type="button" data-resend-code="' + esc(g.qr_code) + '">Reenviar QR</button>'
+            : '';
           html += '<tr>' +
             '<td>' + esc(g.customer_name) +
               (g.attendees.length > 1 ? '<br><span style="font-size:0.75rem;color:var(--muted);">Asistentes: ' + g.attendees.map(esc).join(', ') + '</span>' : '') +
@@ -843,10 +846,14 @@
             '<td>' + g.seats.sort(sortSeats).join(', ') + '</td>' +
             '<td><span class="badge ' + status.className + '">' + status.label + '</span>' + status.time + '</td>' +
             '<td>' + type + '</td>' +
+            '<td>' + resendButton + '</td>' +
             '</tr>';
         });
         html += '</tbody></table>';
         container.innerHTML = html;
+        container.querySelectorAll('[data-resend-code]').forEach(button => {
+          button.addEventListener('click', () => resendTransferTicket(button.dataset.resendCode, button));
+        });
       }
 
       function getReservationStatus(reservation) {

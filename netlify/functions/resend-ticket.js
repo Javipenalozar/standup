@@ -1,4 +1,5 @@
 const https = require('https');
+const crypto = require('node:crypto');
 const { EVENT, eventDetailsHtml, eventOperationsEnabled, publicUrl } = require('../lib/event-config');
 const adminAuth = require('../lib/admin-auth');
 
@@ -116,8 +117,9 @@ exports.handler = async function (event) {
       headers: {
         'Content-Type': 'application/json',
         Authorization: 'Bearer ' + process.env.RESEND_API_KEY,
-        'Idempotency-Key':
-          'standup-ticket-resend-' + qrCode + '-' + new Date().toISOString().slice(0, 10),
+        // Each explicit resend is a new email operation. A daily key prevented
+        // delivery when the recipient address was corrected the same day.
+        'Idempotency-Key': 'standup-ticket-resend-' + qrCode + '-' + crypto.randomUUID(),
         'User-Agent': 'standup-therapy/1.0',
       },
       body: {
