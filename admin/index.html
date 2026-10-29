@@ -57,7 +57,31 @@
       .admin-header-actions .nav-cta { position: static; transform: none; }
       .system-alert { display: none; margin-bottom: 18px; padding: 14px 16px; border: 1px solid #713943; border-radius: 9px; background: #35191d; color: #ffb1b8; font-size: .86rem; line-height: 1.45; }
       .system-alert.show { display: block; }
+      .transfer-intro { color: var(--muted); font-size: .88rem; line-height: 1.55; margin: -4px 0 20px; }
+      .transfer-attendee { border: 1px solid rgba(255,255,255,.11); border-radius: 12px; padding: 18px; margin: 14px 0; min-width: 0; }
+      .transfer-attendee legend { padding: 0 8px; color: #f9b609; font-family: 'Anton', sans-serif; letter-spacing: .04em; text-transform: uppercase; }
+      .transfer-attendee-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 14px; }
+      .admin-field input[type="checkbox"] { width: auto; accent-color: #f9b609; }
+      .transfer-check { display: flex; align-items: flex-start; gap: 10px; margin: 10px 0; color: var(--muted); font-size: .83rem; line-height: 1.5; }
+      .transfer-check input { flex: 0 0 auto; margin-top: 3px; accent-color: #f9b609; }
+      .transfer-check a { color: #ffd15c; }
+      .transfer-total { margin: 8px 0 18px; padding: 13px 15px; background: rgba(249,182,9,.08); border: 1px solid rgba(249,182,9,.2); border-radius: 10px; color: var(--muted); }
+      .transfer-total strong { color: #ffd15c; font-size: 1.15rem; }
+      .transfer-feedback { display: none; margin-top: 16px; padding: 14px 16px; border-radius: 10px; line-height: 1.5; font-size: .88rem; }
+      .transfer-feedback.show { display: block; }
+      .transfer-feedback.error { border: 1px solid #713943; background: #35191d; color: #ffb1b8; }
+      .transfer-feedback.success { border: 1px solid rgba(0,255,200,.2); background: rgba(0,255,200,.06); color: #d6fff4; }
+      .transfer-ticket { border-top: 1px solid rgba(255,255,255,.12); padding-top: 12px; margin-top: 12px; }
+      .transfer-ticket a, .transfer-history-ticket a { color: #ffd15c; overflow-wrap: anywhere; }
+      .transfer-history { display: grid; gap: 12px; margin-top: 18px; }
+      .transfer-history-item { padding: 16px; border: 1px solid rgba(255,255,255,.1); border-radius: 12px; }
+      .transfer-history-item h4 { margin: 0 0 6px; color: #ffd15c; }
+      .transfer-history-item p { margin: 4px 0; color: var(--muted); font-size: .82rem; }
+      .transfer-history-ticket { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding-top: 10px; margin-top: 10px; border-top: 1px solid rgba(255,255,255,.08); font-size: .82rem; }
+      .transfer-history-ticket .copy-btn { padding: 7px 10px; }
       @media (max-width: 620px) {
+        .transfer-attendee-grid { grid-template-columns: 1fr; }
+        .transfer-attendee { padding: 14px; }
         .admin-header-actions .nav-cta:last-child { display: none; }
       }
     </style>
@@ -100,6 +124,7 @@
           <button class="tab-btn active" data-tab="crear">Crear invitación</button>
           <button class="tab-btn" data-tab="historial">Historial</button>
           <button class="tab-btn" data-tab="reservas">Reservas</button>
+          <button class="tab-btn" data-tab="transferencias">Transferencias</button>
         </div>
 
         <!-- Tab: Crear invitación -->
@@ -164,9 +189,48 @@
             <div id="reservasList"><p style="color:var(--muted);">Cargando...</p></div>
           </div>
         </div>
+        <div class="tab-content" id="tab-transferencias">
+          <div class="admin-card">
+            <h3>Registrar transferencia</h3>
+            <p class="transfer-intro">Usa este registro cuando el dinero ya llegó a la cuenta de la empresa. El sistema verifica el valor frente a las sillas, evita duplicar el comprobante y envía un QR individual a cada correo.</p>
+            <form id="transferForm">
+              <div class="admin-field">
+                <label for="transferReference">Referencia del comprobante</label>
+                <input id="transferReference" name="reference" required maxlength="100" autocomplete="off" placeholder="Ej. TRp8wTkJcEEC" />
+              </div>
+              <div class="admin-field">
+                <label for="transferReceivedAt">Fecha y hora del comprobante</label>
+                <input id="transferReceivedAt" name="receivedAt" type="datetime-local" required />
+              </div>
+              <div class="admin-field">
+                <label for="transferOperator">Nombre de quien registra</label>
+                <input id="transferOperator" name="operator" required minlength="2" maxlength="120" autocomplete="name" />
+              </div>
+              <div class="transfer-total">Total de las sillas seleccionadas: <strong id="transferExpectedTotal">$0 COP</strong></div>
+              <div id="transferAttendees"></div>
+              <button class="admin-btn secondary" id="addTransferAttendee" type="button">Añadir asistente</button>
+              <div class="admin-field" style="margin-top:18px;">
+                <label for="transferAmount">Valor recibido (COP)</label>
+                <input id="transferAmount" name="amount" type="number" min="1" step="1" inputmode="numeric" required />
+              </div>
+              <label class="transfer-check">
+                <input id="transferVerified" type="checkbox" required />
+                <span>Confirmo que verifiqué el ingreso del dinero en la cuenta de la empresa.</span>
+              </label>
+              <button class="admin-btn" id="registerTransferBtn" type="submit" style="margin-top:16px;">Registrar pago y enviar QR</button>
+              <div class="transfer-feedback" id="transferFeedback" role="status" aria-live="polite"></div>
+            </form>
+          </div>
+          <div class="admin-card">
+            <h3>Transferencias registradas</h3>
+            <p class="transfer-intro">Consulta comprobantes, sillas y accesos a los QR. También puedes solicitar el reenvío de un correo.</p>
+            <div id="transferHistory" class="transfer-history"><p style="color:var(--muted);">Cargando...</p></div>
+          </div>
+        </div>
       </div>
     </div>
 
+    <script src="/seat-pricing.js"></script>
     <script>
     (function () {
       const TOTAL_SEATS = 239;
@@ -175,6 +239,9 @@
       let reservasLoading = false;
       let adminDataCache = null;
       let adminDataCachedAt = 0;
+      let availableSeats = [];
+      let transferAttendeeCount = 0;
+      let transferAttendeeSequence = 0;
 
       async function fetchAdminData(forceRefresh) {
         if (!forceRefresh && adminDataCache && Date.now() - adminDataCachedAt < 5000) {
@@ -289,6 +356,7 @@
           document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
           if (btn.dataset.tab === 'historial') loadHistory();
           if (btn.dataset.tab === 'reservas') loadReservas();
+          if (btn.dataset.tab === 'transferencias') loadTransferTab();
         });
       });
 
@@ -395,6 +463,269 @@
         btn.textContent = 'Crear invitación';
       });
 
+      // Transferencias manuales
+      const transferAttendees = document.getElementById('transferAttendees');
+      const transferAmount = document.getElementById('transferAmount');
+      const transferReceivedAt = document.getElementById('transferReceivedAt');
+
+      function localDateTimeValue(date) {
+        const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+        return local.toISOString().slice(0, 16);
+      }
+
+      function allSeatIds() {
+        const seats = [];
+        for (const row of 'ABCDEFGHIJ') {
+          for (let number = 1; number <= 22; number += 1) seats.push(row + '-' + number);
+        }
+        for (let number = 1; number <= 19; number += 1) seats.push('K-' + number);
+        return seats.filter(seat => window.StandupSeatPricing.isValidSeat(seat));
+      }
+
+      function createTransferAttendee() {
+        if (transferAttendeeCount >= 10) return;
+        transferAttendeeCount += 1;
+        transferAttendeeSequence += 1;
+        const number = transferAttendeeSequence;
+        const card = document.createElement('fieldset');
+        card.className = 'transfer-attendee';
+        card.innerHTML = `
+          <legend>Asistente ${number}</legend>
+          <div class="transfer-attendee-grid">
+            <div class="admin-field"><label for="transferName${number}">Nombre completo</label><input id="transferName${number}" name="name" required minlength="2" maxlength="120" autocomplete="name"></div>
+            <div class="admin-field"><label for="transferEmail${number}">Correo del asistente</label><input id="transferEmail${number}" name="email" type="email" required maxlength="254" autocomplete="email"></div>
+            <div class="admin-field"><label for="transferPhone${number}">Celular</label><input id="transferPhone${number}" name="phone" type="tel" required minlength="7" maxlength="32" autocomplete="tel"></div>
+            <div class="admin-field"><label for="transferSeat${number}">Silla</label><select id="transferSeat${number}" name="seat" required><option value="">Cargando sillas disponibles...</option></select></div>
+          </div>
+          <label class="transfer-check"><input name="privacyAccepted" type="checkbox" required><span>Confirmo que este asistente aceptó el <a href="/legal/#privacidad" target="_blank" rel="noreferrer">tratamiento de datos personales</a>.</span></label>
+          <label class="transfer-check"><input name="termsAccepted" type="checkbox" required><span>Confirmo que este asistente aceptó los <a href="/legal/#terminos" target="_blank" rel="noreferrer">términos de compra y asistencia</a>.</span></label>
+          <button class="admin-btn secondary remove-transfer-attendee" type="button" style="margin-top:8px;">Quitar asistente</button>
+        `;
+        card.querySelector('.remove-transfer-attendee').addEventListener('click', () => {
+          card.remove();
+          transferAttendeeCount = transferAttendees.querySelectorAll('.transfer-attendee').length;
+          document.getElementById('addTransferAttendee').disabled = transferAttendeeCount >= 10;
+          updateTransferSeatOptions();
+          updateTransferTotal();
+        });
+        card.querySelector('[name="seat"]').addEventListener('change', () => {
+          updateTransferSeatOptions();
+          updateTransferTotal();
+        });
+        transferAttendees.appendChild(card);
+        document.getElementById('addTransferAttendee').disabled = transferAttendeeCount >= 10;
+        updateTransferSeatOptions();
+        return card;
+      }
+
+      function updateTransferSeatOptions() {
+        const selects = [...transferAttendees.querySelectorAll('[name="seat"]')];
+        selects.forEach(select => {
+          const current = select.value;
+          const heldByOthers = new Set(selects.filter(other => other !== select).map(other => other.value).filter(Boolean));
+          const options = ['<option value="">Selecciona una silla</option>'];
+          availableSeats.forEach(seat => {
+            if (heldByOthers.has(seat) && seat !== current) return;
+            const tier = window.StandupSeatPricing.getTierForSeat(seat, transferReceivedAt.value
+              ? new Date(transferReceivedAt.value).getTime()
+              : Date.now());
+            const label = seat + ' · ' + tier.label + ' · $' + tier.price.toLocaleString('es-CO');
+            options.push('<option value="' + esc(seat) + '">' + esc(label) + '</option>');
+          });
+          select.innerHTML = options.join('');
+          select.value = current;
+          select.disabled = availableSeats.length === 0;
+        });
+      }
+
+      function updateTransferTotal() {
+        const seats = [...transferAttendees.querySelectorAll('[name="seat"]')].map(select => select.value).filter(Boolean);
+        let total = 0;
+        try {
+          total = window.StandupSeatPricing.summarizeSeats(seats, transferReceivedAt.value
+            ? new Date(transferReceivedAt.value).getTime()
+            : Date.now()).total;
+        } catch {}
+        document.getElementById('transferExpectedTotal').textContent = '$' + total.toLocaleString('es-CO') + ' COP';
+        if (transferAmount.dataset.touched !== 'true') transferAmount.value = total || '';
+      }
+
+      async function loadManualTransferSeats() {
+        const selects = [...transferAttendees.querySelectorAll('[name="seat"]')];
+        selects.forEach(select => { select.disabled = true; });
+        try {
+          const res = await fetch('/.netlify/functions/public-seats', { cache: 'no-store' });
+          const data = await res.json();
+          if (!res.ok || !Array.isArray(data.seats)) throw new Error('No fue posible cargar las sillas');
+          const occupied = new Set(data.seats);
+          availableSeats = allSeatIds().filter(seat => !occupied.has(seat));
+          updateTransferSeatOptions();
+          updateTransferTotal();
+        } catch {
+          document.getElementById('transferFeedback').textContent = 'No fue posible cargar las sillas disponibles. Actualiza el panel e inténtalo de nuevo.';
+          document.getElementById('transferFeedback').className = 'transfer-feedback show error';
+        }
+      }
+
+      async function loadTransferTab() {
+        if (!transferAttendees.children.length) createTransferAttendee();
+        if (!transferReceivedAt.value) transferReceivedAt.value = localDateTimeValue(new Date());
+        await Promise.all([loadManualTransferSeats(), loadTransferHistory()]);
+      }
+
+      document.getElementById('addTransferAttendee').addEventListener('click', () => {
+        if (transferAttendeeCount >= 10) return;
+        createTransferAttendee();
+        updateTransferTotal();
+      });
+
+      transferAmount.addEventListener('input', () => { transferAmount.dataset.touched = 'true'; });
+      transferReceivedAt.addEventListener('change', () => {
+        transferAmount.dataset.touched = 'false';
+        updateTransferSeatOptions();
+        updateTransferTotal();
+      });
+
+      function showTransferFeedback(message, kind, tickets) {
+        const box = document.getElementById('transferFeedback');
+        box.className = 'transfer-feedback show ' + kind;
+        box.innerHTML = esc(message);
+        (tickets || []).forEach(ticket => {
+          const item = document.createElement('div');
+          item.className = 'transfer-ticket';
+          item.innerHTML = '<strong>' + esc(ticket.customer_name) + ' · ' + esc(ticket.seat_id) + '</strong><br>' +
+            esc(ticket.customer_email) + ' · ' + (ticket.email_sent ? 'Resend aceptó el correo' : 'Correo pendiente de reintento') +
+            '<br><a href="' + esc(ticket.ticket_url) + '" target="_blank" rel="noreferrer">Abrir entrada y QR</a> · Código: ' + esc(ticket.qr_code);
+          if (!ticket.email_sent) {
+            const resend = document.createElement('button');
+            resend.type = 'button';
+            resend.className = 'copy-btn';
+            resend.textContent = 'Reintentar envío';
+            resend.dataset.resendCode = ticket.qr_code;
+            item.appendChild(resend);
+          }
+          box.appendChild(item);
+        });
+        box.querySelectorAll('[data-resend-code]').forEach(button => {
+          button.addEventListener('click', () => resendTransferTicket(button.dataset.resendCode, button));
+        });
+      }
+
+      async function resendTransferTicket(qrCode, button) {
+        button.disabled = true;
+        button.textContent = 'Enviando...';
+        try {
+          const res = await fetch('/.netlify/functions/resend-ticket', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin',
+            body: JSON.stringify({ qrCode }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok || data.sent !== true) throw new Error(data.error || 'No se pudo enviar');
+          button.textContent = 'Envío aceptado';
+          button.classList.add('secondary');
+          button.removeAttribute('data-resend-code');
+          await loadTransferHistory();
+        } catch (error) {
+          button.disabled = false;
+          button.textContent = error.message || 'Reintentar envío';
+        }
+      }
+
+      document.getElementById('transferForm').addEventListener('submit', async event => {
+        event.preventDefault();
+        const button = document.getElementById('registerTransferBtn');
+        const attendees = [...transferAttendees.querySelectorAll('.transfer-attendee')].map(card => ({
+          name: card.querySelector('[name="name"]').value.trim(),
+          email: card.querySelector('[name="email"]').value.trim(),
+          phone: card.querySelector('[name="phone"]').value.trim(),
+          seatId: card.querySelector('[name="seat"]').value,
+          privacyAccepted: card.querySelector('[name="privacyAccepted"]').checked,
+          termsAccepted: card.querySelector('[name="termsAccepted"]').checked,
+        }));
+        const receivedAt = new Date(transferReceivedAt.value);
+        const amount = Number(transferAmount.value);
+        if (!Number.isFinite(receivedAt.getTime())) {
+          showTransferFeedback('Ingresa la fecha que aparece en el comprobante.', 'error');
+          return;
+        }
+        button.disabled = true;
+        button.textContent = 'Registrando y enviando...';
+        try {
+          const res = await fetch('/.netlify/functions/registrar-transferencia', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin',
+            body: JSON.stringify({
+              paymentVerified: document.getElementById('transferVerified').checked,
+              paymentReference: document.getElementById('transferReference').value.trim(),
+              receivedAt: receivedAt.toISOString(),
+              operatorName: document.getElementById('transferOperator').value.trim(),
+              amount,
+              attendees,
+            }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (res.status === 401) endSession('Tu sesión venció. Ingresa de nuevo.');
+          if (!res.ok || data.created !== true) throw new Error(data.error || 'No fue posible registrar la transferencia');
+          const delivered = data.tickets.filter(ticket => ticket.email_sent).length;
+          const message = delivered === data.tickets.length
+            ? 'Transferencia registrada. Resend aceptó el envío de los ' + delivered + ' correo(s).'
+            : 'Transferencia registrada. ' + delivered + ' de ' + data.tickets.length + ' correo(s) fueron aceptados por Resend; revisa y reintenta los restantes.';
+          showTransferFeedback(message, 'success', data.tickets);
+          document.getElementById('transferReference').value = '';
+          transferAmount.value = '';
+          transferAmount.dataset.touched = 'false';
+          transferReceivedAt.value = localDateTimeValue(new Date());
+          document.getElementById('transferVerified').checked = false;
+          transferAttendees.innerHTML = '';
+          transferAttendeeCount = 0;
+          createTransferAttendee();
+          updateTransferSeatOptions();
+          updateTransferTotal();
+          adminDataCache = null;
+          await Promise.all([loadStats(), loadReservas(), loadTransferHistory(), loadManualTransferSeats()]);
+        } catch (error) {
+          showTransferFeedback(error.message || 'Error de conexión. Actualiza reservas antes de reintentar.', 'error');
+        } finally {
+          button.disabled = false;
+          button.textContent = 'Registrar pago y enviar QR';
+        }
+      });
+
+      async function loadTransferHistory() {
+        const container = document.getElementById('transferHistory');
+        let payload;
+        try {
+          payload = await fetchAdminData(false);
+        } catch {
+          container.innerHTML = '<p style="color:#ff8d8d;">No fue posible cargar las transferencias registradas.</p>';
+          return;
+        }
+        const payments = payload.transferPayments || [];
+        if (!payments.length) {
+          container.innerHTML = '<p style="color:var(--muted);">Aún no hay transferencias registradas desde este panel.</p>';
+          return;
+        }
+        container.innerHTML = payments.map(payment => {
+          const tickets = payload.reservations.filter(row => row.manual_payment_id === payment.id);
+          const ticketRows = tickets.map(ticket =>
+            '<div class="transfer-history-ticket"><span><strong>' + esc(ticket.seat_id) + '</strong> · ' + esc(ticket.customer_name) + '<br>' +
+            esc(ticket.customer_email) + '<br>Código: ' + esc(ticket.qr_code) + '</span>' +
+            '<a href="/inscribirse/?ref=' + encodeURIComponent(ticket.qr_code) + '" target="_blank" rel="noreferrer">Abrir QR</a>' +
+            '<button class="copy-btn" type="button" data-history-resend="' + esc(ticket.qr_code) + '">Reenviar correo</button></div>'
+          ).join('');
+          const received = new Date(payment.received_at).toLocaleString('es-CO');
+          return '<article class="transfer-history-item"><h4>Transferencia · ' + esc(payment.receipt_reference) + '</h4>' +
+            '<p>$' + Number(payment.amount).toLocaleString('es-CO') + ' COP · Recibida ' + esc(received) + '</p>' +
+            '<p>Registrada por ' + esc(payment.recorded_by) + ' · ' + tickets.length + ' silla(s)</p>' + ticketRows + '</article>';
+        }).join('');
+        container.querySelectorAll('[data-history-resend]').forEach(button => {
+          button.addEventListener('click', () => resendTransferTicket(button.dataset.historyResend, button));
+        });
+      }
+
       // History
       async function loadHistory() {
         const container = document.getElementById('historyList');
@@ -461,6 +792,9 @@
         const invitationNames = new Map(
           ((payload && payload.invitations) || []).map(inv => [inv.code, inv.guest_name])
         );
+        const transferPayments = new Map(
+          ((payload && payload.transferPayments) || []).map(payment => [payment.id, payment])
+        );
 
         const container = document.getElementById('reservasList');
         refreshBtn.disabled = false;
@@ -496,8 +830,11 @@
         Object.values(groups).forEach(g => {
           const status = getReservationStatus(g);
           const invitationName = g.invitation_code && invitationNames.get(g.invitation_code);
+          const transferPayment = g.manual_payment_id && transferPayments.get(g.manual_payment_id);
           const type = invitationName
             ? 'Empresa · ' + esc(invitationName)
+            : transferPayment
+              ? 'Transferencia · $' + g.total.toLocaleString('es-CO') + ' · ' + esc(transferPayment.receipt_reference)
             : g.total === 0 ? 'Invitación' : '$' + g.total.toLocaleString('es-CO');
           html += '<tr>' +
             '<td>' + esc(g.customer_name) +

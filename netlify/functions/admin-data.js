@@ -44,7 +44,7 @@ exports.handler = async function (event) {
       return { statusCode: 401, headers, body: JSON.stringify({ error: 'Sesión administrativa vencida' }) };
     }
 
-    const [reservationsResult, invitationsResult, webhookEventsResult] = await Promise.all([
+    const [reservationsResult, invitationsResult, webhookEventsResult, transferPaymentsResult] = await Promise.all([
       supabaseGet(
         '/rest/v1/st_event_reservations?select=*' +
         '&event_id=eq.' + encodeURIComponent(EVENT_ID) +
@@ -59,15 +59,22 @@ exports.handler = async function (event) {
         '&select=provider_event_id,event_type,payment_reference,status,notification_status,notification_error,created_at,processed_at' +
         '&order=created_at.desc&limit=30'
       ),
+      supabaseGet(
+        '/rest/v1/st_event_transfer_payments?event_id=eq.' + encodeURIComponent(EVENT_ID) +
+        '&select=id,receipt_reference,amount,currency,received_at,recorded_by,created_at' +
+        '&order=created_at.desc&limit=50'
+      ),
     ]);
 
     if (
       reservationsResult.status >= 400 ||
       invitationsResult.status >= 400 ||
       webhookEventsResult.status >= 400 ||
+      transferPaymentsResult.status >= 400 ||
       !Array.isArray(reservationsResult.data) ||
       !Array.isArray(invitationsResult.data) ||
-      !Array.isArray(webhookEventsResult.data)
+      !Array.isArray(webhookEventsResult.data) ||
+      !Array.isArray(transferPaymentsResult.data)
     ) {
       console.error(
         'Could not load admin data',
@@ -76,7 +83,8 @@ exports.handler = async function (event) {
         invitationsResult.status,
         invitationsResult.data,
         webhookEventsResult.status,
-        webhookEventsResult.data
+        webhookEventsResult.data,
+        transferPaymentsResult.status
       );
       return {
         statusCode: 502,
@@ -92,6 +100,7 @@ exports.handler = async function (event) {
         reservations: reservationsResult.data,
         invitations: invitationsResult.data,
         webhookEvents: webhookEventsResult.data,
+        transferPayments: transferPaymentsResult.data,
       }),
     };
   } catch (error) {

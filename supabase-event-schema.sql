@@ -1,5 +1,7 @@
 -- Esquema canónico y aislado para Stand-Up Therapy, 5 de noviembre de 2026.
 -- Ejecutar completo una sola vez en el proyecto Supabase confirmado.
+-- Para habilitar pagos manuales por transferencia, aplicar además
+-- supabase-manual-transfer-migration.sql después de este esquema.
 -- No depende de public.reservations ni de mundo_de_javi.reservations.
 
 begin;
