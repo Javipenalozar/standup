@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 
-const EVENT_ID = 'standup-therapy-bogota-2sep2026';
+const EVENT_ID = 'standup-therapy-deja-de-joder-pareja-bogota-5nov2026';
 const SELECT_FIELDS = [
   'id',
   'seat_id',
@@ -102,7 +102,7 @@ function formatTicket(rows) {
 
 async function loadTicket(code) {
   const result = await supabase(
-    '/rest/v1/reservations?select=' + SELECT_FIELDS +
+    '/rest/v1/st_event_reservations?select=' + SELECT_FIELDS +
       '&event_id=eq.' + encodeURIComponent(EVENT_ID) +
       '&qr_code=eq.' + encodeURIComponent(code) +
       '&order=seat_id.asc'
@@ -115,7 +115,7 @@ async function loadTicket(code) {
 
 async function loadPaidReservations() {
   const result = await supabase(
-    '/rest/v1/reservations?select=' + SELECT_FIELDS +
+    '/rest/v1/st_event_reservations?select=' + SELECT_FIELDS +
       '&event_id=eq.' + encodeURIComponent(EVENT_ID) +
       '&payment_status=eq.paid&order=seat_id.asc'
   );
@@ -204,7 +204,7 @@ async function handleMutation(action, codeInput, requestedSeats, operatorInput) 
     return json(400, { error: 'La selección contiene una silla inválida' });
   }
 
-  const result = await supabase('/rest/v1/rpc/st_record_checkin', {
+  const result = await supabase('/rest/v1/rpc/st_record_checkin_v2', {
     method: 'POST',
     headers: { Prefer: 'return=representation' },
     body: JSON.stringify({
