@@ -7,6 +7,7 @@
 //   SUPABASE_KEY  — tu service_role key de Supabase
 
 const https = require('https');
+const CURRENT_EVENT_ID = 'standup-therapy-deja-de-joder-pareja-bogota-5nov2026';
 
 function supabaseGet(path) {
   return new Promise((resolve, reject) => {
@@ -89,6 +90,39 @@ exports.handler = async function (event) {
   }
 
   try {
+    // Ticket links for the November 5 event use the same ref parameter as the
+    // old payment-return flow. Resolve the current event first so already sent
+    // links render their QR instead of looking in the retired reservations table.
+    const currentRows = await supabaseGet(
+      '/rest/v1/st_event_reservations?event_id=eq.' + encodeURIComponent(CURRENT_EVENT_ID) +
+      '&qr_code=eq.' + encodeURIComponent(ref) +
+      '&select=payment_status,seat_id,customer_name,customer_email,amount&order=seat_id.asc'
+    );
+
+    if (Array.isArray(currentRows) && currentRows.length > 0) {
+      if (currentRows.some(row => row.payment_status !== 'paid')) {
+        return {
+          statusCode: 200,
+          headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
+          body: JSON.stringify({ status: currentRows[0].payment_status, seats: [] }),
+        };
+      }
+
+      return {
+        statusCode: 200,
+        headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
+        body: JSON.stringify({
+          status: 'paid',
+          seats: currentRows.map(row => row.seat_id),
+          name: currentRows[0].customer_name,
+          email: currentRows[0].customer_email,
+          amount: currentRows.reduce((total, row) => total + Number(row.amount || 0), 0),
+          providerStatus: null,
+          checkoutUrl: null,
+        }),
+      };
+    }
+
     const rows = await supabaseGet(
       '/rest/v1/reservations?qr_code=eq.' + encodeURIComponent(ref) +
       '&select=payment_status,seat_id,customer_name,customer_email,amount,bold_reference&order=seat_id.asc'

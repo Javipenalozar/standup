@@ -1,6 +1,6 @@
 const https = require('https');
 
-const EVENT_ID = 'standup-therapy-bogota-2sep2026';
+const EVENT_ID = 'standup-therapy-deja-de-joder-pareja-bogota-5nov2026';
 
 function requestJson({ method, hostname, path, headers, body }) {
   return new Promise((resolve, reject) => {
@@ -65,7 +65,7 @@ exports.handler = async function (event) {
     }
 
     const supabaseUrl = new URL(
-      '/rest/v1/reservations?select=customer_name,customer_email,seat_id,payment_status' +
+      '/rest/v1/st_event_reservations?select=customer_name,customer_email,seat_id,payment_status' +
       '&event_id=eq.' + encodeURIComponent(EVENT_ID) +
       '&qr_code=eq.' + encodeURIComponent(qrCode) +
       '&order=seat_id.asc',
@@ -116,13 +116,13 @@ exports.handler = async function (event) {
         from: process.env.RESEND_FROM,
         to: [email],
         reply_to: process.env.RESEND_REPLY_TO || undefined,
-        subject: 'Tu entrada para Stand-Up Therapy',
+        subject: 'Tu entrada para Deja de joder a tu pareja',
         html: `
           <div style="font-family:Arial,sans-serif;line-height:1.55;color:#111">
             <h2>Tu entrada está confirmada</h2>
             <p>Hola ${escapeHtml(name)},</p>
-            <p>Te reenviamos la entrada para Stand-Up Therapy.</p>
-            <p><strong>Fecha:</strong> 2 de septiembre de 2026, 6:00 p. m.</p>
+            <p>Te reenviamos tu entrada para Deja de joder a tu pareja.</p>
+            <p><strong>Fecha:</strong> 5 de noviembre de 2026, 7:00 p. m.</p>
             <p><strong>Lugar:</strong> Teatro Belarte, Cra. 7 # 152-54, Bogotá</p>
             <p><strong>Sillas:</strong> ${escapeHtml(seats.join(', '))}</p>
             <p>
