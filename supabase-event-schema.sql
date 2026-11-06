@@ -357,12 +357,12 @@ begin
       returning r.id, r.event_id, r.qr_code, r.seat_id,
         r.checked_in_at, r.checked_in_by
     ), logged as (
-      insert into public.st_ticket_checkin_events (
+      insert into public.st_ticket_checkin_events as event_log (
         reservation_id, event_id, qr_code, seat_id, action, operator_name
       )
       select c.id, c.event_id, c.qr_code, c.seat_id, 'checked_in', c.checked_in_by
         from changed as c
-      returning reservation_id
+      returning event_log.reservation_id
     )
     select c.id, c.seat_id, c.checked_in_at, c.checked_in_by
       from changed as c
@@ -380,12 +380,12 @@ begin
          and r.checked_in_at is not null
       returning r.id, r.event_id, r.qr_code, r.seat_id
     ), logged as (
-      insert into public.st_ticket_checkin_events (
+      insert into public.st_ticket_checkin_events as event_log (
         reservation_id, event_id, qr_code, seat_id, action, operator_name
       )
       select c.id, c.event_id, c.qr_code, c.seat_id, 'reverted', left(p_operator, 80)
         from changed as c
-      returning reservation_id
+      returning event_log.reservation_id
     )
     select c.id, c.seat_id, null::timestamptz, null::text
       from changed as c
