@@ -39,7 +39,7 @@ Se reutilizan las ilustraciones sin texto de astronautas, micrófono, planetas y
 
 ## Validación local
 
-- 25 pruebas automatizadas: tarifas, pagos simulados, rechazo de referencias anteriores, reversión aislada, bloqueo de la edición anterior y autenticación administrativa.
+- 27 pruebas automatizadas: tarifas, pagos simulados, rechazo de referencias anteriores, reversión aislada, bloqueo de la edición anterior y autenticación administrativa.
 - Compilación estática y revisión de sintaxis.
 - Navegador local en 1440, 390 y 320 px. Selección A-1, A-4 y A-6: 187.000 COP. Pagos deshabilitados en la vista local.
 - Invitación comprobada con respuestas simuladas, sin crear ni enviar invitaciones reales.
@@ -62,3 +62,9 @@ Se reutilizan las ilustraciones sin texto de astronautas, micrófono, planetas y
 Esta copia de publicación excluye los cambios locales previos de atribución de Instagram y del diseño de recordatorios. Se mantiene la venta cerrada hasta una validación controlada del pago real y correo. El identificador remoto no se cambió: todas las operaciones nuevas permanecen bloqueadas por falta de coincidencia de edición. El selector público presenta el plano como referencia.
 
 La revisión final de capturas a 1440, 390 y 320 px resolvió el contraste: textos navy sobre naranja uniforme, información sobre azul en crema, y ausencia de superposición de texto e ilustración.
+
+## Activación de pagos autorizada
+
+Se habilita el cobro Bold exclusivamente para el evento 2.0, con `EVENT_RELEASE_ID` de esta edición y `ENABLE_REAL_PAYMENTS=true` en producción. `ENABLE_EVENT_OPERATIONS=false` mantiene bloqueadas invitaciones, transferencias administrativas, reenvíos/campañas y check-in. El endpoint de disponibilidad permite lectura del evento si los pagos están activos. La limpieza de reservas vencidas pertenece al flujo de pagos y mantiene el filtro de evento.
+
+Se verificó en Supabase, dentro de una transacción revertida, el rechazo de montos incorrectos, la confirmación atómica y la idempotencia; no quedaron registros sintéticos. Las pruebas locales pasan con administración desactivada. La creación de enlace y apertura de checkout se comprueban tras el despliegue sin realizar cargos. La prueba de un pago efectivamente abonado y su correo no forma parte de esa comprobación sin cobro.

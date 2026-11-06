@@ -38,7 +38,7 @@ exports.handler = async function (event) {
   }
   const serverTime = new Date().toISOString();
   const pricing = seatPricing.getPricingState(serverTime);
-  if (!eventOperationsEnabled()) {
+  if (!eventOperationsEnabled() && !realPaymentsEnabled()) {
     return {
       statusCode: 200,
       headers,

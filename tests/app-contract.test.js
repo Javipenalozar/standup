@@ -43,6 +43,27 @@ test('event and legal versions match the current edition', () => {
   assert.equal(require('../netlify/lib/event-config').realPaymentsEnabled(), false);
 });
 
+test('the new payment release cannot activate administrative operations while their switch is off', async () => {
+  const names = ['EVENT_RELEASE_ID', 'ENABLE_REAL_PAYMENTS', 'ENABLE_EVENT_OPERATIONS'];
+  const previous = Object.fromEntries(names.map(name => [name, process.env[name]]));
+  Object.assign(process.env, { EVENT_RELEASE_ID: EVENT.id, ENABLE_REAL_PAYMENTS: 'true', ENABLE_EVENT_OPERATIONS: 'false' });
+  try {
+    const config = require('../netlify/lib/event-config');
+    assert.equal(config.realPaymentsEnabled(), true);
+    assert.equal(config.eventOperationsEnabled(), false);
+    for (const name of ['crear-invitacion', 'reservar-invitado', 'registrar-transferencia', 'resend-ticket', 'send-reminder-campaign']) {
+      const result = await require('../netlify/functions/' + name).handler({ httpMethod: 'POST', body: '{}' });
+      assert.equal(result.statusCode, 503, name);
+    }
+    const checkin = (await import('../netlify/functions/check-in.mjs')).default;
+    assert.equal((await checkin(new Request('http://localhost/check-in', { method: 'POST', body: '{}' }))).status, 503);
+  } finally {
+    for (const name of names) {
+      if (previous[name] === undefined) delete process.env[name]; else process.env[name] = previous[name];
+    }
+  }
+});
+
 test('the previous release cannot enable payments, invitations or check-in for 2.0', async () => {
   const previous = { release: process.env.EVENT_RELEASE_ID, payments: process.env.ENABLE_REAL_PAYMENTS,
     operations: process.env.ENABLE_EVENT_OPERATIONS };

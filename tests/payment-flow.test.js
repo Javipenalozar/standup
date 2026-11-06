@@ -90,6 +90,7 @@ function withEventEnvironment() {
 
 test('new edition charges unchanged seat tariffs and holds seats for 15 minutes', async () => {
   const restoreEnvironment = withEventEnvironment();
+  process.env.ENABLE_EVENT_OPERATIONS = 'false';
   const originalNow = Date.now;
   Date.now = () => Date.parse('2026-10-19T22:50:00-05:00');
   const mock = useHttpsResponses([
@@ -138,6 +139,32 @@ test('new edition charges unchanged seat tariffs and holds seats for 15 minutes'
     Date.now = originalNow;
     restoreEnvironment();
   }
+});
+
+test('payment-only activation exposes event-scoped availability while admin operations remain disabled', async () => {
+  const restoreEnvironment = withEventEnvironment();
+  process.env.ENABLE_EVENT_OPERATIONS = 'false';
+  const originalGet = https.get;
+  const requests = [];
+  https.get = (options, callback) => {
+    requests.push(options.path);
+    const response = new EventEmitter();
+    response.statusCode = 200;
+    callback(response);
+    process.nextTick(() => { response.emit('data', '[]'); response.emit('end'); });
+    return new EventEmitter();
+  };
+  try {
+    const response = await require('../netlify/functions/public-seats').handler({ httpMethod: 'GET' });
+    const data = JSON.parse(response.body);
+    assert.equal(response.statusCode, 200);
+    assert.equal(data.salesOpen, true);
+    assert.equal(data.eventId, EVENT_ID);
+    assert.notEqual(data.preview, true);
+    assert.equal(requests.length, 2);
+    assert.ok(requests.every(path => path.includes('event_id=eq.' + EVENT_ID)));
+    assert.equal(require('../netlify/lib/event-config').eventOperationsEnabled(), false);
+  } finally { https.get = originalGet; restoreEnvironment(); }
 });
 
 test('payment creation rejects missing legal consent before external calls', async () => {
