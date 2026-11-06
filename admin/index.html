@@ -3,12 +3,12 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Admin | Deja de joder a tu pareja</title>
+    <title>Admin | Deja de joder a tu pareja 2.0</title>
     <meta name="robots" content="noindex, nofollow" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/styles.css?v=20270218" />
     <style>
       .admin-container { max-width: 700px; margin: 0 auto; padding: 100px 24px 60px; }
       .admin-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 32px; margin-bottom: 24px; }
@@ -90,7 +90,7 @@
     <!-- Login -->
     <div id="loginScreen" class="login-box">
       <h2>Admin Panel</h2>
-      <p style="color:var(--muted);margin-bottom:24px;">Deja de joder a tu pareja · Teatro Belarte · 5 de noviembre de 2026</p>
+      <p style="color:var(--muted);margin-bottom:24px;">Deja de joder a tu pareja 2.0 · Teatro Belarte · 18 de febrero de 2027</p>
       <div class="admin-field">
         <input type="password" id="passwordInput" placeholder="Contraseña" />
       </div>
@@ -442,11 +442,11 @@
 
           document.getElementById('copyWaBtn').onclick = () => {
             const intro = data.corporate
-              ? '*'+ name + '* te obsequia una entrada para *Deja de joder a tu pareja*. 🎭\n\n'
-              : '¡Hola! 🎭 Tu entrada para *Deja de joder a tu pareja* está confirmada.\n\n';
+              ? '*'+ name + '* te obsequia una entrada para *Deja de joder a tu pareja 2.0*. 🎭\n\n'
+              : '¡Hola! 🎭 Tu entrada para *Deja de joder a tu pareja 2.0* está confirmada.\n\n';
             const msg = intro +
               '📍 Teatro Belarte · Cra 7 #152-54, Bogotá\n' +
-              '📅 Jueves 5 de noviembre de 2026 · 7:00 p. m.\n\n' +
+              '📅 Jueves 18 de febrero de 2027 · Inicio 7:30 p. m. · Puertas 7:00 p. m.\n\n' +
               'Registra tus datos, elige tu silla y recibe tu QR aquí:\n' + link + '\n\n' +
               (data.corporate ? 'Enlace individual: máximo una entrada por correo.\n\n' : '') +
               '¡Nos vemos! 🎤';

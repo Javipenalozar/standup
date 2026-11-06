@@ -1,6 +1,8 @@
 import adminAuth from '../lib/admin-auth.js';
 
-const EVENT_ID = 'standup-therapy-deja-de-joder-pareja-bogota-5nov2026';
+import eventConfig from '../lib/event-config.js';
+
+const EVENT_ID = eventConfig.EVENT.id;
 const SELECT_FIELDS = [
   'id',
   'seat_id',

@@ -10,6 +10,7 @@ const files = [
   'index.html',
   'landing.css',
   'script.js',
+  'event-config.js',
   'seat-pricing.js',
   'styles.css',
   'inscribirse/index.html',
@@ -17,8 +18,7 @@ const files = [
   'admin/index.html',
   'admin/check-in/index.html',
   'legal/index.html',
-  'assets/standup-cosmic-hero-v2.jpg',
-  'assets/standup-cosmic-hero-mobile-v2.jpg',
+  'assets/standup-conversacion-2027.jpg',
   'assets/html5-qrcode.min.js',
   'assets/html5-qrcode.LICENSE',
 ];

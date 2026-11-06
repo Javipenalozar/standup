@@ -1,5 +1,5 @@
 :root {
-  --landing-orange: #d54a03;
+  --landing-orange: #f46500;
   --landing-flame: #ef5a18;
   --landing-yellow: #f4a30a;
   --landing-blue: #0f5496;
@@ -114,7 +114,7 @@
   background: var(--landing-orange);
   display: block;
   isolation: isolate;
-  min-height: max(860px, 100svh);
+  min-height: max(960px, 100svh);
   overflow: hidden;
   padding: 0;
   position: relative;
@@ -127,7 +127,7 @@
 }
 
 .hero-art {
-  transform: translate3d(0, var(--hero-shift, 0), 0) scale(1.055);
+  transform: none;
   transform-origin: center top;
   will-change: transform;
   z-index: -3;
@@ -136,13 +136,13 @@
 .hero-art img {
   height: 100%;
   object-fit: cover;
-  object-position: center center;
+  object-position: right center;
   width: 100%;
 }
 
 .hero-wash {
   background:
-    linear-gradient(90deg, rgba(7, 18, 24, 0.72) 0%, rgba(7, 24, 34, 0.55) 31%, rgba(7, 24, 34, 0.08) 61%, transparent 100%),
+    linear-gradient(90deg, rgba(62, 19, 0, 0.40) 0%, rgba(62, 19, 0, 0.28) 31%, rgba(62, 19, 0, 0.02) 61%, transparent 100%),
     linear-gradient(180deg, rgba(7, 18, 24, 0.16) 52%, rgba(7, 18, 24, 0.9) 100%);
   z-index: -2;
 }
@@ -150,7 +150,7 @@
 .hero-content {
   margin: 0 auto;
   max-width: 1500px;
-  padding: clamp(132px, 15vh, 180px) 5vw 150px;
+  padding: clamp(132px, 15vh, 180px) 5vw 190px;
   position: relative;
   width: 100%;
   z-index: 3;
@@ -197,18 +197,20 @@
 .landing-page .hero-title {
   color: var(--landing-cream);
   font-family: "Anton", sans-serif;
-  font-size: clamp(5.3rem, 9.2vw, 9.6rem);
+  font-size: clamp(5rem, 7.8vw, 8.5rem);
   font-weight: 400;
-  letter-spacing: -0.047em;
-  line-height: 0.77;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
   margin: 0;
-  max-width: 880px;
+  max-width: min(620px, 42vw);
   text-transform: uppercase;
 }
 
 .hero-line {
   display: block;
 }
+
+.hero-line:first-child { font-size: .65em; }
 
 .hero-line-main {
   color: var(--landing-cream);
@@ -218,7 +220,7 @@
 
 .hero-line-last {
   color: var(--landing-cream);
-  font-size: 0.7em;
+  font-size: .95em;
   letter-spacing: -0.035em;
   line-height: 1.05;
 }
@@ -228,7 +230,7 @@
   font-size: clamp(1rem, 1.35vw, 1.25rem);
   line-height: 1.55;
   margin: 34px 0 0;
-  max-width: 600px;
+  max-width: min(430px, 36vw);
 }
 
 .masterclass-offer {
@@ -352,7 +354,7 @@
   display: grid;
   grid-template-columns: minmax(170px, 0.9fr) minmax(180px, 0.9fr) minmax(260px, 1.4fr);
   left: 5vw;
-  max-width: 900px;
+  max-width: 1020px;
   position: absolute;
   z-index: 4;
 }
@@ -532,7 +534,7 @@
   font-family: "Anton", sans-serif;
   font-size: clamp(3.8rem, 8.4vw, 8.7rem);
   letter-spacing: -0.035em;
-  line-height: 0.93;
+  line-height: 1.05;
   margin: clamp(78px, 10vw, 140px) 0 0;
   max-width: 1300px;
   text-transform: uppercase;
@@ -608,7 +610,7 @@
   font-family: "Anton", sans-serif;
   font-size: clamp(3.8rem, 6vw, 7rem);
   letter-spacing: -0.035em;
-  line-height: 0.93;
+  line-height: 1.05;
   text-transform: uppercase;
 }
 
@@ -644,7 +646,7 @@
   font-size: clamp(3rem, 5vw, 5.6rem);
   font-weight: 400;
   letter-spacing: -0.03em;
-  line-height: 0.95;
+  line-height: 1.05;
   margin: 26px 0 30px;
   max-width: 620px;
   text-transform: uppercase;
@@ -707,16 +709,16 @@
   font-family: "Anton", sans-serif;
   font-size: clamp(15rem, 35vw, 39rem);
   font-weight: 400;
-  letter-spacing: -0.075em;
-  line-height: 0.69;
-  margin-left: -0.055em;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  margin-left: 0;
 }
 
 .date-number span {
   color: var(--landing-cream);
   font-family: "Anton", sans-serif;
   font-size: clamp(3rem, 6vw, 7rem);
-  line-height: 0.88;
+  line-height: 1.05;
   padding-bottom: 1vw;
   text-transform: uppercase;
 }
@@ -741,7 +743,7 @@
   font-size: clamp(4.2rem, 7vw, 8rem);
   font-weight: 400;
   letter-spacing: -0.04em;
-  line-height: 0.84;
+  line-height: 1.05;
   margin: 0;
   text-transform: uppercase;
 }
@@ -787,8 +789,8 @@
   font-family: "Anton", sans-serif;
   font-size: clamp(4rem, 7.5vw, 8.2rem);
   font-weight: 400;
-  letter-spacing: -0.045em;
-  line-height: 0.86;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
   margin: 0 0 42px;
   text-transform: uppercase;
 }
@@ -914,8 +916,8 @@
   font-family: "Anton", sans-serif;
   font-size: clamp(4.2rem, 9vw, 10rem);
   font-weight: 400;
-  letter-spacing: -0.045em;
-  line-height: 0.87;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
   margin: 0;
   position: relative;
   text-transform: uppercase;
@@ -1062,17 +1064,25 @@
   .landing-page .nav-cta { font-size: 0.66rem; padding: 11px 13px; }
 
   .landing-page .hero {
-    min-height: 920px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
   }
 
   .hero-art {
-    height: 100%;
-    left: 0;
-    top: 0;
+    position: relative;
+    inset: auto;
+    height: 118vw;
+    max-height: 610px;
+    order: 2;
     width: 100%;
+    transform: none;
+    z-index: 0;
   }
 
-  .hero-art img { object-position: center top; }
+  .hero-art picture { display: block; height: 100%; }
+
+  .hero-art img { object-position: center bottom; }
 
   .hero-wash {
     background:
@@ -1081,15 +1091,17 @@
   }
 
   .hero-content {
-    padding: 112px 20px 300px;
+    order: 1;
+    padding: 106px 20px 30px;
+    background: #ff710c;
   }
 
   .hero-kicker { flex-wrap: wrap; font-size: 0.64rem; margin-bottom: 20px; }
   .hero-series { font-size: 0.9rem; margin-bottom: 10px; }
 
   .landing-page .hero-title {
-    font-size: clamp(4.35rem, 22vw, 6rem);
-    line-height: 0.8;
+    font-size: clamp(4rem, 20vw, 6rem);
+    line-height: 1.05;
     max-width: 100%;
   }
 
@@ -1101,10 +1113,14 @@
   .landing-page .hero-actions .button { min-width: 202px; padding: 16px 17px; }
 
   .hero-ticket {
-    bottom: 34px;
+    position: relative;
+    inset: auto;
+    order: 3;
     grid-template-columns: 1fr 1fr;
-    left: 20px;
-    right: 20px;
+    margin: 0;
+    max-width: none;
+    width: 100%;
+    background: #0b2d48;
   }
 
   .hero-ticket > div { min-height: 82px; padding: 14px 13px; }
@@ -1143,7 +1159,8 @@
   .closing-orbit { height: 105vw; width: 145vw; }
 
   .experience-note { padding: 22px 20px 100px; }
-  .landing-page .footer { display: none; }
+  .landing-page .footer { display: flex; flex-direction: column; gap: 18px; padding: 28px 20px 115px; }
+  .landing-page .footer .footer-links { display: flex; flex-wrap: wrap; gap: 18px; }
   .landing-page .mobile-buy { background: var(--landing-blue); color: var(--landing-cream); }
 }
 
@@ -1161,3 +1178,101 @@
   .orbit,
   .scroll-cue i::after { animation: none !important; }
 }
+
+/* 2.0: lettering and date blocks follow the supplied event graphic. */
+.edition-mark {
+  display: inline-block;
+  background: var(--landing-blue);
+  color: var(--landing-cream);
+  font: inherit;
+  font-size: .55em;
+  padding: .04em .12em .09em;
+  margin-left: .08em;
+}
+.host-credit {
+  color: var(--landing-cream);
+  font-size: .83rem;
+  font-weight: 800;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  margin: 24px 0 0;
+}
+.hero-times {
+  color: var(--landing-cream);
+  font-size: .82rem;
+  font-weight: 700;
+  margin: 12px 0 0;
+  max-width: 520px;
+}
+.hero-reservations {
+  display: inline-block;
+  margin-top: 22px;
+  color: var(--landing-cream);
+  font-size: .85rem;
+  font-weight: 800;
+  text-underline-offset: 5px;
+}
+.hero-reservations:hover { text-decoration: underline; }
+.tariff-list { margin: 30px 0; }
+.tariff-list > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--landing-line);
+}
+.tariff-list dt { font-weight: 700; }
+.tariff-list small { display: block; color: #cec8c1; font-size: .75rem; }
+.tariff-list dd { margin: 0; font-weight: 800; font-variant-numeric: tabular-nums; }
+.landing-page :focus-visible { outline: 3px solid #fffaf2; outline-offset: 5px; }
+@media (min-width: 681px) and (max-width: 1000px) {
+  .hero-content { padding-bottom: 260px; }
+  .landing-page .hero-title { font-size: 10.5vw; max-width: 61vw; }
+  .hero-lead { max-width: 48vw; }
+}
+@media (max-width: 680px) {
+  .hero-wash, .hero > .orbit, .hero > .cosmic-dot { display: none; }
+  .hero-line-last { font-size: .95em; }
+  .hero-lead { max-width: 100%; margin-top: 20px; }
+  .hero-times { line-height: 1.7; }
+  .hero-ticket > div { padding-inline: 20px; }
+  .hero-ticket small { line-height: 1.8; }
+  .host-credit { margin-top: 20px; }
+}
+
+/* Latest reference: blue lettering and the seated astronaut conversation. */
+.landing-page .hero-title, .hero-line-last { color: #001e62; text-shadow: none; }
+.hero-line-main { color: var(--landing-cream); }
+.hero-lead, .host-credit, .hero-times, .hero-reservations { color: #092358; }
+.hero-wash { display: none; }
+.hero-ticket { background: #0b2d48; }
+.hero-kicker { color: #092358; }
+@media (max-width: 680px) {
+  .hero-art { height: 90vw; }
+  .hero-art img { object-position: right center; }
+  .hero-lead { max-width: 100%; }
+  .landing-page .hero-title { max-width: 100%; }
+}
+
+@media (min-width: 681px) {
+  .hero-art { left: 44%; right: 0; top: 150px; bottom: 170px; width: auto; overflow: hidden; }
+  .hero-art picture { position: absolute; inset: 0; display: block; }
+  .hero-art img { position: absolute; top: 50%; right: 0; width: 160%; height: auto; max-width: none; object-fit: contain; transform: translateY(-50%); }
+}
+@media (max-width: 680px) {
+  .hero-art { overflow: hidden; }
+  .hero-art img { position: static; width: 160%; height: 100%; max-width: none; object-fit: cover; transform: translateX(-37.5%); }
+}
+
+/* Legibility on flat orange/blue panels, including small labels and links. */
+.landing-page .hero::after { display: none; }
+.hero-actions .text-link { color: #092358; }
+.manifest-copy em, .landing-page .closing h2 em { color: #001e62; }
+.date-number strong, .date-details > p, .date-details address { color: #fffaf2; }
+.experience-note { color: #d8d1cc; }
+.landing-page .mobile-buy span { color: #fffaf2; }
+
+.landing-page .topbar { background: #0b2d48; }
+.hero-series, .scroll-cue { color: #092358; }
+.date-scene .section-index, .landing-page .mobile-buy strong { color: #fffaf2; }
+@media (max-width: 680px) { .hero-content { background: #f46500; } }

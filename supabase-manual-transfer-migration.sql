@@ -50,7 +50,7 @@ declare
   v_reservation_id uuid;
   v_tickets jsonb := '[]'::jsonb;
 begin
-  if p_event_id is distinct from 'standup-therapy-deja-de-joder-pareja-bogota-5nov2026' then
+  if p_event_id is distinct from 'standup-therapy-deja-de-joder-pareja-2-0-bogota-18feb2027' then
     raise exception 'El evento no corresponde a esta operación';
   end if;
 

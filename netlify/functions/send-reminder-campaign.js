@@ -256,7 +256,7 @@ exports.handler = async function (event) {
       headers: {
         'Content-Type': 'application/json',
         Authorization: 'Bearer ' + process.env.RESEND_API_KEY,
-        'Idempotency-Key': `standup-reminder-deja-de-joder-2026-${recipient.key}-v1`,
+        'Idempotency-Key': `${EVENT.id}-reminder-${recipient.key}-v1`,
         'User-Agent': 'standup-therapy/1.0',
       },
       body: {
@@ -267,8 +267,8 @@ exports.handler = async function (event) {
         html: message.html,
         text: message.text,
         tags: [
-          { name: 'campaign', value: 'standup_reminder_deja_de_joder_2026' },
-          { name: 'event', value: 'deja_de_joder_2026' },
+          { name: 'campaign', value: EVENT.id + '-reminder' },
+          { name: 'event', value: EVENT.id },
         ],
       },
     });

@@ -20,6 +20,9 @@ test('the venue map contains 239 valid seats with the agreed price distribution'
   for (let number = 1; number <= 19; number += 1) seats.push('K-' + number);
 
   assert.equal(seats.length, 239);
+  const configuredSeats = require('../event-config').ROWS.flatMap(row =>
+    [...row.left, ...row.center, ...row.right].map(number => row.label + '-' + number));
+  assert.deepEqual(configuredSeats, seats);
   assert.ok(seats.every(seat => pricing.isValidSeat(seat)));
   const counts = seats.reduce((result, seat) => {
     const tier = pricing.getTierForSeat(seat).id;
@@ -30,13 +33,34 @@ test('the venue map contains 239 valid seats with the agreed price distribution'
 });
 
 test('event and legal versions match the current edition', () => {
-  assert.equal(EVENT.id, 'standup-therapy-deja-de-joder-pareja-bogota-5nov2026');
-  assert.equal(EVENT.date, 'jueves 5 de noviembre de 2026');
-  assert.equal(EVENT.time, '7:00 p. m.');
+  assert.equal(EVENT.id, 'standup-therapy-deja-de-joder-pareja-2-0-bogota-18feb2027');
+  assert.equal(EVENT.date, 'jueves 18 de febrero de 2027');
+  assert.equal(EVENT.time, '7:30 p. m.');
+  assert.equal(EVENT.doorsTime, '7:00 p. m.');
   assert.equal(LEGAL.controllerAddress, 'Calle 23G No. 81-66');
   assert.equal(LEGAL.privacyPolicyVersion, '2026-09-04');
-  assert.equal(LEGAL.termsVersion, '2026-09-04');
+  assert.equal(LEGAL.termsVersion, '2026-11-05');
   assert.equal(require('../netlify/lib/event-config').realPaymentsEnabled(), false);
+});
+
+test('the previous release cannot enable payments, invitations or check-in for 2.0', async () => {
+  const previous = { release: process.env.EVENT_RELEASE_ID, payments: process.env.ENABLE_REAL_PAYMENTS,
+    operations: process.env.ENABLE_EVENT_OPERATIONS };
+  Object.assign(process.env, { EVENT_RELEASE_ID: 'standup-therapy-deja-de-joder-pareja-bogota-5nov2026',
+    ENABLE_REAL_PAYMENTS: 'true', ENABLE_EVENT_OPERATIONS: 'true' });
+  try {
+    assert.equal((await require('../netlify/functions/crear-pago-bold').handler({ httpMethod: 'POST' })).statusCode, 503);
+    assert.equal((await require('../netlify/functions/crear-invitacion').handler({ httpMethod: 'POST' })).statusCode, 503);
+    const checkin = (await import('../netlify/functions/check-in.mjs')).default;
+    assert.equal((await checkin(new Request('http://localhost/check-in', { method: 'POST', body: '{}' }))).status, 503);
+    const cleanup = (await import('../netlify/functions/cleanup-expired-holds.mjs')).default;
+    assert.equal((await cleanup()).status, 503);
+  } finally {
+    for (const [name, value] of Object.entries({ EVENT_RELEASE_ID: previous.release,
+      ENABLE_REAL_PAYMENTS: previous.payments, ENABLE_EVENT_OPERATIONS: previous.operations })) {
+      if (value === undefined) delete process.env[name]; else process.env[name] = value;
+    }
+  }
 });
 
 test('Bold signature and documented fields are parsed', () => {
@@ -179,12 +203,12 @@ test('ticket navigation opens the seat selector and inherited turquoise is absen
 
   assert.match(landing, /href="\/inscribirse\/">Boletas<\/a>/);
   assert.match(selector, /href="\/inscribirse\/">Boletas<\/a>/);
-  assert.match(landing, /standup-cosmic-hero-v2\.jpg/);
-  assert.match(landing, /standup-cosmic-hero-mobile-v2\.jpg/);
+  assert.match(landing, /standup-conversacion-2027\.jpg/);
+  assert.match(landing, /standup-conversacion-2027\.jpg/);
   assert.doesNotMatch(landing, /standup-cosmic-hero-v1\.jpg/);
   assert.match(landingStyles, /--landing-blue:\s*#0f5496/i);
-  assert.match(build, /assets\/standup-cosmic-hero-v2\.jpg/);
-  assert.match(build, /assets\/standup-cosmic-hero-mobile-v2\.jpg/);
+  assert.match(build, /assets\/standup-conversacion-2027\.jpg/);
+  assert.match(build, /assets\/standup-conversacion-2027\.jpg/);
   assert.doesNotMatch(styles, /#3fa594|rgba\(63,\s*165,\s*148/i);
 });
 

@@ -1,4 +1,4 @@
--- Esquema canónico y aislado para Stand-Up Therapy, 5 de noviembre de 2026.
+-- Esquema canónico y aislado para Stand-Up Therapy, 18 de febrero de 2027.
 -- Ejecutar completo una sola vez en el proyecto Supabase confirmado.
 -- Para habilitar pagos manuales por transferencia, aplicar además
 -- supabase-manual-transfer-migration.sql después de este esquema.

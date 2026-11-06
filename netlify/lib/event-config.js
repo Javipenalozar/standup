@@ -1,18 +1,10 @@
 'use strict';
 
-const EVENT = Object.freeze({
-  id: 'standup-therapy-deja-de-joder-pareja-bogota-5nov2026',
-  name: 'Deja de joder a tu pareja',
-  date: 'jueves 5 de noviembre de 2026',
-  time: '7:00 p. m.',
-  venue: 'Teatro Belarte',
-  address: 'Cra. 7 # 152-54, Bogot\u00e1',
-  price: 59000,
-});
+const { EVENT } = require('../../event-config');
 
 const LEGAL = Object.freeze({
   privacyPolicyVersion: '2026-09-04',
-  termsVersion: '2026-09-04',
+  termsVersion: '2026-11-05',
   controllerName: 'JV Bienestar y Salud Mental S.A.S.',
   controllerNit: '901912952-9',
   controllerAddress: 'Calle 23G No. 81-66',
@@ -22,7 +14,8 @@ const LEGAL = Object.freeze({
 
 function eventDetailsHtml() {
   return [
-    '<p><strong>Fecha:</strong> ' + EVENT.date + ', ' + EVENT.time + '</p>',
+    '<p><strong>Fecha:</strong> ' + EVENT.date + '</p>',
+    '<p><strong>Puertas:</strong> ' + EVENT.doorsTime + ' · <strong>Inicio:</strong> ' + EVENT.time + '</p>',
     '<p><strong>Lugar:</strong> ' + EVENT.venue + ', ' + EVENT.address + '</p>',
   ].join('');
 }
@@ -30,6 +23,7 @@ function eventDetailsHtml() {
 function eventDetailsText() {
   return [
     'Fecha: ' + EVENT.date,
+    'Puertas: ' + EVENT.doorsTime,
     'Inicio: ' + EVENT.time,
     'Lugar: ' + EVENT.venue,
     'Direcci\u00f3n: ' + EVENT.address,

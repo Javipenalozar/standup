@@ -27,6 +27,7 @@ async function saveBoldReference(orderReference, boldReference, expiresAt) {
   const url = new URL(
     '/rest/v1/st_event_reservations?qr_code=eq.' +
       encodeURIComponent(orderReference) +
+      '&event_id=eq.' + encodeURIComponent(EVENT_ID) +
       '&payment_status=eq.pending',
     process.env.SUPABASE_URL
   );
@@ -68,6 +69,7 @@ async function rollbackReservation(orderReference) {
   return supabaseRequest(
     'DELETE',
     '/rest/v1/st_event_reservations?qr_code=eq.' + encodeURIComponent(orderReference) +
+      '&event_id=eq.' + encodeURIComponent(EVENT_ID) +
       '&payment_status=eq.pending',
     null,
     'return=minimal'
@@ -104,7 +106,7 @@ exports.handler = async function (event) {
 
     if (
       !validSeats ||
-      !orderReference.startsWith('ST-') ||
+      !orderReference.startsWith(EVENT.referencePrefix) ||
       !customer.name ||
       !customer.email ||
       !customer.phone ||

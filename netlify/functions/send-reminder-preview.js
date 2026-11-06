@@ -3,7 +3,7 @@ const { EVENT, eventDetailsText, eventOperationsEnabled, publicUrl } = require('
 const adminAuth = require('../lib/admin-auth');
 
 const TEST_RECIPIENT = 'jvbienestarysaludmental@javipenaloza.com';
-const SAMPLE_QR = 'VISTA-PREVIA-DEJA-DE-JODER-2026';
+const SAMPLE_QR = 'VISTA-PREVIA-DEJA-DE-JODER-2-0-2027';
 
 function requestJson({ method, hostname, path, headers, body }) {
   return new Promise((resolve, reject) => {
@@ -131,7 +131,7 @@ exports.handler = async function (event) {
       headers: {
         'Content-Type': 'application/json',
         Authorization: 'Bearer ' + process.env.RESEND_API_KEY,
-        'Idempotency-Key': 'standup-reminder-preview-deja-de-joder-2026-v1',
+        'Idempotency-Key': EVENT.id + '-reminder-preview-v1',
         'User-Agent': 'standup-therapy/1.0',
       },
       body: {
@@ -143,7 +143,7 @@ exports.handler = async function (event) {
         text,
         tags: [
           { name: 'campaign', value: 'standup_reminder_preview' },
-          { name: 'event', value: 'deja_de_joder_2026' },
+          { name: 'event', value: EVENT.id },
         ],
       },
     });

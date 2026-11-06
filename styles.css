@@ -911,13 +911,13 @@ blockquote {
 }
 
 .seat-btn {
-  width: 26px;
-  height: 26px;
+  width: 36px;
+  height: 40px;
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 5px 5px 8px 8px;
   background: rgba(255, 255, 255, 0.08);
   color: var(--muted);
-  font-size: 0.58rem;
+  font-size: 0.72rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 120ms ease;
@@ -1051,6 +1051,7 @@ blockquote {
 .field-group {
   display: grid;
   gap: 6px;
+  min-width: 0;
 }
 
 .field-group label {
@@ -1061,6 +1062,8 @@ blockquote {
 }
 
 .field-group input {
+  width: 100%;
+  min-width: 0;
   height: 48px;
   border: 1px solid var(--line);
   border-radius: 12px;
@@ -1074,7 +1077,7 @@ blockquote {
 }
 
 .field-group input::placeholder {
-  color: rgba(255, 255, 255, 0.25);
+  color: var(--muted);
 }
 
 .field-group input:focus {
@@ -1553,3 +1556,15 @@ blockquote {
     padding: 20px;
   }
 }
+
+/* Seat controls keep the same geometry and prices at comfortable touch sizes. */
+.seat-btn { flex: 0 0 40px; width: 40px; height: 44px; color: var(--white); }
+.seat-btn:focus-visible { outline: 3px solid var(--white); outline-offset: 2px; }
+.seat-btn.is-taken { color: var(--muted); }
+.seat-map-scroll { padding: 7px 5px 15px; }
+.seat-map-hint { display: block; color: var(--mist); font-size: .8rem; margin: 0 16px 18px; }
+.subpage .event-heading { color: var(--white); max-width: 780px; line-height: 1.7; }
+.subpage .event-heading strong { color: var(--accent-bright); }
+body:has(.subpage) { background: #071822; }
+:focus-visible { outline: 3px solid var(--accent-bright); outline-offset: 4px; }
+input { caret-color: var(--accent-bright); }

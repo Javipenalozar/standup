@@ -6,7 +6,7 @@ const { EventEmitter } = require('node:events');
 const https = require('node:https');
 const test = require('node:test');
 
-const EVENT_ID = 'standup-therapy-deja-de-joder-pareja-bogota-5nov2026';
+const EVENT_ID = 'standup-therapy-deja-de-joder-pareja-2-0-bogota-18feb2027';
 
 function signatureFor(rawBody, secret) {
   return crypto
@@ -88,7 +88,7 @@ function withEventEnvironment() {
   };
 }
 
-test('payment creation applies the 15 percent discount and caps checkout at Monday 11pm', async () => {
+test('new edition charges unchanged seat tariffs and holds seats for 15 minutes', async () => {
   const restoreEnvironment = withEventEnvironment();
   const originalNow = Date.now;
   Date.now = () => Date.parse('2026-10-19T22:50:00-05:00');
@@ -104,7 +104,7 @@ test('payment creation applies the 15 percent discount and caps checkout at Mond
     const response = await handler({
       httpMethod: 'POST',
       body: JSON.stringify({
-        order_reference: 'ST-TEST-MIXED',
+        order_reference: 'ST-18FEB27-TEST-MIXED',
         seats: ['A-1', 'A-4', 'A-6'],
         customer: {
           name: 'Persona Prueba',
@@ -117,21 +117,21 @@ test('payment creation applies the 15 percent discount and caps checkout at Mond
     });
     const body = JSON.parse(response.body);
     assert.equal(response.statusCode, 200);
-    assert.equal(body.totalAmount, 158950);
-    assert.equal(body.promotion.active, true);
+    assert.equal(body.totalAmount, 187000);
+    assert.equal(body.promotion.active, false);
 
     assert.equal(mock.requests[0].options.method, 'GET');
     assert.match(mock.requests[0].options.path, /st_event_seat_holds/);
     const reservationRows = JSON.parse(mock.requests[1].rawBody);
-    assert.deepEqual(reservationRows.map(row => row.amount), [41650, 50150, 67150]);
+    assert.deepEqual(reservationRows.map(row => row.amount), [49000, 59000, 79000]);
     assert.ok(reservationRows.every(row => row.privacy_policy_version === '2026-09-04'));
-    assert.ok(reservationRows.every(row => row.hold_expires_at === '2026-10-20T04:00:00.000Z'));
+    assert.ok(reservationRows.every(row => row.hold_expires_at === '2026-10-20T04:05:00.000Z'));
     assert.equal(mock.requests[1].options.path, '/rest/v1/st_event_reservations');
 
     const boldBody = JSON.parse(mock.requests[2].rawBody);
-    assert.equal(boldBody.amount.total_amount, 158950);
-    assert.equal(boldBody.expiration_date, Date.parse('2026-10-20T04:00:00.000Z') * 1e6);
-    assert.equal(boldBody.reference, 'ST-TEST-MIXED');
+    assert.equal(boldBody.amount.total_amount, 187000);
+    assert.equal(boldBody.expiration_date, Date.parse('2026-10-20T04:05:00.000Z') * 1e6);
+    assert.equal(boldBody.reference, 'ST-18FEB27-TEST-MIXED');
     assert.equal(mock.requests[2].options.hostname, 'integrations.api.bold.co');
   } finally {
     mock.restore();
@@ -147,7 +147,7 @@ test('payment creation rejects missing legal consent before external calls', asy
     const response = await handler({
       httpMethod: 'POST',
       body: JSON.stringify({
-        order_reference: 'ST-TEST-NO-CONSENT',
+        order_reference: 'ST-18FEB27-TEST-NO-CONSENT',
         seats: ['A-1'],
         customer: {
           name: 'Persona Prueba',
@@ -277,4 +277,37 @@ test('a late approval with an occupied seat is flagged without issuing another t
     mock.restore();
     restoreEnvironment();
   }
+});
+
+test('legacy checkout references cannot create reservations in the new show', async () => {
+  const restore = withEventEnvironment();
+  const mock = useHttpsResponses([]);
+  try {
+    const response = await require('../netlify/functions/crear-pago-bold').handler({
+      httpMethod: 'POST',
+      body: JSON.stringify({ order_reference: 'ST-OLD-2026', seats: ['A-1'], customer: {
+        name: 'Prueba', email: 'test@example.com', phone: '3000000000', privacyConsent: true, termsAccepted: true,
+      } }),
+    });
+    assert.equal(response.statusCode, 400);
+    assert.equal(mock.requests.length, 0);
+  } finally { mock.restore(); restore(); }
+});
+
+test('a failed Bold checkout rolls back only reservations of the new event', async () => {
+  const restore = withEventEnvironment();
+  const mock = useHttpsResponses([
+    { status: 200, data: [] }, { status: 201, data: [{ id: 'r1' }] },
+    { status: 502, data: { error: 'simulated failure' } }, { status: 204, data: null },
+  ]);
+  try {
+    const response = await require('../netlify/functions/crear-pago-bold').handler({
+      httpMethod: 'POST', body: JSON.stringify({ order_reference: 'ST-18FEB27-FAILURE', seats: ['A-1'], customer: {
+        name: 'Prueba', email: 'test@example.com', phone: '3000000000', privacyConsent: true, termsAccepted: true,
+      } }),
+    });
+    assert.equal(response.statusCode, 502);
+    assert.equal(mock.requests[3].options.method, 'DELETE');
+    assert.ok(mock.requests[3].options.path.includes('event_id=eq.' + EVENT_ID));
+  } finally { mock.restore(); restore(); }
 });

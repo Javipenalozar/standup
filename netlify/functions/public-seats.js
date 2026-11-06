@@ -1,5 +1,5 @@
 const https = require('https');
-const { EVENT, eventOperationsEnabled } = require('../lib/event-config');
+const { EVENT, eventOperationsEnabled, realPaymentsEnabled } = require('../lib/event-config');
 const seatPricing = require('../../seat-pricing');
 
 const EVENT_ID = EVENT.id;
@@ -42,7 +42,7 @@ exports.handler = async function (event) {
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify({ seats: [], preview: true, serverTime, pricing }),
+      body: JSON.stringify({ eventId: EVENT_ID, seats: [], preview: true, salesOpen: false, serverTime, pricing }),
     };
   }
 
@@ -83,6 +83,8 @@ exports.handler = async function (event) {
       statusCode: 200,
       headers,
       body: JSON.stringify({
+        eventId: EVENT_ID,
+        salesOpen: realPaymentsEnabled(),
         seats: [...new Set([
           ...result.data.map(row => row.seat_id),
           ...holdsResult.data.map(row => row.seat_id),

@@ -1,0 +1,325 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-06T05:14:37.183331+00:00",
+  "title": "Design System: Stand-Up Therapy",
+  "extensions": {
+    "colorMeta": {
+      "landing-orange": {
+        "role": "primary",
+        "displayName": "Naranja de escenario",
+        "tonalRamp": [
+          "oklch(15% 0.1947 44.74)",
+          "oklch(26% 0.1947 44.74)",
+          "oklch(38% 0.1947 44.74)",
+          "oklch(49% 0.1947 44.74)",
+          "oklch(61% 0.1947 44.74)",
+          "oklch(72% 0.1947 44.74)",
+          "oklch(84% 0.1947 44.74)",
+          "oklch(95% 0.1947 44.74)"
+        ]
+      },
+      "landing-blue": {
+        "role": "primary",
+        "displayName": "Azul de acción",
+        "tonalRamp": [
+          "oklch(15% 0.1256 252.61)",
+          "oklch(26% 0.1256 252.61)",
+          "oklch(38% 0.1256 252.61)",
+          "oklch(49% 0.1256 252.61)",
+          "oklch(61% 0.1256 252.61)",
+          "oklch(72% 0.1256 252.61)",
+          "oklch(84% 0.1256 252.61)",
+          "oklch(95% 0.1256 252.61)"
+        ]
+      },
+      "landing-cream": {
+        "role": "neutral",
+        "displayName": "Crema",
+        "tonalRamp": [
+          "oklch(15% 0.0118 79.79)",
+          "oklch(26% 0.0118 79.79)",
+          "oklch(38% 0.0118 79.79)",
+          "oklch(49% 0.0118 79.79)",
+          "oklch(61% 0.0118 79.79)",
+          "oklch(72% 0.0118 79.79)",
+          "oklch(84% 0.0118 79.79)",
+          "oklch(95% 0.0118 79.79)"
+        ]
+      },
+      "landing-ink": {
+        "role": "neutral",
+        "displayName": "Tinta",
+        "tonalRamp": [
+          "oklch(15% 0.0088 169.10)",
+          "oklch(26% 0.0088 169.10)",
+          "oklch(38% 0.0088 169.10)",
+          "oklch(49% 0.0088 169.10)",
+          "oklch(61% 0.0088 169.10)",
+          "oklch(72% 0.0088 169.10)",
+          "oklch(84% 0.0088 169.10)",
+          "oklch(95% 0.0088 169.10)"
+        ]
+      },
+      "landing-plum": {
+        "role": "neutral",
+        "displayName": "Noche",
+        "tonalRamp": [
+          "oklch(15% 0.0306 236.41)",
+          "oklch(26% 0.0306 236.41)",
+          "oklch(38% 0.0306 236.41)",
+          "oklch(49% 0.0306 236.41)",
+          "oklch(61% 0.0306 236.41)",
+          "oklch(72% 0.0306 236.41)",
+          "oklch(84% 0.0306 236.41)",
+          "oklch(95% 0.0306 236.41)"
+        ]
+      },
+      "accent": {
+        "role": "secondary",
+        "displayName": "Azul operativo",
+        "tonalRamp": [
+          "oklch(15% 0.1395 250.72)",
+          "oklch(26% 0.1395 250.72)",
+          "oklch(38% 0.1395 250.72)",
+          "oklch(49% 0.1395 250.72)",
+          "oklch(61% 0.1395 250.72)",
+          "oklch(72% 0.1395 250.72)",
+          "oklch(84% 0.1395 250.72)",
+          "oklch(95% 0.1395 250.72)"
+        ]
+      },
+      "accent-bright": {
+        "role": "secondary",
+        "displayName": "Azul luminoso",
+        "tonalRamp": [
+          "oklch(15% 0.1133 243.31)",
+          "oklch(26% 0.1133 243.31)",
+          "oklch(38% 0.1133 243.31)",
+          "oklch(49% 0.1133 243.31)",
+          "oklch(61% 0.1133 243.31)",
+          "oklch(72% 0.1133 243.31)",
+          "oklch(84% 0.1133 243.31)",
+          "oklch(95% 0.1133 243.31)"
+        ]
+      },
+      "landing-yellow": {
+        "role": "secondary",
+        "displayName": "Amarillo cálido",
+        "tonalRamp": [
+          "oklch(15% 0.1637 73.21)",
+          "oklch(26% 0.1637 73.21)",
+          "oklch(38% 0.1637 73.21)",
+          "oklch(49% 0.1637 73.21)",
+          "oklch(61% 0.1637 73.21)",
+          "oklch(72% 0.1637 73.21)",
+          "oklch(84% 0.1637 73.21)",
+          "oklch(95% 0.1637 73.21)"
+        ]
+      },
+      "tier-general": {
+        "role": "secondary",
+        "displayName": "General",
+        "tonalRamp": [
+          "oklch(15% 0.1673 81.57)",
+          "oklch(26% 0.1673 81.57)",
+          "oklch(38% 0.1673 81.57)",
+          "oklch(49% 0.1673 81.57)",
+          "oklch(61% 0.1673 81.57)",
+          "oklch(72% 0.1673 81.57)",
+          "oklch(84% 0.1673 81.57)",
+          "oklch(95% 0.1673 81.57)"
+        ]
+      },
+      "tier-lateral": {
+        "role": "neutral",
+        "displayName": "Lateral",
+        "tonalRamp": [
+          "oklch(15% 0.0378 81.52)",
+          "oklch(26% 0.0378 81.52)",
+          "oklch(38% 0.0378 81.52)",
+          "oklch(49% 0.0378 81.52)",
+          "oklch(61% 0.0378 81.52)",
+          "oklch(72% 0.0378 81.52)",
+          "oklch(84% 0.0378 81.52)",
+          "oklch(95% 0.0378 81.52)"
+        ]
+      },
+      "hero-orange-mobile": {
+        "role": "primary",
+        "displayName": "Naranja móvil",
+        "tonalRamp": [
+          "oklch(15% 0.1950 46.55)",
+          "oklch(26% 0.1950 46.55)",
+          "oklch(38% 0.1950 46.55)",
+          "oklch(49% 0.1950 46.55)",
+          "oklch(61% 0.1950 46.55)",
+          "oklch(72% 0.1950 46.55)",
+          "oklch(84% 0.1950 46.55)",
+          "oklch(95% 0.1950 46.55)"
+        ]
+      },
+      "hero-title-navy": {
+        "role": "primary",
+        "displayName": "Navy de titular",
+        "tonalRamp": [
+          "oklch(15% 0.1252 262.02)",
+          "oklch(26% 0.1252 262.02)",
+          "oklch(38% 0.1252 262.02)",
+          "oklch(49% 0.1252 262.02)",
+          "oklch(61% 0.1252 262.02)",
+          "oklch(72% 0.1252 262.02)",
+          "oklch(84% 0.1252 262.02)",
+          "oklch(95% 0.1252 262.02)"
+        ]
+      },
+      "hero-body-blue": {
+        "role": "neutral",
+        "displayName": "Azul de lectura del hero",
+        "tonalRamp": [
+          "oklch(15% 0.1011 262.29)",
+          "oklch(26% 0.1011 262.29)",
+          "oklch(38% 0.1011 262.29)",
+          "oklch(49% 0.1011 262.29)",
+          "oklch(61% 0.1011 262.29)",
+          "oklch(72% 0.1011 262.29)",
+          "oklch(84% 0.1011 262.29)",
+          "oklch(95% 0.1011 262.29)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display condensado",
+        "purpose": "Titulares editoriales de la landing."
+      },
+      "body": {
+        "displayName": "Lectura y operación",
+        "purpose": "Párrafos, controles y datos."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "hero-enter",
+        "value": "900ms cubic-bezier(0.2, 0.76, 0.2, 1)",
+        "purpose": "Entrada escalonada existente del hero; se elimina con movimiento reducido."
+      },
+      {
+        "name": "editorial-state",
+        "value": "180ms ease",
+        "purpose": "Cambios de fondo, color y transformación en acciones editoriales."
+      },
+      {
+        "name": "seat-state",
+        "value": "120ms ease",
+        "purpose": "Respuesta de las sillas disponibles."
+      },
+      {
+        "name": "text-link",
+        "value": "220ms ease",
+        "purpose": "Transformación del subrayado en hover."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "landing-stack",
+        "value": "980px"
+      },
+      {
+        "name": "landing-mobile",
+        "value": "680px"
+      },
+      {
+        "name": "operation-stack",
+        "value": "900px"
+      },
+      {
+        "name": "operation-mobile",
+        "value": "620px"
+      },
+      {
+        "name": "hero-tablet-upper",
+        "value": "1000px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Acción editorial",
+      "kind": "button",
+      "description": "CTA de la landing con inversión de color en hover.",
+      "html": "<button class=\"ds-primary\">Elegir mi silla</button>",
+      "css": ".ds-primary{display:inline-flex;align-items:center;justify-content:space-between;min-height:52px;min-width:218px;background:var(--landing-blue,#0f5496);color:var(--landing-cream,#fffaf2);border:1px solid rgba(255,250,242,.48);border-radius:0;padding:18px 19px;font-family:Inter,system-ui,sans-serif;font-size:.82rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:background 180ms ease,color 180ms ease,transform 180ms ease}.ds-primary:hover{background:var(--landing-cream,#fffaf2);border-color:var(--landing-cream,#fffaf2);color:var(--landing-blue,#0f5496)}.ds-primary:focus-visible,.ds-payment:focus-visible,.ds-nav a:focus-visible,.ds-link:focus-visible{outline:3px solid var(--white,#fffaf2);outline-offset:5px}",
+      "refersTo": "button-primary"
+    },
+    {
+      "name": "Enlace editorial",
+      "kind": "button",
+      "description": "Enlace de continuidad con respuesta del subrayado.",
+      "html": "<a class=\"ds-link\" href=\"#experiencia\">Descubrir la experiencia</a>",
+      "css": ".ds-link{display:inline-flex;position:relative;padding-bottom:7px;color:var(--landing-cream,#fffaf2);font-family:Inter,system-ui,sans-serif;font-size:.78rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;text-decoration:none}.ds-link:after{content:\"\";position:absolute;left:0;bottom:0;width:100%;height:1px;background:currentColor;transform-origin:right;transition:transform 220ms ease}.ds-link:hover:after{transform:scaleX(.25)}.ds-primary:focus-visible,.ds-payment:focus-visible,.ds-nav a:focus-visible,.ds-link:focus-visible{outline:3px solid var(--white,#fffaf2);outline-offset:5px}"
+    },
+    {
+      "name": "Pago",
+      "kind": "button",
+      "description": "Acción del checkout; el estado deshabilitado conserva geometría.",
+      "html": "<button class=\"ds-payment\">Pagar con Bold</button> <button class=\"ds-payment\" disabled>Pagar con Bold</button>",
+      "css": ".ds-payment{display:inline-flex;min-height:56px;align-items:center;justify-content:center;border:0;border-radius:14px;padding:16px 28px;background:var(--accent,#0f67b1);color:var(--white,#fffaf2);font-family:Inter,system-ui,sans-serif;font-size:1.05rem;font-weight:900;cursor:pointer;transition:transform 160ms}.ds-payment:hover:not(:disabled){transform:translateY(-2px)}.ds-payment:disabled{opacity:.4;cursor:not-allowed}.ds-primary:focus-visible,.ds-payment:focus-visible,.ds-nav a:focus-visible,.ds-link:focus-visible{outline:3px solid var(--white,#fffaf2);outline-offset:5px}",
+      "refersTo": "button-payment"
+    },
+    {
+      "name": "Campo de datos",
+      "kind": "input",
+      "description": "Etiqueta y campo del formulario operativo.",
+      "html": "<div class=\"ds-field\"><label for=\"ds-name\">Nombre</label><input id=\"ds-name\" placeholder=\"Tu nombre\" /></div>",
+      "css": ".ds-field{display:grid;gap:6px;min-width:0;font-family:Inter,system-ui,sans-serif}.ds-field label{font-size:.72rem;font-weight:900;color:var(--muted,#bdb4ad);text-transform:uppercase}.ds-field input{width:100%;min-width:0;height:48px;border:1px solid var(--line,rgba(255,255,255,.14));border-radius:12px;padding:0 16px;background:rgba(255,255,255,.06);color:var(--white,#fffaf2);font-size:1rem;font-family:inherit;outline:none;caret-color:var(--accent-bright,#78c4ff);transition:border-color 160ms}.ds-field input::placeholder{color:var(--muted,#bdb4ad)}.ds-field input:focus{border-color:var(--accent,#0f67b1)}",
+      "refersTo": "field"
+    },
+    {
+      "name": "Navegación editorial",
+      "kind": "nav",
+      "description": "Enlaces de escritorio y CTA compacto, sobre fondo noche.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Ejemplo de navegación\"><a href=\"#experiencia\">Experiencia</a><a href=\"#fecha\">Fecha</a><a class=\"ds-nav-cta\" href=\"/inscribirse\">Elegir silla</a></nav>",
+      "css": ".ds-nav{display:flex;gap:clamp(18px,3vw,48px);align-items:center;background:rgba(7,18,24,.94);padding:18px;font-family:Inter,system-ui,sans-serif}.ds-nav a{color:rgba(255,240,214,.78);font-size:.74rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;text-decoration:none}.ds-nav a:hover{color:var(--accent-bright,#78c4ff)}.ds-nav .ds-nav-cta{background:var(--landing-blue,#0f5496);border:1px solid rgba(255,250,242,.5);border-radius:0;color:var(--landing-cream,#fffaf2);font-weight:900;letter-spacing:.1em;padding:14px 20px}.ds-primary:focus-visible,.ds-payment:focus-visible,.ds-nav a:focus-visible,.ds-link:focus-visible{outline:3px solid var(--white,#fffaf2);outline-offset:5px}"
+    },
+    {
+      "name": "Sillas y estados",
+      "kind": "custom",
+      "description": "Geometría táctil, marca de tarifa y estados disponibles, seleccionados y ocupados.",
+      "html": "<div class=\"ds-seats\"><button class=\"ds-seat\" aria-label=\"Fila A silla 1, lateral\">1</button><button class=\"ds-seat ds-selected\" aria-pressed=\"true\" aria-label=\"Fila A silla 4, seleccionada\">4</button><button class=\"ds-seat ds-taken\" disabled aria-label=\"Fila A silla 6, ocupada\">6</button></div>",
+      "css": ".ds-seats{display:flex;gap:3px;padding:7px 5px 15px}.ds-seat{flex:0 0 40px;width:40px;height:44px;display:flex;align-items:center;justify-content:center;padding:0;border:1px solid rgba(255,255,255,.18);border-radius:5px 5px 8px 8px;background:rgba(255,255,255,.08);color:var(--white,#fffaf2);font-family:Inter,system-ui,sans-serif;font-size:.72rem;font-weight:700;cursor:pointer;box-shadow:inset 0 -3px 0 var(--seat-tier-color,#fff0d6);transition:all 120ms ease}.ds-seat:hover:not(.ds-taken):not(.ds-selected){background:rgba(249,182,9,.2);border-color:var(--accent,#0f67b1);color:var(--accent-bright,#78c4ff);transform:scale(1.12)}.ds-seat:focus-visible{outline:3px solid var(--white,#fffaf2);outline-offset:2px}.ds-seat.ds-selected{background:var(--accent,#0f67b1);border-color:var(--accent,#0f67b1);color:var(--white,#fffaf2);box-shadow:none}.ds-seat.ds-taken{background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.06);color:var(--muted,#bdb4ad);cursor:not-allowed;box-shadow:none}",
+      "refersTo": "seat"
+    },
+    {
+      "name": "Panel de checkout",
+      "kind": "card",
+      "description": "Contenedor operativo con total destacado y selección resumida.",
+      "html": "<section class=\"ds-checkout\"><div class=\"ds-checkout-head\"><h3>3 sillas seleccionadas</h3><strong>$187.000 COP</strong></div><p>Fila A · Silla 1 · Fila A · Silla 4 · Fila A · Silla 6</p></section>",
+      "css": ".ds-checkout{margin-top:40px;border:1px solid var(--line,rgba(255,255,255,.14));border-radius:22px;background:linear-gradient(145deg,rgba(15,84,150,.24),rgba(255,250,242,.025));padding:clamp(24px,4vw,44px);font-family:Inter,system-ui,sans-serif}.ds-checkout-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:12px}.ds-checkout h3{margin:0;font-family:Anton,sans-serif;font-size:1.6rem;line-height:.98;color:var(--white,#fffaf2);text-transform:uppercase}.ds-checkout strong{font-family:Anton,sans-serif;font-size:2rem;color:var(--accent-bright,#78c4ff)}.ds-checkout p{margin-top:12px;color:var(--muted,#bdb4ad);font-size:.92rem;min-height:24px}",
+      "refersTo": "checkout-panel"
+    }
+  ],
+  "narrative": {
+    "northStar": "Comedia cósmica editorial",
+    "overview": "Comedia con estética cósmica editorial. El naranja, los titulares azul navy y el blanco crema sostienen una voz de afiche: titulares condensados y cambios amplios de superficie. La referencia vigente muestra una pareja de astronautas sentados conversando en `assets/standup-conversacion-2027.jpg`; el título y la información del evento permanecen como HTML independiente.\n\nEl sistema combina la composición expresiva de la landing con superficies densas y legibles para elegir sillas y completar datos. Se documenta el código local de la edición 2.0, actualizada al 18 de febrero de 2027; este archivo no acredita publicación. No existe PRODUCT.md conocido y no se deduce una estrategia de producto adicional.",
+    "keyCharacteristics": [
+      "Naranja y título navy en el hero, cuerpo azul oscuro y acento crema; azul y noche en acciones y operación.",
+      "Anton condensada en titulares; Inter en lectura, controles y datos; Playfair Display en énfasis editorial.",
+      "Imagen y texto separados en el hero móvil; plano de sillas horizontal con desplazamiento interno."
+    ],
+    "rules": [],
+    "dos": [
+      "Do mantener los textos del evento en HTML, independientes de la imagen.",
+      "Do separar el bloque de texto y la pareja de astronautas en móvil hasta 680px.",
+      "Do conservar controles de silla de 40 × 44px y desplazar el plano dentro de su contenedor.",
+      "Do acompañar los colores de tarifa con nombre y precio; distinguir selección y ocupación también mediante estados del control.",
+      "Do mantener el foco visible y respetar la preferencia de movimiento reducido en la landing."
+    ],
+    "donts": [
+      "Don't incrustar fechas, precios o títulos en el arte como única fuente de información.",
+      "Don't reducir el plano completo para encajarlo en una pantalla pequeña.",
+      "Don't extender los halos, kickers, numeraciones ornamentales o flechas Unicode heredados como nuevos patrones del sistema.",
+      "Don't tratar tamaños de fecha gigantes o efectos decorativos puntuales como una escala general para nuevas pantallas."
+    ]
+  }
+}

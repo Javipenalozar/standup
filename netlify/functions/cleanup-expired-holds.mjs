@@ -1,6 +1,8 @@
 import https from 'node:https';
 
-const EVENT_ID = 'standup-therapy-deja-de-joder-pareja-bogota-5nov2026';
+import eventConfig from '../lib/event-config.js';
+
+const EVENT_ID = eventConfig.EVENT.id;
 
 function env(name) {
   return globalThis.Netlify?.env?.get(name) || process.env[name];

@@ -3,15 +3,15 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Elegir silla | Deja de joder a tu pareja</title>
-    <meta name="description" content="Elige tu silla en Teatro Belarte para Stand-Up Therapy: Deja de joder a tu pareja. Paga en línea y recibe tu QR de entrada." />
-    <meta property="og:title" content="Elige tu silla — Deja de joder a tu pareja" />
-    <meta property="og:description" content="Selecciona tu silla para el 5 de noviembre de 2026 en Teatro Belarte, Bogotá." />
+    <title>Elegir silla | Deja de joder a tu pareja 2.0</title>
+    <meta name="description" content="Elige tu silla en Teatro Belarte para Stand-Up Therapy: Deja de joder a tu pareja 2.0. Paga en línea y recibe tu QR de entrada." />
+    <meta property="og:title" content="Elige tu silla — Deja de joder a tu pareja 2.0" />
+    <meta property="og:description" content="Selecciona tu silla para el 18 de febrero de 2027 en Teatro Belarte, Bogotá." />
     <meta property="og:image" content="/assets/standup-cosmic-hero-v2.jpg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/styles.css?v=20270218" />
   </head>
   <body>
     <header class="topbar is-scrolled" data-topbar>
@@ -24,23 +24,19 @@
         <a href="/#fecha">Fecha</a>
         <a href="/inscribirse/">Boletas</a>
       </nav>
-      <a class="nav-cta" href="https://wa.me/573238016527?text=Hola%2C%20quiero%20informacion%20de%20Deja%20de%20joder%20a%20tu%20pareja" target="_blank" rel="noreferrer">
+      <a class="nav-cta" href="https://wa.me/573238016527?text=Hola%2C%20quiero%20informacion%20de%20Deja%20de%20joder%20a%20tu%20pareja%202.0" target="_blank" rel="noreferrer">
         WhatsApp
       </a>
     </header>
 
     <main class="subpage">
       <div style="margin-bottom: 40px;">
-        <p class="eyebrow">Jueves 5 de noviembre de 2026 · 7:00 p. m. · Teatro Belarte · Carrera 7 #152-54, Bogotá</p>
+        <p class="event-heading"><strong>Deja de joder a tu pareja 2.0</strong><br />Jueves 18 de febrero de 2027 · Teatro Belarte<br />Puertas 7:00 p. m. · Inicio 7:30 p. m.</p>
         <h2 style="font-size: clamp(2rem, 5vw, 4rem);">Elige tu silla</h2>
         <p style="color: var(--muted); max-width: 600px; margin-top: 10px;">
           Selecciona donde quieres sentarte, completa tus datos y paga en línea.
           Recibirás un QR único para presentar en la entrada.
         </p>
-        <div class="checkout-promotion" id="masterclassPromotion" hidden>
-          <strong>15% de descuento en tus entradas</strong>
-          <span>Hasta hoy, lunes 19 de octubre, 11:00 p. m. · Hora de Colombia · <b id="promotionCountdown"></b></span>
-        </div>
         <p id="localPreviewNotice" style="display:none;color:var(--yellow);max-width:680px;margin-top:18px;font-weight:800;">
           Vista de prueba: puedes usar el selector y el formulario. Los pagos reales permanecen bloqueados.
         </p>
@@ -49,6 +45,7 @@
       <div class="theater-container" style="padding: 0;">
 
         <div class="stage-label">Escenario</div>
+        <p class="seat-map-hint">239 sillas · Lateral $49.000 · General $59.000 · Preferencial $79.000</p>
 
         <div id="seatMapLoading" class="map-loading">
           <div class="spinner"></div>
@@ -125,12 +122,14 @@
       <div class="footer-links"><a href="/legal/">Privacidad y términos</a><a href="https://wa.me/573238016527" target="_blank" rel="noreferrer">+57 323 801 6527</a></div>
     </footer>
 
+    <script src="/event-config.js?v=20270218"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
-    <script src="/seat-pricing.js?v=5"></script>
+    <script src="/seat-pricing.js?v=20270218"></script>
     <script>
     (function () {
       const PRICING = window.StandupSeatPricing;
       let PREVIEW_MODE = ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
+      let SALES_OPEN = !PREVIEW_MODE;
       let serverClockOffset = 0;
 
       if (!PRICING) {
@@ -140,19 +139,7 @@
       }
 
       // ── Theater layout (Teatro Belarte — Cra 7 # 152-54) ──
-      const ROWS = [
-        { label: 'A', left: [1,2,3,4,5], center: [6,7,8,9,10,11,12,13,14,15,16,17], right: [18,19,20,21,22] },
-        { label: 'B', left: [1,2,3,4,5], center: [6,7,8,9,10,11,12,13,14,15,16,17], right: [18,19,20,21,22] },
-        { label: 'C', left: [1,2,3,4,5], center: [6,7,8,9,10,11,12,13,14,15,16,17], right: [18,19,20,21,22] },
-        { label: 'D', left: [1,2,3,4,5], center: [6,7,8,9,10,11,12,13,14,15,16,17], right: [18,19,20,21,22] },
-        { label: 'E', left: [1,2,3,4,5], center: [6,7,8,9,10,11,12,13,14,15,16,17], right: [18,19,20,21,22] },
-        { label: 'F', left: [1,2,3,4,5], center: [6,7,8,9,10,11,12,13,14,15,16,17], right: [18,19,20,21,22] },
-        { label: 'G', left: [1,2,3,4,5], center: [6,7,8,9,10,11,12,13,14,15,16,17], right: [18,19,20,21,22] },
-        { label: 'H', left: [1,2,3,4,5], center: [6,7,8,9,10,11,12,13,14,15,16,17], right: [18,19,20,21,22] },
-        { label: 'I', left: [1,2,3,4,5], center: [6,7,8,9,10,11,12,13,14,15,16,17], right: [18,19,20,21,22] },
-        { label: 'J', left: [1,2,3,4,5], center: [6,7,8,9,10,11,12,13,14,15,16,17], right: [18,19,20,21,22] },
-        { label: 'K', left: [1,2,3,4],   center: [5,6,7,8,9,10,11,12,13,14,15],     right: [16,17,18,19] },
-      ];
+      const ROWS = window.StandupEvent.ROWS;
 
       const takenSeats = new Set();
       const selectedSeats = new Set();
@@ -189,6 +176,13 @@
           if (data.preview === true) {
             PREVIEW_MODE = true;
             document.getElementById('localPreviewNotice').style.display = 'block';
+          }
+          if (data.salesOpen === false || data.preview === true) {
+            SALES_OPEN = false;
+            const notice = document.getElementById('localPreviewNotice');
+            notice.textContent = 'La venta de entradas todavía no está habilitada. Puedes consultar el plano y los precios.';
+            notice.style.display = 'block';
+            document.getElementById('btnPay').textContent = 'Venta próximamente';
           }
           data.seats.forEach(seat => takenSeats.add(seat));
         } catch (error) {
@@ -229,6 +223,8 @@
               const seatId = row.label + '-' + num;
               btn.className = 'seat-btn';
               btn.textContent = num;
+              btn.setAttribute('aria-label', 'Fila ' + row.label + ', silla ' + num);
+              btn.setAttribute('aria-pressed', 'false');
               const tier = PRICING.getTierForSeat(seatId);
               btn.dataset.priceTier = tier.id;
               btn.style.setProperty('--seat-tier-color', tier.color);
@@ -289,16 +285,16 @@
         const state = pricingState();
         const promotion = document.getElementById('masterclassPromotion');
         const countdown = document.getElementById('promotionCountdown');
-        promotion.hidden = !state.active;
+        if (promotion) promotion.hidden = !state.active;
 
         if (state.active) {
           const remaining = Math.max(0, Date.parse(state.endsAt) - pricingNow());
           const hours = String(Math.floor(remaining / 3600000)).padStart(2, '0');
           const minutes = String(Math.floor((remaining % 3600000) / 60000)).padStart(2, '0');
           const seconds = String(Math.floor((remaining % 60000) / 1000)).padStart(2, '0');
-          countdown.textContent = hours + ':' + minutes + ':' + seconds;
+          if (countdown) countdown.textContent = hours + ':' + minutes + ':' + seconds;
         } else {
-          countdown.textContent = '';
+          if (countdown) countdown.textContent = '';
         }
 
         if (
@@ -329,6 +325,7 @@
           selectedSeats.add(seatId);
           seatButtons[seatId].classList.add('is-selected');
         }
+        seatButtons[seatId].setAttribute('aria-pressed', String(selectedSeats.has(seatId)));
         updateCheckout();
       }
 
@@ -379,7 +376,7 @@
         const phone = document.getElementById('phone').value.trim();
         const privacyConsent = document.getElementById('privacyConsent').checked;
         const termsAccepted = document.getElementById('termsAccepted').checked;
-        btn.disabled = PREVIEW_MODE || !(
+        btn.disabled = PREVIEW_MODE || !SALES_OPEN || !(
           selectedSeats.size > 0 && fname && lname && email && phone && privacyConsent && termsAccepted
         );
       }
@@ -427,8 +424,8 @@
           ? window.crypto.randomUUID().slice(0, 8).toUpperCase()
           : Math.random().toString(36).slice(2, 10).toUpperCase();
         const orderRef =
-          'ST-' + Date.now().toString(36).toUpperCase() + '-' + randomPart;
-        sessionStorage.setItem('standupPendingPaymentRef', orderRef);
+          window.StandupEvent.EVENT.referencePrefix + Date.now().toString(36).toUpperCase() + '-' + randomPart;
+        sessionStorage.setItem('standupPendingPaymentRef:' + window.StandupEvent.EVENT.id, orderRef);
 
         try {
           const controller = new AbortController();
@@ -548,7 +545,7 @@
           '<h2 style="font-size:clamp(2rem,5vw,4rem);">Estamos verificando</h2>' +
           '<p style="color:var(--muted);max-width:500px;">Tu pago está siendo procesado. Recibirás tu QR por correo electrónico cuando Bold confirme la transacción. Si no lo recibes, escríbenos por WhatsApp.</p>' +
           '<div style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;">' +
-            '<a class="button primary" href="https://wa.me/573238016527?text=Hola%2C%20hice%20un%20pago%20para%20Deja%20de%20joder%20a%20tu%20pareja%20con%20referencia%20' + orderRef + '" target="_blank" rel="noreferrer">WhatsApp</a>' +
+            '<a class="button primary" href="https://wa.me/573238016527?text=Hola%2C%20hice%20un%20pago%20para%20Deja%20de%20joder%20a%20tu%20pareja%202.0%20con%20referencia%20' + orderRef + '" target="_blank" rel="noreferrer">WhatsApp</a>' +
             '<a class="button ghost" href="/">Volver al inicio</a>' +
           '</div>';
       }
@@ -568,7 +565,7 @@
         section.innerHTML =
           '<div class="qr-result-card">' +
             '<h3>RESERVA CONFIRMADA</h3>' +
-          '<p class="qr-subtitle">Presenta este QR en la entrada del Teatro Belarte el 5 de noviembre de 2026 a las 7:00 p. m.</p>' +
+          '<p class="qr-subtitle">Presenta este QR en la entrada del Teatro Belarte el 18 de febrero de 2027 · Inicio 7:30 p. m. · Puertas 7:00 p. m.</p>' +
             '<div class="qr-canvas-wrap"><canvas id="qrCanvas"></canvas></div>' +
             '<div class="qr-info">' +
               '<div class="qr-info-item"><span>Nombre</span><strong>' + escapeHtml(name) + '</strong></div>' +
@@ -579,7 +576,7 @@
             '<p class="qr-footer-note">También enviamos la confirmación a <strong>' + escapeHtml(email) + '</strong></p>' +
             '<div style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">' +
               '<a class="button primary" href="/" style="display:inline-flex;">Volver al inicio</a>' +
-              '<a class="button ghost" href="https://wa.me/573238016527?text=Hola%2C%20ya%20pagu%C3%A9%20mi%20boleta%20para%20Deja%20de%20joder%20a%20tu%20pareja.%20Mi%20c%C3%B3digo%20es%20' + encodeURIComponent(code) + '" target="_blank" rel="noreferrer" style="display:inline-flex;">Confirmar por WhatsApp</a>' +
+              '<a class="button ghost" href="https://wa.me/573238016527?text=Hola%2C%20ya%20pagu%C3%A9%20mi%20boleta%20para%20Deja%20de%20joder%20a%20tu%20pareja%202.0.%20Mi%20c%C3%B3digo%20es%20' + encodeURIComponent(code) + '" target="_blank" rel="noreferrer" style="display:inline-flex;">Confirmar por WhatsApp</a>' +
             '</div>' +
           '</div>';
 

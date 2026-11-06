@@ -1,45 +1,64 @@
-# Revisión local: Deja de joder a tu pareja
+# Revisión local: Deja de joder a tu pareja 2.0
 
-Esta edición permanece aislada del evento anterior. La versión pública está activa en `https://standup.eventosjv.com`; los cambios descritos en la sección “Pendiente de despliegue” siguen únicamente en este repositorio hasta recibir autorización de publicación.
+Preparación local del nuevo evento. No se ha publicado esta edición, habilitado ventas ni enviado correos durante esta actualización.
 
-## Datos del evento
+## Evento confirmado
 
-- Evento: Stand-Up Therapy — Deja de joder a tu pareja
-- Fecha: jueves 5 de noviembre de 2026
-- Hora: 7:00 p. m.
-- Lugar: Teatro Belarte, Cra. 7 # 152-54, Bogotá
-- Tarifa lateral: $49.000 COP — sillas 1, 2, 3, 20, 21 y 22 de las filas A–J
-- Tarifa preferencial: $79.000 COP — sillas 6 a 17 de las filas A–C
-- Preventa general: $59.000 COP — todas las demás sillas
-- Identificador: `standup-therapy-deja-de-joder-pareja-bogota-5nov2026`
-- Plano confirmado: 239 sillas, con filas A–J de 22 puestos y fila K de 19 puestos
+- Jueves 18 de febrero de 2027. Teatro Belarte, Cra. 7 #152-54, Bogotá.
+- Puertas: 7:00 p. m. Inicio: 7:30 p. m. Zona: America/Bogota.
+- Identificador: `standup-therapy-deja-de-joder-pareja-2-0-bogota-18feb2027`.
+- Referencias del checkout: prefijo `ST-18FEB27-`.
+- Configuración compartida: `event-config.js`, consumida por servidor, motor de precios y ambos selectores.
 
-## Protecciones activas
+## Plano y tarifas
 
-- El navegador local muestra el selector sin consultar ocupación remota y mantiene el botón de pago deshabilitado.
-- `crear-pago-bold`, el webhook y la limpieza de pagos exigen `ENABLE_REAL_PAYMENTS=true` y que `EVENT_RELEASE_ID` coincida exactamente con esta edición.
-- Creación de invitaciones, reservas de cortesía y envíos administrativos exigen `ENABLE_EVENT_OPERATIONS=true`.
-- Todo enlace público generado por el backend exige `EVENT_PUBLIC_URL`; no hay un dominio de producción heredado como respaldo.
-- Reservas, webhooks, administración, recordatorios e invitaciones usan tablas `st_*` y filtran el identificador de esta edición.
-- La aceptación de privacidad y términos es explícita, separada y sin casillas premarcadas.
-- La verificación pública de entradas oculta parcialmente el correo del comprador.
-- Los pagos aprobados se aplican de forma atómica únicamente cuando valor y moneda coinciden con las sillas reservadas.
-- Los eventos de Bold conservan una bitácora idempotente, incluso cuando el procesamiento termina en error.
-- El panel administrativo usa una cookie de sesión firmada, `HttpOnly`, `Secure` y `SameSite=Strict`; la contraseña deja de viajar en cada operación. Requiere `ADMIN_SESSION_SECRET` antes de desplegar esta versión.
+239 sillas: A–J con 22 puestos por fila, K con 19. Se conserva la división de pasillos.
 
-## Verificación realizada
+| Ubicación | Sillas | Precio COP |
+| --- | --- | ---: |
+| Lateral | A–J: 1, 2, 3, 20, 21 y 22; 60 sillas | 49.000 |
+| Preferencial | A–C: 6 a 17; 36 sillas | 79.000 |
+| General | Las restantes, incluida toda K; 143 sillas | 59.000 |
 
-- `npm test`: pruebas automatizadas de precios, aislamiento, pagos, webhook, seguridad administrativa y contrato de publicación.
-- `npm run check`: sintaxis, referencias del evento y contrato de archivos superados.
-- `npm exec netlify build`: compilación y empaquetado de funciones superados.
-- Revisión responsive en 522 px y 1253 px sin desbordamiento horizontal ni errores de consola.
-- Producción verificada: https://standup.eventosjv.com
-- La base remota usa las tablas aisladas `st_*`; RLS y permisos de `anon`, `authenticated` y `service_role` fueron revisados.
-- Prueba de vencimiento sin pago completada el 4 de septiembre de 2026: A-1 por $49.000, referencia `ST-EXPIRY-20260904-A1`, enlace Bold `LNK_Y59LPS849G`. La reserva venció a los 15 minutos, el proceso programado la cambió a `cancelled`, el selector volvió a mostrar la silla disponible y el registro sintético fue eliminado después de la verificación.
+La promoción temporal anterior está desactivada. La categoría interna `preventa` conserva su identificador técnico y se presenta como General.
 
-## Pendiente de despliegue y operación
+## Identidad y experiencia
 
-1. Configurar `ADMIN_SESSION_SECRET` en Netlify con al menos 32 caracteres aleatorios antes de publicar el nuevo panel.
-2. Probar en una vista previa el inicio de sesión, cierre de sesión, creación de invitaciones y check-in con la nueva cookie.
-3. Confirmar ciudad y domicilio legal del responsable si se desea que la política los indique de forma separada a la dirección de atención `Calle 23G No. 81-66`.
-4. Publicar el cambio en producción únicamente con autorización separada.
+Se reutilizan las ilustraciones sin texto de astronautas, micrófono, planetas y mariposas. El afiche actualizado guía el título y el número visible de reservas: +57 323 801 6527. En móvil, texto e ilustración ocupan bloques distintos.
+
+## Separación y protecciones
+
+- Check-in y limpieza automática importan el identificador compartido.
+- Las operaciones requieren `EVENT_RELEASE_ID` igual al identificador nuevo, además de sus interruptores de habilitación.
+- El checkout rechaza referencias del evento anterior. Actualización y reversión de reservas incluyen `event_id`.
+- Las claves del almacenamiento de referencias del navegador incluyen el identificador nuevo.
+- Correos, recordatorios, QR, administración y términos muestran el nombre, fecha y horarios nuevos.
+- Los envíos conservan `RESEND_FROM` como remitente configurable del evento. No se verificaron ni modificaron credenciales remotas.
+- Se conserva la corrección local de check-in con `event_log.reservation_id`.
+- No se ejecutaron mutaciones de Supabase durante esta actualización de la web. Se conservaron los cambios locales previos.
+
+## Validación local
+
+- 25 pruebas automatizadas: tarifas, pagos simulados, rechazo de referencias anteriores, reversión aislada, bloqueo de la edición anterior y autenticación administrativa.
+- Compilación estática y revisión de sintaxis.
+- Navegador local en 1440, 390 y 320 px. Selección A-1, A-4 y A-6: 187.000 COP. Pagos deshabilitados en la vista local.
+- Invitación comprobada con respuestas simuladas, sin crear ni enviar invitaciones reales.
+- Prueba táctil simulada a 390 px: A-22 y C-17 por 128.000 COP, formulario completo, pago real bloqueado. Ver `touch-check.json`.
+- Segunda revisión independiente: resueltos el desbordamiento de invitación y el acceso legal en móvil.
+- Evidencia del navegador: `.impeccable/review/`. Ver `browser-checks.json` para los resultados de la última pasada.
+- El detector automático de diseño no pudo ejecutarse porque el motor no está instalado. Se realizó revisión independiente sobre capturas y código.
+
+## Antes de publicar o vender
+
+1. Aplicar y verificar en Supabase el cambio preparado en `supabase-manual-transfer-migration.sql`: la función remota de transferencias conserva su restricción de edición hasta actualizarla. No se ejecutó ese SQL.
+2. Verificar disponibilidad real del nuevo identificador y remitente del evento. Una vista local vacía no prueba disponibilidad remota.
+3. Actualizar bot y enlaces de Instagram para esta edición antes de promocionarlos: su tabla remota de enlaces todavía no incorpora un evento.
+4. Probar con registros exclusivos del nuevo evento: pago y notificación, invitación, reenvío, transferencia y check-in con reversión. Las pruebas de este repositorio usan respuestas simuladas.
+5. Configurar `EVENT_RELEASE_ID`, `EVENT_PUBLIC_URL`, secretos administrativos y remitente. Habilitar interruptores únicamente después de las pruebas controladas.
+6. Publicar solo con autorización posterior de Javi. No realizar commit ni push sin autorización.
+
+## Publicación autorizada
+
+Esta copia de publicación excluye los cambios locales previos de atribución de Instagram y del diseño de recordatorios. Se mantiene la venta cerrada hasta una validación controlada del pago real y correo. El identificador remoto no se cambió: todas las operaciones nuevas permanecen bloqueadas por falta de coincidencia de edición. El selector público presenta el plano como referencia.
+
+La revisión final de capturas a 1440, 390 y 320 px resolvió el contraste: textos navy sobre naranja uniforme, información sobre azul en crema, y ausencia de superposición de texto e ilustración.

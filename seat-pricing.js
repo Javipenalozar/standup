@@ -1,5 +1,7 @@
 (function attachSeatPricing(root, factory) {
-  const pricing = factory();
+  const config = typeof module !== 'undefined' && module.exports
+    ? require('./event-config') : root.StandupEvent;
+  const pricing = factory(config);
 
   if (typeof module !== 'undefined' && module.exports) {
     module.exports = pricing;
@@ -8,19 +10,13 @@
   if (root) {
     root.StandupSeatPricing = pricing;
   }
-})(typeof window !== 'undefined' ? window : null, function createSeatPricingModule() {
+})(typeof window !== 'undefined' ? window : null, function createSeatPricingModule(config) {
   'use strict';
+  const { EVENT } = config;
 
-  const EVENT_ID = 'standup-therapy-deja-de-joder-pareja-bogota-5nov2026';
+  const EVENT_ID = EVENT.id;
   const SEAT_PATTERN = /^(?:[A-J]-(?:[1-9]|1\d|2[0-2])|K-(?:[1-9]|1\d))$/;
-  const MASTERCLASS_PROMOTION = Object.freeze({
-    id: 'especial-15-por-ciento-19-octubre-2026',
-    label: 'Descuento especial del 15%',
-    discountPercent: 15,
-    startsAt: '2026-10-19T21:05:58-05:00',
-    endsAt: '2026-10-19T23:00:00-05:00',
-    timeZone: 'America/Bogota',
-  });
+  const MASTERCLASS_PROMOTION = null;
 
   function createPricingEngine(config) {
     const tiers = Array.isArray(config?.tiers) ? config.tiers : [];
@@ -241,9 +237,9 @@
     defaultTierId: 'preventa',
     promotion: MASTERCLASS_PROMOTION,
     tiers: [
-      { id: 'preventa', label: 'Preventa', price: 59000, color: '#f9b609' },
+      { id: 'preventa', label: 'General', price: 59000, color: '#f9b609' },
       { id: 'lateral', label: 'Tarifa lateral', price: 49000, color: '#fff0d6' },
-      { id: 'preferencial', label: 'Preferencial', price: 79000, color: '#e00c26' },
+      { id: 'preferencial', label: 'Preferencial', price: 79000, color: '#78c4ff' },
     ],
     rules: [
       {
