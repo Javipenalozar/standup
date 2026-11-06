@@ -145,24 +145,26 @@ Los nombres de frontmatter conservan los identificadores de las variables fuente
 **Character:** Letras condensadas, mayúsculas y grandes masas de texto para el escenario. Inter organiza precios, instrucciones, campos y navegación sin competir con esa voz.
 
 ### Hierarchy
-- **Display:** familia, peso, interlineado y tracking en frontmatter; el hero usa `clamp(5.3rem, 9.2vw, 9.6rem)` en escritorio y `clamp(4rem, 20vw, 6rem)` hasta 680px. Son medidas de esta composición, no un límite global para nuevas vistas.
+- **Display:** familia, peso, interlineado y tracking en frontmatter; el hero de la home compacta usa `clamp(5rem, 7vw, 8rem)` en escritorio y `clamp(4rem, 20vw, 6rem)` hasta 680px. Son medidas de esta composición, no un límite global para nuevas vistas.
 - **Headline:** títulos de los bloques narrativos; en móvil pasan a `clamp(3.2rem, 15vw, 4.6rem)`.
-- **Body:** el lead usa `clamp(1rem, 1.35vw, 1.25rem)` y medida máxima `min(520px, 43vw)`; móvil usa `.93rem`, interlineado `1.48` y ancho completo. Otros párrafos narrativos usan interlineado `1.65` y máximo `520px`.
+- **Body:** el lead de la home compacta usa `1rem`, interlineado `1.65`, margen superior de `22px` y medida máxima `min(520px, 43vw)`; en móvil conserva `1rem` y `1.65`, con ancho completo. Otros párrafos narrativos usan interlineado `1.65` y máximo `520px`.
 - **Action:** botones editoriales en mayúsculas; la acción grande usa `.9rem` y padding de `22px`.
 - **Field label:** etiquetas de formulario en mayúsculas; campos de `1rem`, sillas de `.72rem` y `.64rem` hasta 620px.
 - **Data:** tarifas y contadores usan cifras tabulares donde está declarado; precios principales combinan Anton y azul luminoso.
 
 ## Layout
 
-El hero de escritorio ocupa todo el ancho: bloque de texto a la izquierda (zona de composición del 42%) y arte a la derecha, cuyo contenedor comienza en el 44% del ancho. La imagen muestra astronautas sentados conversando. Su contenedor deja `150px` arriba y `170px` abajo; el archivo se presenta al `160%` de ancho, centrado verticalmente y recortado por el contenedor. Su contenido tiene máximo de `1500px`, laterales de `5vw` y padding superior adaptable. Las secciones alternan campos amplios con composiciones asimétricas y columnas; sus gutters principales son `6vw`.
+El hero de escritorio ocupa todo el ancho: bloque de texto a la izquierda (zona de composición del 42%) y arte a la derecha, cuyo contenedor comienza en el 44% del ancho. La imagen muestra astronautas sentados conversando. Su contenedor deja `150px` arriba y `170px` abajo; el archivo se presenta al `160%` de ancho, centrado verticalmente y recortado por el contenedor. Su contenido tiene máximo de `1500px`, laterales de `5vw` y padding vertical de `120px` arriba y `160px` abajo. El borde izquierdo del contenedor del arte se integra al naranja mediante una máscara horizontal que llega a opacidad completa al `18%`; la imagen tiene otra máscara vertical con centro opaco entre `12%` y `88%`. Las secciones alternan campos amplios con composiciones asimétricas y columnas; sus gutters principales son `6vw`.
 
-Hasta `980px`, desaparecen los enlaces centrales de navegación y se apilan narrativa, fecha y compra. Entre `681px` y `1000px`, el título del hero usa `10.5vw` con máximo `61vw`; el lead conserva máximo `48vw`.
+Hasta `980px`, desaparecen los enlaces centrales de navegación y se apilan narrativa y fecha. La compra se apila hasta `1000px`, con gap de `36px` y panel de máximo `680px`. Entre `681px` y `1000px`, el título conserva la escala de la home compacta y máximo `61vw`; el lead conserva máximo `48vw`.
 
-Hasta `680px`, el hero es una columna ordenada: texto, imagen y ficha del evento. El texto tiene padding `106px 20px 30px`; la imagen es relativa, sin transformación, con altura `90vw` y máximo `610px`. Se usa la imagen de conversación; el recorte móvil ocupa `160%` de ancho con desplazamiento horizontal de `-37.5%`, dentro de un contenedor que oculta el excedente. Las capas decorativas del hero se ocultan. La ficha pasa a dos columnas y el lugar ocupa una fila completa. Este orden evita escribir sobre los astronautas.
+Hasta `680px`, el hero es una columna ordenada: texto, imagen y ficha del evento. El texto tiene padding `94px 20px 28px`; la imagen es relativa, sin transformación, con altura `90vw` y máximo `610px`. Se usa la imagen de conversación; el recorte móvil ocupa `160%` de ancho con desplazamiento horizontal de `-37.5%`, dentro de un contenedor que oculta el excedente. La máscara horizontal del contenedor se elimina en móvil; la máscara vertical de la imagen permanece. Las capas decorativas del hero se ocultan. La ficha pasa a dos columnas y el lugar ocupa una fila completa. Este orden evita escribir sobre los astronautas.
+
+La home compacta coloca la compra inmediatamente después del hero. En escritorio usa dos columnas (`minmax(0, 1fr) minmax(360px, .9fr)`), gap de `64px`, padding de `80px 6vw` y panel interno de `32px`. Manifiesto y fecha comparten `80px 6vw`; los bloques narrativos pasan a altura mínima de `230px` y padding `40px 5vw`, y el cierre usa `90px 6vw` sin altura mínima. Hasta `680px`, compra, manifiesto y fecha usan `64px 20px`; el panel usa `24px 20px`, los bloques narrativos pierden la altura mínima y el cierre usa `75px 20px`. Estas medidas pertenecen a la composición vigente; no añaden tokens globales de tipografía o espaciado.
 
 La operación usa un contenedor máximo de `1160px`. El formulario tiene dos columnas y gap de `14px`; pasa a una columna hasta `900px`. El plano conserva 239 sillas: filas A–J de 22 y K de 19. Sus filas no se encogen para caber; el scroll horizontal pertenece al plano, con controles finales de `40 × 44px` en todos los anchos. Las secciones de asientos usan gap de `3px`; los pasillos son de `16px` y `12px` hasta 620px. La leyenda se organiza en dos columnas hasta 620px.
 
-La evidencia guardada en `.impeccable/review/` y `browser-checks.json` cubre 1440, 390 y 320px; confirma separación móvil, conteo y dimensiones del plano. Esta documentación no añade una nueva verificación de navegador ni prueba de pagos.
+La evidencia guardada en `.impeccable/review/` y `browser-checks.json` cubre 1440, 390 y 320px; confirma separación móvil, conteo y dimensiones del plano. La revisión local del 6 de noviembre de 2026 también contrasta las capturas de la home a 1440 y 390px y de la confirmación a 390px en `/private/tmp/standup-qa/` con el código fuente. Son evidencias locales; no acreditan disponibilidad real, pago ni publicación.
 
 ## Elevation & Depth
 
@@ -183,6 +185,18 @@ El foco visible de la landing es un contorno crema de `3px`, separado `5px`; en 
 ### Cards / Containers
 
 La ficha del hero reúne precio, fecha y lugar con separadores finos; su tratamiento responsive está en Layout. El panel de compra editorial organiza lista de tarifas, pasos y CTA sobre tinta. El panel de checkout operativo agrupa selección, total y campos con el gradiente y radio del frontmatter; padding móvil de `20px` hasta 620px. No convertir los halos o bordes decorativos heredados en componentes nuevos.
+
+### Promotional notice / Availability
+
+El aviso promocional compartido por home y selector reutiliza azul profundo y crema. Es un bloque recto con ancho máximo de `460px`, padding de `16px 18px`, gap de `8px`, cuerpo de `.875rem` y titular de `1rem`; hasta `680px`, usa padding de `14px`, cuerpo de `.8125rem` y titular de `.9375rem`. El contador emplea cifras tabulares sin salto de línea y el aviso oculto no ocupa espacio. La campaña vigente muestra 20% hasta el 8 de noviembre de 2026 a las 22:00 de Colombia; el plazo es contenido de campaña, no un token visual.
+
+La lista de tarifas coloca categoría y disponibilidad a la izquierda y precio a la derecha. La disponibilidad usa azul luminoso (`.85rem`, `.8rem` en móvil); el precio usa `1.35rem` (`1.2rem` en móvil), y el precio regular tachado queda subordinado en arena. Primero muestra «Consultando disponibilidad»; después usa el conteo de la respuesta pública válida o «Consulta disponibilidad en el plano» cuando no pudo verificarse. Las cifras de una captura no constituyen inventario vigente.
+
+### Confirmation / Download
+
+La confirmación mantiene el panel operativo redondeado, QR de alto contraste y tarjetas de nombre, sillas, total y código. El QR visible conserva zona clara alrededor, canvas de `220px` limitado al ancho disponible y envoltura que incluye su padding en el ancho. El bloque de datos usa columnas automáticas con mínimo de `160px` y gap de `12px`. La acción de descarga permanece oculta hasta generar correctamente la imagen; un fallo conserva la confirmación y ofrece un estado textual.
+
+El mensaje distingue pago y cortesía, agradece la compra cuando corresponde e indica que un QR incluye todas las sillas del grupo. El PNG descargable contiene datos del evento, comprador, sillas, total o cortesía, QR, código y agradecimiento; incluye «No se realizan devoluciones, salvo los casos en que la ley lo exija». La vista añade el enlace a términos. El PNG se dibuja con texto oscuro sobre fondo claro y recorta únicamente el espacio inferior vacío; sus medidas de exportación y Arial son decisiones del archivo, no tokens de la interfaz ni una nueva familia del sistema. Esta descripción visual no acredita confirmación de un pago real.
 
 ### Inputs / Fields
 

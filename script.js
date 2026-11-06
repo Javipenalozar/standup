@@ -48,6 +48,16 @@ const updatePromotion = () => {
     element.textContent = formatPrice(lowestTier.price);
   });
 
+  state.tiers.forEach((tier) => {
+    document.querySelectorAll('[data-tier-price="' + tier.id + '"]').forEach(element => {
+      element.textContent = formatPrice(tier.price);
+    });
+    document.querySelectorAll('[data-tier-base="' + tier.id + '"]').forEach(element => {
+      element.textContent = formatPrice(tier.basePrice);
+      element.hidden = !state.active;
+    });
+  });
+
   document.querySelectorAll("[data-price-label]").forEach((element) => {
     if (!element.dataset.defaultLabel) element.dataset.defaultLabel = element.textContent;
     element.textContent = state.active
@@ -79,11 +89,12 @@ const updatePromotion = () => {
   if (!state.active) return;
 
   const remaining = Math.max(0, Date.parse(state.endsAt) - now);
-  const hours = String(Math.floor(remaining / 3600000)).padStart(2, "0");
+  const days = Math.floor(remaining / 86400000);
+  const hours = String(Math.floor((remaining % 86400000) / 3600000)).padStart(2, "0");
   const minutes = String(Math.floor((remaining % 3600000) / 60000)).padStart(2, "0");
   const seconds = String(Math.floor((remaining % 60000) / 1000)).padStart(2, "0");
   document.querySelectorAll("[data-promotion-countdown]").forEach((element) => {
-    element.textContent = `${hours}:${minutes}:${seconds}`;
+    element.textContent = `${days} d ${hours} h ${minutes} min ${seconds} s`;
   });
 };
 
@@ -91,11 +102,23 @@ const syncPricingClock = async () => {
   try {
     const response = await fetch("/.netlify/functions/public-seats", { cache: "no-store" });
     const data = await response.json();
+    if (!response.ok || data.eventId !== seatPricing.EVENT_ID || data.preview === true) {
+      throw new Error('La disponibilidad todavía no pudo verificarse');
+    }
+    const available = seatPricing.getAvailability(data.seats);
+    document.querySelectorAll('[data-tier-available]').forEach(element => {
+      const count = available[element.dataset.tierAvailable];
+      element.textContent = count + (count === 1 ? ' silla disponible' : ' sillas disponibles');
+    });
     const serverTimestamp = Date.parse(data.serverTime);
     if (response.ok && Number.isFinite(serverTimestamp)) {
       pricingClockOffset = serverTimestamp - Date.now();
     }
-  } catch {}
+  } catch {
+    document.querySelectorAll('[data-tier-available]').forEach(element => {
+      element.textContent = 'Consulta disponibilidad en el plano';
+    });
+  }
   updatePromotion();
 };
 
@@ -140,6 +163,8 @@ if (canUseMagnet && !reduceMotion.matches) {
 updateViewportEffects();
 updatePromotion();
 syncPricingClock();
+window.setInterval(() => { if (!document.hidden) syncPricingClock(); }, 30000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) syncPricingClock(); });
 window.setInterval(updatePromotion, 1000);
 window.addEventListener("scroll", requestViewportUpdate, { passive: true });
 window.addEventListener("resize", requestViewportUpdate, { passive: true });

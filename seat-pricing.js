@@ -12,11 +12,18 @@
   }
 })(typeof window !== 'undefined' ? window : null, function createSeatPricingModule(config) {
   'use strict';
-  const { EVENT } = config;
+  const { EVENT, ROWS } = config;
 
   const EVENT_ID = EVENT.id;
   const SEAT_PATTERN = /^(?:[A-J]-(?:[1-9]|1\d|2[0-2])|K-(?:[1-9]|1\d))$/;
-  const MASTERCLASS_PROMOTION = null;
+  const MASTERCLASS_PROMOTION = Object.freeze({
+    id: 'descuento-20-hasta-domingo-8nov2026',
+    label: '20% de descuento en todas las ubicaciones',
+    discountPercent: 20,
+    startsAt: '2026-11-06T08:08:11-05:00',
+    endsAt: '2026-11-08T22:00:00-05:00',
+    timeZone: 'America/Bogota',
+  });
 
   function createPricingEngine(config) {
     const tiers = Array.isArray(config?.tiers) ? config.tiers : [];
@@ -256,5 +263,18 @@
     ],
   });
 
-  return Object.freeze({ EVENT_ID, MASTERCLASS_PROMOTION, createPricingEngine, ...engine });
+  function getAvailability(takenSeats) {
+    if (!Array.isArray(takenSeats)) throw new Error('Falta consultar la disponibilidad');
+    const occupied = new Set(takenSeats.map(seat => String(seat).trim().toUpperCase()));
+    const available = Object.fromEntries(engine.tiers.map(tier => [tier.id, 0]));
+    ROWS.forEach(row => {
+      [...row.left, ...row.center, ...row.right].forEach(number => {
+        const seat = row.label + '-' + number;
+        if (!occupied.has(seat)) available[engine.getTierForSeat(seat).id] += 1;
+      });
+    });
+    return Object.freeze(available);
+  }
+
+  return Object.freeze({ EVENT_ID, MASTERCLASS_PROMOTION, createPricingEngine, getAvailability, ...engine });
 });

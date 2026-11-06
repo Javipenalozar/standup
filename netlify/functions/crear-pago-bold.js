@@ -155,7 +155,7 @@ exports.handler = async function (event) {
       return {
         statusCode: 409,
         headers,
-        body: JSON.stringify({ error: 'Algunas sillas están apartadas para pago en efectivo' }),
+        body: JSON.stringify({ error: 'Algunas sillas tienen un apartado o bloqueo administrativo. Elige otras disponibles.' }),
       };
     }
 

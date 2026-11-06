@@ -71,3 +71,24 @@ assert.deepStrictEqual(
 );
 
 console.log('seat-pricing tests passed');
+
+const promo = pricing.MASTERCLASS_PROMOTION;
+const start = Date.parse(promo.startsAt);
+const end = Date.parse(promo.endsAt);
+assert.equal(pricing.getPricingState(start - 1).active, false);
+assert.equal(pricing.getPricingState(start).active, true);
+assert.equal(pricing.getPricingState(end - 1).active, true);
+assert.equal(pricing.getPricingState(end).active, false);
+assert.equal(end, Date.parse('2026-11-09T03:00:00Z'));
+assert.deepEqual(['A-1', 'A-4', 'C-6'].map(seat => pricing.getPriceForSeat(seat, start)), [39200, 47200, 63200]);
+for (const row of require('../event-config').ROWS) {
+  for (const number of [...row.left, ...row.center, ...row.right]) {
+    const seat = row.label + '-' + number;
+    assert.equal(pricing.getPriceForSeat(seat, end - 1), pricing.getPriceForSeat(seat, end) * 0.8);
+  }
+}
+const blocks = ['A', 'B'].flatMap(row => Array.from({ length: 12 }, (_, i) => row + '-' + (i + 6)));
+assert.deepEqual(pricing.getAvailability([]), { lateral: 60, preventa: 143, preferencial: 36 });
+assert.deepEqual(pricing.getAvailability(blocks), { lateral: 60, preventa: 143, preferencial: 12 });
+assert.deepEqual(pricing.getAvailability([...blocks, 'A-1', 'A-1', 'K-19', 'K-20']), { lateral: 59, preventa: 142, preferencial: 12 });
+assert.throws(() => pricing.getAvailability(null));

@@ -4,7 +4,7 @@ const { EVENT } = require('../../event-config');
 
 const LEGAL = Object.freeze({
   privacyPolicyVersion: '2026-09-04',
-  termsVersion: '2026-11-05',
+  termsVersion: '2026-11-06',
   controllerName: 'JV Bienestar y Salud Mental S.A.S.',
   controllerNit: '901912952-9',
   controllerAddress: 'Calle 23G No. 81-66',

@@ -1149,11 +1149,16 @@ blockquote {
 }
 
 .qr-canvas-wrap {
+  max-width: 100%;
+  box-sizing: border-box;
   display: inline-block;
   background: var(--white);
   padding: 16px;
   border-radius: 18px;
 }
+
+.qr-canvas-wrap canvas { width: 220px; max-width: 100%; height: auto; }
+#downloadTicket[hidden] { display: none !important; }
 
 .qr-info {
   margin-top: 24px;
@@ -1568,3 +1573,25 @@ blockquote {
 body:has(.subpage) { background: #071822; }
 :focus-visible { outline: 3px solid var(--accent-bright); outline-offset: 4px; }
 input { caret-color: var(--accent-bright); }
+.sale-offer {
+  display: grid;
+  gap: 8px;
+  max-width: 460px;
+  margin-top: 24px;
+  padding: 16px 18px;
+  background: #0b2d48;
+  color: #fffaf2;
+  font-size: .875rem;
+  line-height: 1.5;
+}
+.sale-offer[hidden] { display: none; }
+.sale-offer strong { font-size: 1rem; line-height: 1.4; }
+.sale-offer p { margin: 0; }
+.sale-offer .sale-clock { color: #fffaf2; }
+.sale-clock b { display: inline-block; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tariff-list del { display: block; color: #d8d1cc; font-size: .8rem; }
+.tariff-list del[hidden] { display: none; }
+@media (max-width: 680px) {
+  .sale-offer { padding: 14px; font-size: .8125rem; }
+  .sale-offer strong { font-size: .9375rem; }
+}

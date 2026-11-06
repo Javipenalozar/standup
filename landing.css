@@ -1276,3 +1276,79 @@
 .hero-series, .scroll-cue { color: #092358; }
 .date-scene .section-index, .landing-page .mobile-buy strong { color: #fffaf2; }
 @media (max-width: 680px) { .hero-content { background: #f46500; } }
+
+/* Home: make the offer and actual seat availability easy to find. */
+.home-refresh .hero-content { padding-top: 120px; padding-bottom: 160px; }
+.home-refresh .hero-art {
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 18%);
+  mask-image: linear-gradient(90deg, transparent, #000 18%);
+}
+.home-refresh .hero-art img {
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 12%, #000 88%, transparent);
+  mask-image: linear-gradient(180deg, transparent, #000 12%, #000 88%, transparent);
+}
+.home-refresh .hero-title { font-size: clamp(5rem, 7vw, 8rem); }
+.home-refresh .hero-lead { font-size: 1rem; line-height: 1.65; margin-top: 22px; }
+.home-refresh .hero-actions { margin-top: 24px; gap: 22px; }
+.home-refresh .hero-reservations { margin-top: 18px; }
+.home-refresh .host-credit { margin-top: 20px; }
+.home-refresh .tickets {
+  gap: 64px;
+  padding: 80px 6vw;
+  grid-template-columns: minmax(0, 1fr) minmax(360px, .9fr);
+}
+.home-refresh .tickets-copy .section-index { margin-bottom: 24px; }
+.home-refresh .tickets-copy h2 { font-size: clamp(3.2rem, 5vw, 5.5rem); margin-bottom: 24px; }
+.home-refresh .purchase-panel { padding: 32px; }
+.home-refresh .purchase-panel::before { height: 4px; }
+.home-refresh .purchase-price strong { font-size: clamp(3.2rem, 4.8vw, 5rem); }
+.home-refresh .tariff-list { margin: 24px 0; }
+.home-refresh .tariff-list > div { padding: 16px 0; align-items: center; }
+.home-refresh .tariff-list small { font-size: .85rem; color: #78c4ff; margin-top: 5px; font-weight: 500; }
+.home-refresh .tariff-list dd { font-size: 1.35rem; text-align: right; }
+.home-refresh .tariff-list del { font-size: .85rem; color: #d8d1cc; }
+.home-refresh .purchase-steps { margin: 24px 0; padding: 12px 0; }
+.home-refresh .manifest { min-height: 0; padding: 80px 6vw; }
+.home-refresh .manifest-copy { font-size: clamp(3.4rem, 6.4vw, 7rem); margin-top: 42px; }
+.home-refresh .manifest-foot { margin-top: 40px; }
+.home-refresh .friction-sticky { position: static; min-height: 0; padding: 64px 6vw; }
+.home-refresh .friction-words { margin-top: 40px; }
+.home-refresh .friction-words span { font-size: clamp(3rem, 4.5vw, 5rem); }
+.home-refresh .story-beat { min-height: 230px; padding: 40px 5vw; }
+.home-refresh .story-beat h2 { font-size: clamp(2.4rem, 3.3vw, 4rem); margin: 14px 0 20px; }
+.home-refresh .date-scene { min-height: 0; padding: 80px 6vw; }
+.home-refresh .date-composition { margin-top: 45px; }
+.home-refresh .date-number strong { font-size: clamp(11rem, 22vw, 22rem); }
+.home-refresh .date-number span { font-size: clamp(2.8rem, 4.5vw, 5rem); }
+.home-refresh .date-details h2 { font-size: clamp(3.5rem, 5vw, 6rem); }
+.home-refresh .closing { min-height: 0; padding: 90px 6vw; }
+.home-refresh .closing-kicker { margin: 0 0 30px; }
+.home-refresh .closing h2 { font-size: clamp(3.2rem, 6vw, 6.5rem); }
+.home-refresh .closing .button { margin: 38px 0 0; }
+@media (max-width: 1000px) {
+  .home-refresh .tickets { grid-template-columns: 1fr; gap: 36px; }
+  .home-refresh .purchase-panel { width: 100%; max-width: 680px; }
+}
+@media (max-width: 680px) {
+  .home-refresh .hero-content { padding: 94px 20px 28px; }
+  .home-refresh .hero-art { -webkit-mask-image: none; mask-image: none; }
+  .home-refresh .hero-title { font-size: clamp(4rem, 20vw, 6rem); }
+  .home-refresh .hero-actions { gap: 16px; }
+  .home-refresh .tickets, .home-refresh .manifest, .home-refresh .date-scene { padding: 64px 20px; }
+  .home-refresh .purchase-panel { padding: 24px 20px; }
+  .home-refresh .purchase-price strong { font-size: clamp(3.2rem, 16vw, 4.5rem); }
+  .home-refresh .tickets-copy h2 { font-size: clamp(3rem, 15vw, 4.5rem); }
+  .home-refresh .tariff-list small { font-size: .8rem; }
+  .home-refresh .tariff-list dd { font-size: 1.2rem; }
+  .home-refresh .manifest-copy { font-size: clamp(2.7rem, 12vw, 4.5rem); }
+  .home-refresh .friction-sticky { padding: 60px 20px 40px; }
+  .home-refresh .friction-words span { font-size: clamp(3rem, 14vw, 4.5rem); }
+  .home-refresh .story-beat { min-height: 0; padding: 40px 20px; }
+  .home-refresh .story-beat h2 { font-size: clamp(2.6rem, 11vw, 3.7rem); }
+  .home-refresh .date-composition { gap: 42px; }
+  .home-refresh .date-number strong { font-size: 47vw; }
+  .home-refresh .date-number span { font-size: 12vw; }
+  .home-refresh .date-details h2 { font-size: 17vw; }
+  .home-refresh .closing { padding: 75px 20px; }
+  .home-refresh .closing h2 { font-size: clamp(2.6rem, 12vw, 4.4rem); }
+}

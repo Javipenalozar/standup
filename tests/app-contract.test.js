@@ -39,7 +39,7 @@ test('event and legal versions match the current edition', () => {
   assert.equal(EVENT.doorsTime, '7:00 p. m.');
   assert.equal(LEGAL.controllerAddress, 'Calle 23G No. 81-66');
   assert.equal(LEGAL.privacyPolicyVersion, '2026-09-04');
-  assert.equal(LEGAL.termsVersion, '2026-11-05');
+  assert.equal(LEGAL.termsVersion, '2026-11-06');
   assert.equal(require('../netlify/lib/event-config').realPaymentsEnabled(), false);
 });
 

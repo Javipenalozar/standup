@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-06T05:14:37.183331+00:00",
+  "generatedAt": "2026-11-06T14:02:10.318484+00:00",
   "title": "Design System: Stand-Up Therapy",
   "extensions": {
     "colorMeta": {
@@ -240,6 +240,10 @@
       {
         "name": "hero-tablet-upper",
         "value": "1000px"
+      },
+      {
+        "name": "purchase-stack",
+        "value": "1000px"
       }
     ]
   },
@@ -297,6 +301,13 @@
       "html": "<section class=\"ds-checkout\"><div class=\"ds-checkout-head\"><h3>3 sillas seleccionadas</h3><strong>$187.000 COP</strong></div><p>Fila A · Silla 1 · Fila A · Silla 4 · Fila A · Silla 6</p></section>",
       "css": ".ds-checkout{margin-top:40px;border:1px solid var(--line,rgba(255,255,255,.14));border-radius:22px;background:linear-gradient(145deg,rgba(15,84,150,.24),rgba(255,250,242,.025));padding:clamp(24px,4vw,44px);font-family:Inter,system-ui,sans-serif}.ds-checkout-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:12px}.ds-checkout h3{margin:0;font-family:Anton,sans-serif;font-size:1.6rem;line-height:.98;color:var(--white,#fffaf2);text-transform:uppercase}.ds-checkout strong{font-family:Anton,sans-serif;font-size:2rem;color:var(--accent-bright,#78c4ff)}.ds-checkout p{margin-top:12px;color:var(--muted,#bdb4ad);font-size:.92rem;min-height:24px}",
       "refersTo": "checkout-panel"
+    },
+    {
+      "name": "Aviso promocional",
+      "kind": "custom",
+      "description": "Aviso compartido por home y selector, con fecha límite legible y contador de cifras tabulares.",
+      "html": "<aside class=\"ds-sale\" aria-label=\"Descuento en entradas\"><strong>20% de descuento en todas las ubicaciones</strong><p>Hasta el domingo 8 de noviembre, 10:00 p. m. · Hora de Colombia</p><p>Termina en <b>2 d 12 h 00 min 00 s</b></p></aside>",
+      "css": ".ds-sale{display:grid;gap:8px;max-width:460px;margin-top:24px;padding:16px 18px;background:var(--landing-wine,#0b2d48);color:var(--landing-cream,#fffaf2);font-family:Inter,system-ui,sans-serif;font-size:.875rem;line-height:1.5}.ds-sale[hidden]{display:none}.ds-sale strong{font-size:1rem;line-height:1.4}.ds-sale p{margin:0}.ds-sale b{display:inline-block;font-variant-numeric:tabular-nums;white-space:nowrap}@media(max-width:680px){.ds-sale{padding:14px;font-size:.8125rem}.ds-sale strong{font-size:.9375rem}}"
     }
   ],
   "narrative": {

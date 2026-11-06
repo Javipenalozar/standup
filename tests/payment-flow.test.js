@@ -141,6 +141,50 @@ test('new edition charges unchanged seat tariffs and holds seats for 15 minutes'
   }
 });
 
+for (const [timestamp, expected, expires] of [
+  ['2026-11-08T21:59:00-05:00', 47200, '2026-11-09T03:00:00.000Z'],
+  ['2026-11-08T22:00:00-05:00', 59000, '2026-11-09T03:15:00.000Z'],
+]) {
+  test('server tariff and hold expiry at promotion boundary ' + timestamp, async () => {
+    const restoreEnvironment = withEventEnvironment();
+    const originalNow = Date.now;
+    Date.now = () => Date.parse(timestamp);
+    const mock = useHttpsResponses([
+      { status: 200, data: [] },
+      { status: 201, data: [{ id: 'r1' }] },
+      { status: 200, data: { payload: { payment_link: 'LNK_BOUNDARY', url: 'https://checkout.bold.co/LNK_BOUNDARY' } } },
+      { status: 200, data: [{ id: 'r1' }] },
+    ]);
+    try {
+      const response = await require('../netlify/functions/crear-pago-bold').handler({
+        httpMethod: 'POST', body: JSON.stringify({
+          order_reference: 'ST-18FEB27-TEST-BOUNDARY', seats: ['K-19'], amount: 1,
+          customer: { name: 'Prueba', email: 'test@example.invalid', phone: '3000000000', privacyConsent: true, termsAccepted: true },
+        }),
+      });
+      assert.equal(response.statusCode, 200);
+      assert.equal(JSON.parse(response.body).totalAmount, expected);
+      assert.equal(JSON.parse(mock.requests[1].rawBody)[0].hold_expires_at, expires);
+      assert.equal(JSON.parse(mock.requests[2].rawBody).amount.total_amount, expected);
+    } finally { mock.restore(); Date.now = originalNow; restoreEnvironment(); }
+  });
+}
+
+test('administrative blocks reject checkout before creating a reservation or Bold link', async () => {
+  const restore = withEventEnvironment();
+  const mock = useHttpsResponses([{ status: 200, data: [{ seat_id: 'A-6' }] }]);
+  try {
+    const response = await require('../netlify/functions/crear-pago-bold').handler({
+      httpMethod: 'POST', body: JSON.stringify({
+        order_reference: 'ST-18FEB27-TEST-BLOCK', seats: ['A-6'],
+        customer: { name: 'Prueba', email: 'test@example.invalid', phone: '3000000000', privacyConsent: true, termsAccepted: true },
+      }),
+    });
+    assert.equal(response.statusCode, 409);
+    assert.equal(mock.requests.length, 1);
+  } finally { mock.restore(); restore(); }
+});
+
 test('payment-only activation exposes event-scoped availability while admin operations remain disabled', async () => {
   const restoreEnvironment = withEventEnvironment();
   process.env.ENABLE_EVENT_OPERATIONS = 'false';

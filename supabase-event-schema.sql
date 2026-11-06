@@ -2,6 +2,7 @@
 -- Ejecutar completo una sola vez en el proyecto Supabase confirmado.
 -- Para habilitar pagos manuales por transferencia, aplicar además
 -- supabase-manual-transfer-migration.sql después de este esquema.
+-- Aplicar también supabase-admin-courtesy-migration.sql para cortesías administrativas.
 -- No depende de public.reservations ni de mundo_de_javi.reservations.
 
 begin;
@@ -60,7 +61,7 @@ create index if not exists st_event_reservations_checkin_idx
   on public.st_event_reservations (event_id, checked_in_at)
   where payment_status = 'paid';
 
--- Apartados administrativos para pagos en efectivo. No son tickets pagados
+-- Apartados administrativos y para efectivo. No son tickets pagados
 -- ni registran consentimientos legales del asistente.
 create table if not exists public.st_event_seat_holds (
   id uuid primary key default gen_random_uuid(),
@@ -70,7 +71,7 @@ create table if not exists public.st_event_seat_holds (
   ),
   holder_name text not null,
   holder_email text not null,
-  payment_method text not null default 'cash' check (payment_method = 'cash'),
+  payment_method text not null default 'cash' check (payment_method in ('cash', 'admin')),
   status text not null default 'active' check (status in ('active', 'released', 'expired')),
   hold_expires_at timestamptz not null,
   created_at timestamptz not null default now()

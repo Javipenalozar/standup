@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/styles.css?v=20270218" />
+    <link rel="stylesheet" href="/styles.css?v=20261106promo20" />
   </head>
   <body>
     <header class="topbar is-scrolled" data-topbar>
@@ -37,6 +37,11 @@
           Selecciona donde quieres sentarte, completa tus datos y paga en línea.
           Recibirás un QR único para presentar en la entrada.
         </p>
+        <aside class="sale-offer" id="masterclassPromotion" hidden aria-label="Descuento en entradas">
+          <strong>20% de descuento en todas las ubicaciones</strong>
+          <p>Hasta el domingo 8 de noviembre, 10:00 p. m. · Hora de Colombia</p>
+          <p class="sale-clock">Termina en <b id="promotionCountdown" role="timer" aria-live="off"></b></p>
+        </aside>
         <p id="localPreviewNotice" style="display:none;color:var(--yellow);max-width:680px;margin-top:18px;font-weight:800;">
           Vista de prueba: puedes usar el selector y el formulario. Los pagos reales permanecen bloqueados.
         </p>
@@ -45,7 +50,7 @@
       <div class="theater-container" style="padding: 0;">
 
         <div class="stage-label">Escenario</div>
-        <p class="seat-map-hint">239 sillas · Lateral $49.000 · General $59.000 · Preferencial $79.000</p>
+        <p class="seat-map-hint">239 sillas · Lateral <span data-seat-price="lateral">$49.000</span> · General <span data-seat-price="preventa">$59.000</span> · Preferencial <span data-seat-price="preferencial">$79.000</span></p>
 
         <div id="seatMapLoading" class="map-loading">
           <div class="spinner"></div>
@@ -101,7 +106,7 @@
             </label>
             <label>
               <input type="checkbox" id="termsAccepted" required />
-              <span>Acepto los <a href="/legal/#terminos" target="_blank">términos de compra y asistencia</a>.</span>
+              <span>Acepto los <a href="/legal/#terminos" target="_blank">términos de compra y asistencia</a>. No se realizan devoluciones, salvo los casos en que la ley lo exija.</span>
             </label>
           </div>
           <div class="checkout-actions">
@@ -122,9 +127,10 @@
       <div class="footer-links"><a href="/legal/">Privacidad y términos</a><a href="https://wa.me/573238016527" target="_blank" rel="noreferrer">+57 323 801 6527</a></div>
     </footer>
 
-    <script src="/event-config.js?v=20270218"></script>
-    <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
-    <script src="/seat-pricing.js?v=20270218"></script>
+    <script src="/event-config.js?v=20261106promo20"></script>
+    <script src="/assets/qrious.min.js"></script>
+    <script src="/ticket-download.js?v=20261106promo20"></script>
+    <script src="/seat-pricing.js?v=20261106promo20"></script>
     <script>
     (function () {
       const PRICING = window.StandupSeatPricing;
@@ -283,16 +289,22 @@
 
       function refreshPricingUi() {
         const state = pricingState();
+        state.tiers.forEach(tier => {
+          document.querySelectorAll('[data-seat-price="' + tier.id + '"]').forEach(element => {
+            element.textContent = formatCop(tier.price);
+          });
+        });
         const promotion = document.getElementById('masterclassPromotion');
         const countdown = document.getElementById('promotionCountdown');
         if (promotion) promotion.hidden = !state.active;
 
         if (state.active) {
           const remaining = Math.max(0, Date.parse(state.endsAt) - pricingNow());
-          const hours = String(Math.floor(remaining / 3600000)).padStart(2, '0');
+          const days = Math.floor(remaining / 86400000);
+          const hours = String(Math.floor((remaining % 86400000) / 3600000)).padStart(2, '0');
           const minutes = String(Math.floor((remaining % 3600000) / 60000)).padStart(2, '0');
           const seconds = String(Math.floor((remaining % 60000) / 1000)).padStart(2, '0');
-          if (countdown) countdown.textContent = hours + ':' + minutes + ':' + seconds;
+          if (countdown) countdown.textContent = days + ' d ' + hours + ' h ' + minutes + ' min ' + seconds + ' s';
         } else {
           if (countdown) countdown.textContent = '';
         }
@@ -513,28 +525,34 @@
         document.getElementById('checkoutPanel').style.display = 'none';
 
         let verifyData = null;
-        for (let attempt = 0; attempt < 2; attempt += 1) {
+        let confirmed = false;
+        for (let attempt = 0; attempt < 20; attempt += 1) {
           try {
             const verifyRes = await fetch(
               '/.netlify/functions/verify-bold-payment?ref=' + encodeURIComponent(orderRef),
               { cache: 'no-store' }
             );
             verifyData = await verifyRes.json();
-            if (verifyRes.ok && verifyData.status === 'paid') break;
+            if (verifyRes.ok && verifyData.status === 'paid' && Array.isArray(verifyData.seats) && verifyData.seats.length > 0) {
+              confirmed = true;
+              break;
+            }
+            if (verifyRes.ok && ['failed', 'cancelled', 'expired', 'not_found'].includes(verifyData.status)) break;
           } catch (error) {
             console.warn('No fue posible verificar el pago', error);
           }
-          if (attempt === 0) await new Promise(resolve => setTimeout(resolve, 3000));
+          if (attempt < 19) await new Promise(resolve => setTimeout(resolve, 3000));
         }
 
-        if (verifyData && verifyData.status === 'paid' && verifyData.seats.length > 0) {
+        if (confirmed) {
           document.getElementById('seatMapLoading').style.display = 'none';
           showQRResult(
             verifyData.seats,
             verifyData.name,
             verifyData.email,
             orderRef,
-            verifyData.amount
+            verifyData.amount,
+            verifyData.courtesy === true
           );
           return;
         }
@@ -543,17 +561,19 @@
         document.querySelector('.subpage > div:first-child').innerHTML =
           '<p class="eyebrow">Pago en proceso</p>' +
           '<h2 style="font-size:clamp(2rem,5vw,4rem);">Estamos verificando</h2>' +
-          '<p style="color:var(--muted);max-width:500px;">Tu pago está siendo procesado. Recibirás tu QR por correo electrónico cuando Bold confirme la transacción. Si no lo recibes, escríbenos por WhatsApp.</p>' +
+          '<p style="color:var(--muted);max-width:500px;">Todavía no tenemos un pago confirmado. Vuelve a consultar para ver y descargar tu entrada aquí. Conserva esta página; si ya pagaste, no repitas el pago. Si necesitas ayuda, escríbenos con tu referencia.</p>' +
           '<div style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;">' +
-            '<a class="button primary" href="https://wa.me/573238016527?text=Hola%2C%20hice%20un%20pago%20para%20Deja%20de%20joder%20a%20tu%20pareja%202.0%20con%20referencia%20' + orderRef + '" target="_blank" rel="noreferrer">WhatsApp</a>' +
+            '<button class="button primary" id="retryPayment" type="button">Volver a consultar mi pago</button>' +
+            '<a class="button ghost" href="https://wa.me/573238016527?text=Hola%2C%20hice%20un%20pago%20para%20Deja%20de%20joder%20a%20tu%20pareja%202.0%20con%20referencia%20' + encodeURIComponent(orderRef) + '" target="_blank" rel="noreferrer">WhatsApp</a>' +
             '<a class="button ghost" href="/">Volver al inicio</a>' +
           '</div>';
+        document.getElementById('retryPayment').addEventListener('click', () => handleBoldReturn(orderRef));
       }
 
       // ══════════════════════════════════════════════
       //  6. MOSTRAR QR DE CONFIRMACIÓN
       // ══════════════════════════════════════════════
-      function showQRResult(seats, name, email, code, amount) {
+      function showQRResult(seats, name, email, code, amount, courtesy = false) {
         document.getElementById('checkoutPanel').style.display = 'none';
         document.querySelector('.theater-container').style.display = 'none';
         document.querySelector('.subpage > div:first-child').style.display = 'none';
@@ -564,29 +584,42 @@
 
         section.innerHTML =
           '<div class="qr-result-card">' +
-            '<h3>RESERVA CONFIRMADA</h3>' +
+            '<p class="eyebrow">' + (courtesy ? 'Cortesía confirmada' : 'Pago confirmado') + '</p>' +
+            '<h3>' + (courtesy ? '¡Te esperamos en el show!' : '¡Gracias por tu compra!') + '</h3>' +
+            '<p class="qr-subtitle">Que disfrutes el show. Descarga tu entrada y guárdala en tu celular.</p>' +
           '<p class="qr-subtitle">Presenta este QR en la entrada del Teatro Belarte el 18 de febrero de 2027 · Inicio 7:30 p. m. · Puertas 7:00 p. m.</p>' +
             '<div class="qr-canvas-wrap"><canvas id="qrCanvas"></canvas></div>' +
             '<div class="qr-info">' +
               '<div class="qr-info-item"><span>Nombre</span><strong>' + escapeHtml(name) + '</strong></div>' +
-              '<div class="qr-info-item"><span>Sillas</span><strong>' + seats.map(s => s.replace('-', ' #')).join(', ') + '</strong></div>' +
+              '<div class="qr-info-item"><span>Sillas</span><strong>' + escapeHtml(seats.map(s => s.replace('-', ' #')).join(', ')) + '</strong></div>' +
               '<div class="qr-info-item"><span>Total</span><strong>$' + amount.toLocaleString('es-CO') + ' COP</strong></div>' +
               '<div class="qr-info-item"><span>Código</span><strong style="font-size:0.78rem;word-break:break-all;">' + escapeHtml(code) + '</strong></div>' +
             '</div>' +
-            '<p class="qr-footer-note">También enviamos la confirmación a <strong>' + escapeHtml(email) + '</strong></p>' +
+            '<p class="qr-footer-note">Este QR incluye todas las sillas de esta compra. Preséntalo al ingresar. No necesitas esperar el correo para descargarlo.</p>' +
+            '<p class="qr-footer-note">No se realizan devoluciones, salvo los casos en que la ley lo exija. <a href="/legal/#terminos">Consultar términos</a>.</p>' +
             '<div style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">' +
-              '<a class="button primary" href="/" style="display:inline-flex;">Volver al inicio</a>' +
-              '<a class="button ghost" href="https://wa.me/573238016527?text=Hola%2C%20ya%20pagu%C3%A9%20mi%20boleta%20para%20Deja%20de%20joder%20a%20tu%20pareja%202.0.%20Mi%20c%C3%B3digo%20es%20' + encodeURIComponent(code) + '" target="_blank" rel="noreferrer" style="display:inline-flex;">Confirmar por WhatsApp</a>' +
+              '<a class="button primary" id="downloadTicket" hidden>Descargar entrada con QR</a>' +
+              '<a class="button ghost" href="/" style="display:inline-flex;">Volver al inicio</a>' +
             '</div>' +
+            '<p id="ticketDownloadError" role="status"></p>' +
           '</div>';
 
-        new QRious({
+        try {
+          new QRious({
           element: document.getElementById('qrCanvas'),
           value: code,
-          size: 220,
+          size: 360,
+          level: 'H',
           foreground: '#050608',
           background: '#ffffff',
         });
+          const link = document.getElementById('downloadTicket');
+          link.href = StandupTicket.createDownload(document.getElementById('qrCanvas'), { name, seats, code, amount, courtesy });
+          link.download = 'Entrada-Standup-18feb2027-' + code.replace(/[^a-zA-Z0-9_-]/g, '') + '.png';
+          link.hidden = false;
+        } catch (error) {
+          document.getElementById('ticketDownloadError').textContent = 'Tu pago está confirmado, pero no pudimos dibujar la entrada. Recarga esta página para volver a intentarlo o escríbenos por WhatsApp con tu referencia.';
+        }
 
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }

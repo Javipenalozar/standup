@@ -107,7 +107,7 @@ exports.handler = async function (event) {
     const rows = await supabaseGet(
       '/rest/v1/st_event_reservations?event_id=eq.' + encodeURIComponent(EVENT.id) +
       '&qr_code=eq.' + encodeURIComponent(ref) +
-      '&select=payment_status,seat_id,customer_name,customer_email,amount,bold_reference&order=seat_id.asc'
+      '&select=payment_status,seat_id,customer_name,customer_email,amount,bold_reference,invitation_code&order=seat_id.asc'
     );
 
     if (!rows || rows.length === 0) {
@@ -134,10 +134,11 @@ exports.handler = async function (event) {
 
     return {
       statusCode: 200,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', 'Access-Control-Allow-Origin': '*' },
       body: JSON.stringify({
-        status: rows[0].payment_status,
+        status: rows.every(row => row.payment_status === 'paid') ? 'paid' : (rows.some(row => row.payment_status === 'pending') ? 'pending' : rows[0].payment_status === 'paid' ? 'pending' : rows[0].payment_status),
         seats: rows.map(row => row.seat_id),
+        courtesy: rows.every(row => Number(row.amount) === 0 && Boolean(row.invitation_code)),
         name: rows[0].customer_name,
         email: maskEmail(rows[0].customer_email),
         amount: rows.reduce((total, row) => total + Number(row.amount || 0), 0),

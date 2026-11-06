@@ -14,10 +14,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
     <script>document.documentElement.classList.add('js');</script>
-    <link rel="stylesheet" href="styles.css?v=20270218" />
-    <link rel="stylesheet" href="landing.css?v=20270218" />
+    <link rel="stylesheet" href="styles.css?v=20261106promo20" />
+    <link rel="stylesheet" href="landing.css?v=20261106promo20" />
   </head>
-  <body class="landing-page">
+  <body class="landing-page home-refresh">
     <div class="page-progress" aria-hidden="true"><span data-progress></span></div>
     <header class="topbar" data-topbar>
       <a aria-label="Stand-Up Therapy" class="brand" href="#inicio"><span class="brand-icon">ST</span><span>Stand-Up Therapy</span></a>
@@ -44,6 +44,11 @@
           <h1 class="hero-title" aria-label="Deja de joder a tu pareja 2.0">
             <span class="hero-line hero-enter">Deja de joder</span><span class="hero-line hero-line-main hero-enter">a tu</span><span class="hero-line hero-line-last hero-enter">pareja <b class="edition-mark">2.0</b></span>
           </h1>
+          <aside class="sale-offer" data-promotion-banner hidden aria-label="Descuento en entradas">
+            <strong>20% de descuento en todas las ubicaciones</strong>
+            <p>Hasta el domingo 8 de noviembre, 10:00 p. m. · Hora de Colombia</p>
+            <p class="sale-clock">Termina en <b data-promotion-countdown role="timer" aria-live="off"></b></p>
+          </aside>
           <p class="host-credit hero-enter">Con Javi Peñaloza</p>
           <p class="hero-times hero-enter">Puertas 7:00 p. m. · Inicio 7:30 p. m.</p>
           <p class="hero-lead hero-enter">La convivencia tiene reclamos, silencios y discusiones que ya merecen escenario. Esta vez, el remate lo ponemos entre todos.</p>
@@ -59,6 +64,17 @@
           <div class="ticket-venue"><span>Teatro Belarte</span><small>Cra 7 # 152-54 · Bogotá</small></div>
         </aside>
         <a class="scroll-cue" href="#experiencia" aria-label="Continuar hacia la experiencia"><span>Desliza</span><i aria-hidden="true"></i></a>
+      </section>
+
+      <section class="tickets" id="boletas">
+        <div class="tickets-copy reveal"><p class="section-index">Entradas</p><h2>Tu lugar<br />en el teatro.</h2><p>Consulta las sillas disponibles por ubicación y elige tu lugar en el plano.</p></div>
+        <div class="purchase-panel reveal">
+          <div class="purchase-price"><span data-price-label>Precios por ubicación</span><strong>Desde <b data-price-from>$49.000</b></strong><small><span data-price-regular hidden></span> COP · por persona</small></div>
+          <dl class="tariff-list"><div><dt>Lateral <small data-tier-available="lateral">Consultando disponibilidad</small></dt><dd><del data-tier-base="lateral" hidden></del><span data-tier-price="lateral">$49.000</span></dd></div><div><dt>General <small data-tier-available="preventa">Consultando disponibilidad</small></dt><dd><del data-tier-base="preventa" hidden></del><span data-tier-price="preventa">$59.000</span></dd></div><div><dt>Preferencial <small data-tier-available="preferencial">Consultando disponibilidad</small></dt><dd><del data-tier-base="preferencial" hidden></del><span data-tier-price="preferencial">$79.000</span></dd></div></dl>
+          <div class="purchase-steps" aria-label="Pasos de compra"><p><span>1</span> Escoge la silla</p><p><span>2</span> Paga en línea</p><p><span>3</span> Recibe tu QR</p></div>
+          <a class="button primary large magnetic" href="/inscribirse"><span>Ver mapa de sillas</span><b aria-hidden="true">↗</b></a>
+          <a class="purchase-help" href="https://wa.me/573238016527?text=Hola%2C%20quiero%20informaci%C3%B3n%20de%20Stand-Up%20Therapy%3A%20Deja%20de%20joder%20a%20tu%20pareja%202.0" target="_blank" rel="noreferrer">Necesito ayuda por WhatsApp</a>
+        </div>
       </section>
 
       <section class="manifest" id="experiencia">
@@ -92,16 +108,6 @@
         </div>
       </section>
 
-      <section class="tickets" id="boletas">
-        <div class="tickets-copy reveal"><p class="section-index">Tu lugar en el teatro</p><h2>Elige la silla.<br />Nosotros ponemos<br />el escenario.</h2><p>Selecciona tu ubicación en el mapa, completa el pago en Bold y recibe el código QR para ingresar.</p></div>
-        <div class="purchase-panel reveal">
-          <div class="purchase-price"><span data-price-label>Precios por ubicación</span><strong>Desde <b data-price-from>$49.000</b></strong><small><span data-price-regular hidden></span> COP · por persona</small></div>
-          <dl class="tariff-list"><div><dt>Lateral <small>60 sillas</small></dt><dd>$49.000</dd></div><div><dt>General <small>143 sillas</small></dt><dd>$59.000</dd></div><div><dt>Preferencial <small>36 sillas</small></dt><dd>$79.000</dd></div></dl>
-          <div class="purchase-steps" aria-label="Pasos de compra"><p><span>1</span> Escoge la silla</p><p><span>2</span> Paga en línea</p><p><span>3</span> Recibe tu QR</p></div>
-          <a class="button primary large magnetic" href="/inscribirse"><span>Ver mapa de sillas</span><b aria-hidden="true">↗</b></a>
-          <a class="purchase-help" href="https://wa.me/573238016527?text=Hola%2C%20quiero%20informaci%C3%B3n%20de%20Stand-Up%20Therapy%3A%20Deja%20de%20joder%20a%20tu%20pareja%202.0" target="_blank" rel="noreferrer">Necesito ayuda por WhatsApp</a>
-        </div>
-      </section>
 
       <section class="closing">
         <div class="closing-orbit" aria-hidden="true"></div>
@@ -114,8 +120,8 @@
     </main>
     <footer class="footer"><p>Javi Penaloza · Sí es posible</p><div class="footer-links"><a href="/legal/">Privacidad y términos</a><a href="https://wa.me/573238016527" target="_blank" rel="noreferrer">+57 323 801 6527</a></div></footer>
     <a class="mobile-buy" href="/inscribirse" aria-label="Elegir silla desde 49.000 pesos"><span>Desde · <b data-price-from>$49.000</b></span><strong>Elegir silla</strong></a>
-    <script src="/event-config.js?v=20270218"></script>
-    <script src="/seat-pricing.js?v=20270218"></script>
-    <script src="script.js?v=20270218"></script>
+    <script src="/event-config.js?v=20261106promo20"></script>
+    <script src="/seat-pricing.js?v=20261106promo20"></script>
+    <script src="script.js?v=20261106promo20"></script>
   </body>
 </html>
