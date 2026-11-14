@@ -235,6 +235,20 @@ begin
     raise exception 'Falta registrar la aceptación legal';
   end if;
 
+  -- Administrative holds use the same table lock order. Keep their availability
+  -- stable until this invitation commits, including holds created concurrently.
+  lock table public.st_event_reservations in row exclusive mode;
+  lock table public.st_event_seat_holds in share mode;
+  if exists (
+    select 1 from public.st_event_seat_holds as seat_hold
+     where seat_hold.event_id = p_event_id
+       and seat_hold.seat_id = any(p_seats)
+       and seat_hold.status = 'active'
+       and seat_hold.hold_expires_at > now()
+  ) then
+    raise exception 'Una de las sillas tiene un apartado o bloqueo administrativo. Elige otra.';
+  end if;
+
   select count(*)::integer
     into v_used
     from public.st_event_reservations
