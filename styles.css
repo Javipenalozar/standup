@@ -913,10 +913,10 @@ blockquote {
 .seat-btn {
   width: 36px;
   height: 40px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid var(--seat-tier-color, #e3eef2);
   border-radius: 5px 5px 8px 8px;
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--muted);
+  background: var(--seat-tier-color, #e3eef2);
+  color: #092338;
   font-size: 0.72rem;
   font-weight: 700;
   cursor: pointer;
@@ -926,12 +926,13 @@ blockquote {
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
 }
 
 .seat-btn:hover:not(.is-taken):not(.is-selected) {
-  background: rgba(249, 182, 9, 0.2);
+  background: var(--seat-tier-color, #e3eef2);
   border-color: var(--accent);
-  color: var(--accent-bright);
+  color: #092338;
   transform: scale(1.12);
 }
 
@@ -943,10 +944,21 @@ blockquote {
 }
 
 .seat-btn.is-taken {
-  background: rgba(255, 255, 255, 0.03);
-  border-color: rgba(255, 255, 255, 0.06);
-  color: rgba(255, 255, 255, 0.12);
+  background: #071822;
+  border-color: #34444e;
+  color: #7a8b94;
+  box-shadow: none;
+  opacity: 0.38;
   cursor: not-allowed;
+}
+
+.seat-btn.is-taken::after {
+  content: '×';
+  position: absolute;
+  top: 2px;
+  right: 3px;
+  font-size: 10px;
+  line-height: 1;
 }
 
 .map-legend {
@@ -972,12 +984,12 @@ blockquote {
 }
 
 .legend-swatch.sw-available {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: #e3eef2;
+  border: 1px solid #e3eef2;
 }
 
 .legend-swatch.sw-price {
-  background: color-mix(in srgb, var(--seat-tier-color) 24%, transparent);
+  background: var(--seat-tier-color);
   border: 1px solid var(--seat-tier-color);
 }
 
@@ -986,8 +998,18 @@ blockquote {
 }
 
 .legend-swatch.sw-taken {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: #071822;
+  border: 1px solid #34444e;
+  color: #7a8b94;
+  opacity: 0.55;
+  display: grid;
+  place-items: center;
+}
+
+.legend-swatch.sw-taken::after {
+  content: '×';
+  font-size: 12px;
+  line-height: 1;
 }
 
 .exit-row {
@@ -1563,9 +1585,8 @@ blockquote {
 }
 
 /* Seat controls keep the same geometry and prices at comfortable touch sizes. */
-.seat-btn { flex: 0 0 40px; width: 40px; height: 44px; color: var(--white); }
+.seat-btn { flex: 0 0 40px; width: 40px; height: 44px; }
 .seat-btn:focus-visible { outline: 3px solid var(--white); outline-offset: 2px; }
-.seat-btn.is-taken { color: var(--muted); }
 .seat-map-scroll { padding: 7px 5px 15px; }
 .seat-map-hint { display: block; color: var(--mist); font-size: .8rem; margin: 0 16px 18px; }
 .subpage .event-heading { color: var(--white); max-width: 780px; line-height: 1.7; }

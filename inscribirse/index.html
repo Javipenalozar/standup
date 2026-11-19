@@ -14,7 +14,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/styles.css?v=20261106promo20" />
+    <link rel="stylesheet" href="/styles.css?v=20261119seats" />
   </head>
   <body>
     <header class="topbar is-scrolled" data-topbar>
@@ -243,6 +243,8 @@
               if (takenSeats.has(seatId)) {
                 btn.classList.add('is-taken');
                 btn.disabled = true;
+                btn.title += ' · Ocupada';
+                btn.setAttribute('aria-label', btn.getAttribute('aria-label') + ', ocupada');
               } else {
                 btn.addEventListener('click', () => toggleSeat(seatId));
               }
@@ -324,6 +326,10 @@
             button.style.setProperty('--seat-tier-color', tier.color);
             button.title = 'Fila ' + seatId.replace('-', ', Silla ') + ' · ' + tier.label + ' · ' + formatCop(tier.price);
             button.setAttribute('aria-label', 'Fila ' + seatId.replace('-', ' Silla ') + ', ' + tier.label + ', ' + formatCop(tier.price));
+            if (button.disabled) {
+              button.title += ' · Ocupada';
+              button.setAttribute('aria-label', button.getAttribute('aria-label') + ', ocupada');
+            }
             button.textContent = number;
           });
           if (selectedSeats.size > 0) updateCheckout();
