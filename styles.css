@@ -900,6 +900,22 @@ blockquote {
   flex-shrink: 0;
 }
 
+.seat-map-row > .row-id:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 3;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+  background: #0b1c26;
+  color: #fffaf2;
+  font-size: 0.85rem;
+  border-right: 1px solid #40515c;
+  box-shadow: 5px 0 8px rgba(7, 24, 34, 0.85);
+}
+
 .seat-section {
   display: flex;
   gap: 3px;
