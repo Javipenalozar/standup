@@ -17,11 +17,11 @@
   const EVENT_ID = EVENT.id;
   const SEAT_PATTERN = /^(?:[A-J]-(?:[1-9]|1\d|2[0-2])|K-(?:[1-9]|1\d))$/;
   const MASTERCLASS_PROMOTION = Object.freeze({
-    id: 'descuento-20-hasta-domingo-8nov2026',
-    label: '20% de descuento en todas las ubicaciones',
-    discountPercent: 20,
-    startsAt: '2026-11-06T08:08:11-05:00',
-    endsAt: '2026-11-08T22:00:00-05:00',
+    id: 'blackdays-15-hasta-viernes-27nov2026',
+    label: 'Blackdays: 15% de descuento en todas las ubicaciones',
+    discountPercent: 15,
+    startsAt: '2026-11-23T15:26:47Z',
+    endsAt: '2026-11-27T23:00:00-05:00',
     timeZone: 'America/Bogota',
   });
 

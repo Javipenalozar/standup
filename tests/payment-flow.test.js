@@ -142,8 +142,8 @@ test('new edition charges unchanged seat tariffs and holds seats for 15 minutes'
 });
 
 for (const [timestamp, expected, expires] of [
-  ['2026-11-08T21:59:00-05:00', 47200, '2026-11-09T03:00:00.000Z'],
-  ['2026-11-08T22:00:00-05:00', 59000, '2026-11-09T03:15:00.000Z'],
+  ['2026-11-27T22:59:00-05:00', 50150, '2026-11-28T04:00:00.000Z'],
+  ['2026-11-27T23:00:00-05:00', 59000, '2026-11-28T04:15:00.000Z'],
 ]) {
   test('server tariff and hold expiry at promotion boundary ' + timestamp, async () => {
     const restoreEnvironment = withEventEnvironment();

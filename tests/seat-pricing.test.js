@@ -79,12 +79,12 @@ assert.equal(pricing.getPricingState(start - 1).active, false);
 assert.equal(pricing.getPricingState(start).active, true);
 assert.equal(pricing.getPricingState(end - 1).active, true);
 assert.equal(pricing.getPricingState(end).active, false);
-assert.equal(end, Date.parse('2026-11-09T03:00:00Z'));
-assert.deepEqual(['A-1', 'A-4', 'C-6'].map(seat => pricing.getPriceForSeat(seat, start)), [39200, 47200, 63200]);
+assert.equal(end, Date.parse('2026-11-28T04:00:00Z'));
+assert.deepEqual(['A-1', 'A-4', 'C-6'].map(seat => pricing.getPriceForSeat(seat, start)), [41650, 50150, 67150]);
 for (const row of require('../event-config').ROWS) {
   for (const number of [...row.left, ...row.center, ...row.right]) {
     const seat = row.label + '-' + number;
-    assert.equal(pricing.getPriceForSeat(seat, end - 1), pricing.getPriceForSeat(seat, end) * 0.8);
+    assert.equal(pricing.getPriceForSeat(seat, end - 1), pricing.getPriceForSeat(seat, end) * 0.85);
   }
 }
 const blocks = ['A', 'B'].flatMap(row => Array.from({ length: 12 }, (_, i) => row + '-' + (i + 6)));
